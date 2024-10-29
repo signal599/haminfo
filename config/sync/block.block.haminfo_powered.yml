@@ -1,0 +1,22 @@
+uuid: 7b5e6a02-74cf-4709-bda7-dfd335f6c11c
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - haminfo
+_core:
+  default_config_hash: eYL19CLDyinGTWYQfBD1DswWzglEotE_kHnHx3AxTXM
+id: haminfo_powered
+theme: haminfo
+region: sidebar_first
+weight: 0
+provider: null
+plugin: system_powered_by_block
+settings:
+  id: system_powered_by_block
+  label: 'Powered by Drupal'
+  label_display: '0'
+  provider: system
+visibility: {  }

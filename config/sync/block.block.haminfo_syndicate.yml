@@ -1,0 +1,23 @@
+uuid: f93d6e9c-0f82-4e55-9ee5-3904eb166de5
+langcode: en
+status: true
+dependencies:
+  module:
+    - node
+  theme:
+    - haminfo
+_core:
+  default_config_hash: 0gq3VPg-_UM69FCCWurLFIrrnIjC2HLKhwo9iQNtcUo
+id: haminfo_syndicate
+theme: haminfo
+region: sidebar_first
+weight: 0
+provider: null
+plugin: node_syndicate_block
+settings:
+  id: node_syndicate_block
+  label: 'RSS feed'
+  label_display: '0'
+  provider: node
+  block_count: 10
+visibility: {  }

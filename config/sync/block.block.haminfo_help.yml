@@ -1,0 +1,22 @@
+uuid: e728536b-af2d-4017-be10-fa2d27d9cb4f
+langcode: en
+status: true
+dependencies:
+  module:
+    - help
+  theme:
+    - haminfo
+_core:
+  default_config_hash: VfPFqqxfkomud5CO8DUijw85QIl9GIxh_nIxLOYESxg
+id: haminfo_help
+theme: haminfo
+region: sidebar_first
+weight: 0
+provider: null
+plugin: help_block
+settings:
+  id: help_block
+  label: Help
+  label_display: '0'
+  provider: help
+visibility: {  }

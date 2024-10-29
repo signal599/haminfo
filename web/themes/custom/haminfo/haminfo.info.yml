@@ -1,0 +1,4 @@
+name: HamInfo
+type: theme
+base theme: olivero
+core_version_requirement: ^11
