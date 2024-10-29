@@ -2,7 +2,7 @@ _core:
   default_config_hash: ijfbzDTN4CbE7Sr-6ubWzy_t1vH4OtU1doNCLssVz-4
 langcode: en
 uuid: 1db86d40-236f-45c4-a075-65c610311d69
-name: 'Drush Site-Install'
+name: 'Ham Info'
 mail: admin@example.com
 slogan: ''
 page:
