@@ -417,10 +417,9 @@ const hamstationApp = (function ($) {
         uiCtrl.selectQueryType(e.target.value);
       });
 
-      $('#edit-submit', context).click(e => {
+      $('#ham-map-form', context).on('submit', e => {
         e.preventDefault();
 
-        console.log('aaaa');
         let query = getAndFormatQuery();
         if (!query) {
           return;

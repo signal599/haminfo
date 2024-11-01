@@ -119,3 +119,12 @@ function ham_station_file_download($uri) {
     'Content-disposition' => 'attachment; filename="' . $file_entity->getFilename() . '"',
   ];
 }
+
+/**
+ * Implements hook_preprocess_HOOK() for the content region.
+ */
+function ham_station_preprocess_region__content(&$variables) {
+  if (\Drupal::routeMatch()->getRouteName() === 'ham_station.ham_map') {
+    $variables['attributes']['class'][] = 'map-page';
+  }
+}

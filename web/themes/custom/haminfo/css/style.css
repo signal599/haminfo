@@ -1,3 +1,10 @@
+@media (min-width: 62.5rem) {
+  .map-page.layout--content-medium,
+  .map-page.layout--pass--content-medium > * {
+    grid-column: 2 / 14;
+  }
+}
+
 .ham-map-wrapper .map-container {
   padding-bottom: 60%;
   margin-bottom: 20px;
