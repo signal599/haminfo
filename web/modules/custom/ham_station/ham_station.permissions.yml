@@ -1,0 +1,60 @@
+add amateur radio station entities:
+  title: 'Create new Amateur Radio Station entities'
+
+administer amateur radio station entities:
+  title: 'Administer Amateur Radio Station entities'
+  description: 'Allow to access the administration form to configure Amateur Radio Station entities.'
+  restrict access: true
+
+delete amateur radio station entities:
+  title: 'Delete Amateur Radio Station entities'
+
+edit amateur radio station entities:
+  title: 'Edit Amateur Radio Station entities'
+
+view published amateur radio station entities:
+  title: 'View published Amateur Radio Station entities'
+
+view unpublished amateur radio station entities:
+  title: 'View unpublished Amateur Radio Station entities'
+add ham address entities:
+  title: 'Create new Ham address entities'
+
+administer ham address entities:
+  title: 'Administer Ham address entities'
+  description: 'Allow to access the administration form to configure Ham address entities.'
+  restrict access: true
+
+delete ham address entities:
+  title: 'Delete Ham address entities'
+
+edit ham address entities:
+  title: 'Edit Ham address entities'
+
+view published ham address entities:
+  title: 'View published Ham address entities'
+
+view unpublished ham address entities:
+  title: 'View unpublished Ham address entities'
+add ham location entities:
+  title: 'Create new Ham location entities'
+
+administer ham location entities:
+  title: 'Administer Ham location entities'
+  description: 'Allow to access the administration form to configure Ham location entities.'
+  restrict access: true
+
+delete ham location entities:
+  title: 'Delete Ham location entities'
+
+edit ham location entities:
+  title: 'Edit Ham location entities'
+
+view published ham location entities:
+  title: 'View published Ham location entities'
+
+view unpublished ham location entities:
+  title: 'View unpublished Ham location entities'
+
+export ham station:
+  title: 'Export ham station data to CSV file.'

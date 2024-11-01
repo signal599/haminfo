@@ -1,0 +1,50 @@
+services:
+  logger.channel.ham_station:
+    class: Drupal\Core\Logger\LoggerChannel
+    factory: logger.factory:get
+    arguments: ['ham_station']
+
+  ham_station.fcc_importer:
+    class: Drupal\ham_station\Importers\FccImporter
+    arguments: ['@database', '@logger.channel.ham_station']
+
+  ham_station.distance_service:
+    class: Drupal\ham_station\DistanceService
+
+  ham_station.report_service:
+    class: Drupal\ham_station\ReportService
+    arguments: ['@database', '@cache.default']
+
+  ham_station.map_query_service:
+    class: Drupal\ham_station\Query\MapQueryService
+    arguments:
+      - '@entity_type.manager'
+      - '@database'
+      - '@ham_station.distance_service'
+      - '@ham_station.google_geocoder'
+
+  ham_station.normalizer.getset:
+      class: Symfony\Component\Serializer\Normalizer\GetSetMethodNormalizer
+      tags:
+        - { name: normalizer }
+
+  ham_station.google_geocoder:
+    class: Drupal\ham_station\GoogleGeocoder
+    arguments:
+      - '@http_client'
+      - '@ham_station.config'
+
+  ham_station.config:
+    class: Drupal\Core\Config\ImmutableConfig
+    factory: config.factory:get
+    arguments: ['ham_station.settings']
+
+  ham_station.export_service:
+    class: Drupal\ham_station\Exporters\ExportHelper
+    arguments:
+      - '@database'
+      - '@uuid'
+      - '@messenger'
+      - '@entity_type.manager'
+      - '@file_system'
+      - '@current_user'

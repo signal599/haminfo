@@ -1,0 +1,42 @@
+ham_station.config:
+  path: '/admin/hamstation/config'
+  defaults:
+    _form: '\Drupal\ham_station\Form\HamStationConfigForm'
+    _title: 'Ham Station Configuration'
+  requirements:
+    _permission: 'administer site configuration'
+
+ham_station.map_export:
+  path: '/map/export'
+  defaults:
+    _form: '\Drupal\ham_station\Form\ExportForm'
+    _title: 'Amateur Radio License Map Export'
+  requirements:
+    _permission: 'export ham station'
+
+ham_station.ham_map:
+  path: '/map/{query_type}/{query_value}'
+  defaults:
+    _controller: '\Drupal\ham_station\Controller\DefaultController::hamMap'
+    _title: 'Amateur Radio License Map'
+    query_type: null
+    query_value: null
+  requirements:
+    _permission: 'access content'
+
+ham_station.ham_map_ajax:
+  path: '/ham-map-ajax'
+  defaults:
+    _controller: '\Drupal\ham_station\Controller\DefaultController::hamMapAjax'
+  requirements:
+    _method: 'POST'
+    _permission: 'access content'
+
+ham_station.geocode_invalidate_cache:
+  path: '/ham-map/invalidate-geocode-cache/{key}'
+  defaults:
+    _controller: '\Drupal\ham_station\Controller\DefaultController::invalidateGeocodeCache'
+  options:
+    no_cache: TRUE
+  requirements:
+    _access_system_cron: 'TRUE'

@@ -2,3 +2,9 @@ name: haminfo
 recipe: drupal11
 config:
   webroot: web
+  xdebug: true
+
+services:
+  appserver:
+    config:
+      php: lando-config/php.ini
