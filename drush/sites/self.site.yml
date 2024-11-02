@@ -1,0 +1,5 @@
+live:
+  host: alpha.tetranz.com
+  user: ross
+  root: /srv/haminfo/web
+  uri: https://map.tetranz.com

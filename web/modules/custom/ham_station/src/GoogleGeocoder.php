@@ -33,7 +33,7 @@ class GoogleGeocoder {
 
   public function makeRequest($query) {
     $query = ['key' => $this->config->get('google_geocode_api_key')] + $query;
-    $response = $this->client->get('https://maps.googleapis.com/maps/api/geocode/json', [
+    $response = $this->client->get(self::API_ENDPOINT, [
       'query' => $query,
       'http_errors' => FALSE,
     ]);
