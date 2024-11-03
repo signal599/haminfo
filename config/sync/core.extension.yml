@@ -20,6 +20,7 @@ module:
   dynamic_page_cache: 0
   easy_breadcrumb: 0
   editor: 0
+  fcc_ham_data: 0
   field: 0
   field_ui: 0
   file: 0
