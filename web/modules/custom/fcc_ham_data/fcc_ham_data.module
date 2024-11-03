@@ -1,0 +1,24 @@
+<?php
+
+/**
+ * @file
+ * Contains fcc_ham_data.module.
+ */
+
+use Drupal\Core\Routing\RouteMatchInterface;
+
+/**
+ * Implements hook_help().
+ */
+function fcc_ham_data_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the fcc_ham_data module.
+    case 'help.page.fcc_ham_data':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Import FCC license data for amateur radio licenses.') . '</p>';
+      return $output;
+
+    default:
+  }
+}

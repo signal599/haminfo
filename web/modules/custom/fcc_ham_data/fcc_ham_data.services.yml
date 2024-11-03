@@ -1,0 +1,17 @@
+services:
+  logger.channel.fcc_ham_data:
+    class: Drupal\Core\Logger\LoggerChannel
+    factory: logger.factory:get
+    arguments: ['fcc_ham_data']
+
+  fcc_ham_data.fcc_schema_parser:
+    class: Drupal\fcc_ham_data\FccSchemaParser
+    arguments: ['@module_handler']
+
+  fcc_ham_data.importer_manager:
+    class: Drupal\fcc_ham_data\Plugin\Importer\ImporterManager
+    parent: default_plugin_manager
+
+  fcc_ham_data.data_utils:
+    class: Drupal\fcc_ham_data\DataUtils
+    arguments: ['@database', '@logger.channel.fcc_ham_data']

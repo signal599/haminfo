@@ -1,0 +1,6 @@
+services:
+  fcc_ham_data.commands:
+    class: \Drupal\fcc_ham_data\Commands\FccHamDataCommands
+    arguments: ['@fcc_ham_data.importer_manager', '@fcc_ham_data.data_utils']
+    tags:
+      - { name: drush.command }

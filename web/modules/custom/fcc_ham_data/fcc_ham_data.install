@@ -1,0 +1,97 @@
+<?php
+
+/**
+ * Implements hook_schema();
+ */
+function fcc_ham_data_schema() {
+  /** @var \Drupal\fcc_ham_data\FccSchemaParser $parser */
+  $parser = \Drupal::service('fcc_ham_data.fcc_schema_parser');
+
+  // Generate the schema for the import files from the SQL file from FCC.
+  $schema = [];
+  foreach (['hd', 'en', 'am'] as $table_id) {
+    $table_name = 'fcc_license_' . $table_id;
+    $schema[$table_name] = [
+      'fields' => $parser->getFields($table_id),
+    ];
+  }
+
+  // Add our extra schema components.
+  return array_replace_recursive($schema, _fcc_ham_data_get_extra_schema());
+}
+
+/**
+ * Get extra schema components we need in addition to what's in the FCC file.
+ *
+ * @return array
+ *   Schema array to merge in hook_schema.
+ */
+function _fcc_ham_data_get_extra_schema() {
+  return [
+    'fcc_license_hd' => [
+      'fields' => [
+        'row_hash' => [
+          'type' => 'varchar',
+          'length' => 40,
+          'description' => 'A hash of the entire row for easy detection of changes.',
+        ],
+        'total_hash' => [
+          'type' => 'varchar',
+          'length' => 40,
+          'description' => 'A hash of the three table joined result for easy detection of changes.',
+        ],
+      ],
+      'primary key' => ['unique_system_identifier'],
+      'indexes' => [
+        'call_sign' => ['call_sign'],
+      ],
+    ],
+    'fcc_license_en' => [
+      'fields' => [
+        'row_hash' => [
+          'type' => 'varchar',
+          'length' => 40,
+          'description' => 'A hash of the entire row for easy detection of changes.',
+        ],
+        'address_hash' => [
+          'type' => 'varchar',
+          'length' => 40,
+          'description' => 'A hash of just the address fields to help with geocoding.',
+        ],
+        'street_address' => [
+          // Make room for street_address, po_box.
+          'length' => 82,
+        ],
+        'zip_code' => [
+          // Make room for dash in 9 digit zip code.
+          'length' => 10,
+        ],
+      ],
+      'primary key' => ['unique_system_identifier'],
+      'indexes' => [
+        'address_hash' => ['address_hash'],
+      ],
+    ],
+    'fcc_license_am' => [
+      'fields' => [
+        'row_hash' => [
+          'type' => 'varchar',
+          'length' => 40,
+          'description' => 'A hash of the entire row for easy detection of changes.',
+        ],
+      ],
+      'primary key' => ['unique_system_identifier'],
+    ],
+  ];
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function fcc_ham_data_uninstall() {
+  $schema = \Drupal::database()->schema();
+
+  foreach (['hd', 'en', 'am'] as $table_id) {
+    $schema->dropTable('fcc_license_' . $table_id);
+  }
+}

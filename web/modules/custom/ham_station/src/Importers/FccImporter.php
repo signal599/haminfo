@@ -56,18 +56,19 @@ class FccImporter {
     organization, operator_class, previous_callsign, total_hash, address_hash,
     user_id, status, created, changed)
     SELECT uuid() AS uuid, \'en\' AS langcode, hd.call_sign AS callsign, en.first_name, en.mi AS middle_name, en.last_name, en.suffix,
-    CASE WHEN applicant_type_code != \'I\' THEN en.entity_name ELSE NULL END AS organization, 
+    CASE WHEN applicant_type_code != \'I\' THEN en.entity_name ELSE NULL END AS organization,
     am.operator_class, am.previous_callsign, hd.total_hash, en.address_hash,
-    1 AS user_id, 1 AS status, unix_timestamp() AS created, unix_timestamp() AS changed    
+    1 AS user_id, 1 AS status, unix_timestamp() AS created, unix_timestamp() AS changed
     FROM {fcc_license_hd} hd
     INNER JOIN {fcc_license_en} en ON en.unique_system_identifier = hd.unique_system_identifier
     INNER JOIN {fcc_license_am} am ON am.unique_system_identifier = hd.unique_system_identifier
     WHERE hd.license_status = \'A\'
     AND NOT EXISTS (SELECT id FROM {ham_station} hs WHERE hs.callsign = hd.call_sign)';
 
-    $row_count = $this->dbConnection->query($sql, [], ['return' => Database::RETURN_AFFECTED]);
+    $stmt = $this->dbConnection->prepareStatement($sql, [], TRUE);
+    $stmt->execute();
 
-    $msg = sprintf('%s new FCC licenses imported.', $row_count);
+    $msg = sprintf('%s new FCC licenses imported.', $stmt->rowCount());
     $this->logger->info($msg);
 
     if ($callback !== NULL) {
@@ -88,8 +89,8 @@ class FccImporter {
     INNER JOIN {fcc_license_hd} hd ON hd.call_sign = hs.callsign
     INNER JOIN {fcc_license_en} en ON en.unique_system_identifier = hd.unique_system_identifier
     INNER JOIN {fcc_license_am} am ON am.unique_system_identifier = hd.unique_system_identifier
-    SET 
-    hs.first_name = en.first_name, 
+    SET
+    hs.first_name = en.first_name,
     hs.middle_name = en.mi,
     hs.last_name = en.last_name,
     hs.suffix = en.suffix,
@@ -101,9 +102,10 @@ class FccImporter {
     hs.changed = unix_timestamp()
     WHERE hd.license_status = \'A\'';
 
-    $row_count = $this->dbConnection->query($sql, [], ['return' => Database::RETURN_AFFECTED]);
+    $stmt = $this->dbConnection->prepareStatement($sql, [], TRUE);
+    $stmt->execute();
 
-    $msg = sprintf('%s existing FCC licenses updated.', $row_count);
+    $msg = sprintf('%s existing FCC licenses updated.', $stmt->rowCount());
     $this->logger->info($msg);
 
     if ($callback !== NULL) {
@@ -132,13 +134,14 @@ class FccImporter {
     INNER JOIN {fcc_license_hd} hd ON hd.unique_system_identifier = en.unique_system_identifier AND hd.license_status = \'A\'
     WHERE NOT EXISTS (SELECT id FROM {ham_address} ha WHERE ha.hash = en.address_hash)
     AND en.unique_system_identifier = (
-    SELECT MIN(en2.unique_system_identifier) 
+    SELECT MIN(en2.unique_system_identifier)
     FROM {fcc_license_en} en2 INNER JOIN {fcc_license_hd} hd2 ON hd2.unique_system_identifier = en2.unique_system_identifier
     WHERE hd2.license_status = \'A\' AND en2.address_hash = en.address_hash)';
 
-    $row_count = $this->dbConnection->query($sql, [], ['return' => Database::RETURN_AFFECTED]);
+    $stmt = $this->dbConnection->prepareStatement($sql, [], TRUE);
+    $stmt->execute();
 
-    $msg = sprintf('%s new FCC addresses imported.', $row_count);
+    $msg = sprintf('%s new FCC addresses imported.', $stmt->rowCount());
     $this->logger->info($msg);
 
     if ($callback !== NULL) {
@@ -159,9 +162,10 @@ class FccImporter {
     LEFT JOIN fcc_license_hd hd ON hd.call_sign = ham_station.callsign AND hd.license_status = \'A\'
     WHERE hd.unique_system_identifier IS NULL';
 
-    $row_count = $this->dbConnection->query($sql, [], ['return' => Database::RETURN_AFFECTED]);
+    $stmt = $this->dbConnection->prepareStatement($sql, [], TRUE);
+    $stmt->execute();
 
-    $msg = sprintf('%s inactive FCC stations deleted.', $row_count);
+    $msg = sprintf('%s inactive FCC stations deleted.', $stmt->rowCount());
     $this->logger->info($msg);
 
     if ($callback !== NULL) {
@@ -182,9 +186,10 @@ class FccImporter {
     LEFT JOIN ham_station hs ON hs.address_hash = ham_address.hash
     WHERE hs.id IS NULL';
 
-    $row_count = $this->dbConnection->query($sql, [], ['return' => Database::RETURN_AFFECTED]);
+    $stmt = $this->dbConnection->prepareStatement($sql, [], TRUE);
+    $stmt->execute();
 
-    $msg = sprintf('%s inactive FCC addresses deleted.', $row_count);
+    $msg = sprintf('%s inactive FCC addresses deleted.', $stmt->rowCount());
     $this->logger->info($msg);
 
     if ($callback !== NULL) {
@@ -205,9 +210,10 @@ class FccImporter {
     LEFT JOIN ham_address ha ON ha.location_id = ham_location.id
     WHERE ha.id IS NULL';
 
-    $row_count = $this->dbConnection->query($sql, [], ['return' => Database::RETURN_AFFECTED]);
+    $stmt = $this->dbConnection->prepareStatement($sql, [], TRUE);
+    $stmt->execute();
 
-    $msg = sprintf('%s inactive FCC locations deleted.', $row_count);
+    $msg = sprintf('%s inactive FCC locations deleted.', $stmt->rowCount());
     $this->logger->info($msg);
 
     if ($callback !== NULL) {
@@ -228,13 +234,12 @@ class FccImporter {
     WHERE address__address_line1 LIKE :pobox_like
     AND (geocode_provider IS NULL OR geocode_provider != \'mn\')';
 
-    $row_count = $this->dbConnection->query(
-      $sql,
-      [':pobox_status' => MapQueryService::GEOCODE_STATUS_PO_BOX, ':pobox_like' => 'PO Box%'],
-      ['return' => Database::RETURN_AFFECTED]
+    $stmt = $this->dbConnection->prepareStatement($sql, [], TRUE);
+    $stmt->execute(
+      [':pobox_status' => MapQueryService::GEOCODE_STATUS_PO_BOX, ':pobox_like' => 'PO Box%']
     );
 
-    $msg = sprintf('%s addresses set as PO Box.', $row_count);
+    $msg = sprintf('%s addresses set as PO Box.', $stmt->rowCount());
     $this->logger->info($msg);
 
     if ($callback !== NULL) {
