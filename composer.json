@@ -23,6 +23,7 @@
         "drupal/core-project-message": "^11.0",
         "drupal/core-recommended": "^11.0",
         "drupal/easy_breadcrumb": "^2.0",
+        "drupal/smtp": "^1.4",
         "drush/drush": "^13.3"
     },
     "conflict": {

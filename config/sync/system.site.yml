@@ -3,7 +3,7 @@ _core:
 langcode: en
 uuid: 1db86d40-236f-45c4-a075-65c610311d69
 name: 'Ham Info'
-mail: admin@example.com
+mail: haminfo@tetranz.com
 slogan: ''
 page:
   403: ''

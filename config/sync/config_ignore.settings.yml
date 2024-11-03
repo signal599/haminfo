@@ -3,3 +3,4 @@ _core:
 mode: simple
 ignored_config_entities:
   - ham_station.settings
+  - smtp.settings
