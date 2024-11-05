@@ -64,15 +64,19 @@ class HamNeighborsReport extends BlockBase implements ContainerFactoryPluginInte
    * {@inheritdoc}
    */
   public function build() {
-    $result = $this->reportService->geocodeStatus();
+    $table = $this->reportService->geocodeStatus();
 
-    return [
+    $build = [
       '#theme' => 'ham_neighbors_report',
-      '#state_counts' => $result['states'],
-      '#totals'  => $result['totals'],
-      '#success_pc' => $result['success_pc'],
-      '#cache' => ['tags' => ['geocoding'], 'max-age' => Cache::PERMANENT],
+      '#table' => $table,
     ];
+
+    CacheableMetadata::createFromRenderArray($build)
+      ->addCacheTags(['geocoding'])
+      ->setCacheMaxAge(Cache::PERMANENT)
+      ->applyTo($build);
+
+    return $build;
   }
 
 }

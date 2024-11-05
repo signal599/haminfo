@@ -32,9 +32,7 @@ function ham_station_theme($existing, $type, $theme, $path) {
   return [
     'ham_neighbors_report' => [
       'variables' => [
-        'state_counts' => NULL,
-        'totals' => NULL,
-        'success_pc' => NULL,
+        'table' => NULL,
       ],
     ],
     'ham_neighbors' => [

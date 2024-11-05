@@ -48,3 +48,17 @@
   background: transparent url(../../../../core/misc/throbber-active.gif) no-repeat 0 center;
   display: none;
 }
+
+.geocode-report {
+  width: 75%;
+  border-collapse:collapse;
+}
+
+.geocode-report td, .geocode-report tr {
+  text-align: right;
+  border-top: 1px solid black;
+}
+
+.geocode-report tfoot td {
+  font-weight: bold;
+}

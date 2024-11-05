@@ -51,7 +51,8 @@ class ReportService {
     $query->addExpression('COUNT(*)', 'count');
     $query->condition('ha.address__administrative_area', '', '>');
     $query->condition('ha.address__administrative_area', ['AA', 'AE'], 'NOT IN');
-    $query->groupBy('ha.address__administrative_area, ha.geocode_status');
+    $query->groupBy('ha.address__administrative_area');
+    $query->groupBy('ha.geocode_status');
     $rows = $query->execute();
 
     $totals = [0, 0, 0, 0];
@@ -67,13 +68,22 @@ class ReportService {
     }
 
     ksort($states);
+    $rows = [];
 
-    $result = [
-      'states' => $states,
-      'totals' => $totals,
+    foreach ($states as $state => $values) {
+      array_unshift($values, $state);
+      $rows[] = $values;
+    }
+
+    array_unshift($totals, 'Totals');
+
+    return [
+      '#type' => 'table',
+      '#header' => ['State', 'New', 'Successful', 'Not Found', 'PO Box'],
+      '#rows' => $rows,
+      '#footer' => [$totals],
+      '#attributes' => ['class' => ['geocode-report']],
     ];
-
-    return $result;
   }
 
 }
