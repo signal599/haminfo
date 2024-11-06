@@ -1,4 +1,4 @@
-uuid: 5f0b6d2c-49eb-40b5-bb6c-bc838b4aee15
+uuid: c223633c-51f1-46c3-a79f-ba0640a59703
 langcode: en
 status: true
 dependencies:
@@ -8,8 +8,8 @@ _core:
   default_config_hash: 6aOgWsNTXjqrDm98TXSAjP6qd2nCijD1xw45MrnbK-Y
 id: haminfo_page_title
 theme: haminfo
-region: sidebar_first
-weight: -5
+region: content_above
+weight: -7
 provider: null
 plugin: page_title_block
 settings:

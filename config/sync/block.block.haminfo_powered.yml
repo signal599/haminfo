@@ -1,4 +1,4 @@
-uuid: 7b5e6a02-74cf-4709-bda7-dfd335f6c11c
+uuid: 33a2b6ee-a227-447c-8a32-574465aa866d
 langcode: en
 status: true
 dependencies:
@@ -10,8 +10,8 @@ _core:
   default_config_hash: eYL19CLDyinGTWYQfBD1DswWzglEotE_kHnHx3AxTXM
 id: haminfo_powered
 theme: haminfo
-region: sidebar_first
-weight: 0
+region: footer_bottom
+weight: -7
 provider: null
 plugin: system_powered_by_block
 settings:

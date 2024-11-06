@@ -1,4 +1,4 @@
-uuid: fc6beafb-031e-4fbe-afb2-6ff5168b9bd7
+uuid: e0688050-def6-4992-b314-8c7330e7d511
 langcode: en
 status: true
 dependencies:
@@ -11,7 +11,7 @@ _core:
 id: haminfo_content
 theme: haminfo
 region: content
-weight: -7
+weight: 0
 provider: null
 plugin: system_main_block
 settings:
