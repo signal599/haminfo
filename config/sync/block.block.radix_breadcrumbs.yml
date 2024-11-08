@@ -1,17 +1,17 @@
-uuid: a9d5424f-7987-4a51-8dd2-1db7bd102257
+uuid: 7e8860ad-bdc1-4d06-9aea-e8697d4a3593
 langcode: en
 status: true
 dependencies:
   module:
     - system
   theme:
-    - haminfo
+    - radix
 _core:
-  default_config_hash: 3zoAfHiFu6DKYX2MqHxjkeTa8pNk0LVyFCbQ1Bxliyw
-id: haminfo_breadcrumbs
-theme: haminfo
-region: header
-weight: -5
+  default_config_hash: VhBzWb7lMRtIOg9G7VSw_0uopi-7zXeHq4vXqqV1HFE
+id: radix_breadcrumbs
+theme: radix
+region: navbar_branding
+weight: 0
 provider: null
 plugin: system_breadcrumb_block
 settings:

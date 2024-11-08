@@ -1,17 +1,17 @@
-uuid: 33a2b6ee-a227-447c-8a32-574465aa866d
+uuid: 78781a1d-8c68-4038-92bd-b557d7211cb2
 langcode: en
 status: true
 dependencies:
   module:
     - system
   theme:
-    - haminfo
+    - radix
 _core:
   default_config_hash: eYL19CLDyinGTWYQfBD1DswWzglEotE_kHnHx3AxTXM
-id: haminfo_powered
-theme: haminfo
-region: footer_bottom
-weight: -7
+id: radix_powered
+theme: radix
+region: navbar_branding
+weight: 0
 provider: null
 plugin: system_powered_by_block
 settings:

@@ -1,14 +1,14 @@
-uuid: 86fdd7de-336a-4dca-ad55-7db265c028d6
+uuid: 918505e2-8c0f-45bb-8c59-a71db1b3e20b
 langcode: en
 status: true
 dependencies:
   theme:
-    - haminfo
+    - radix
 _core:
   default_config_hash: nGE3EoPQQaQCuqTUtZgw0-KIzmrqdKDzdNQf2JyPUt4
-id: haminfo_primary_local_tasks
-theme: haminfo
-region: highlighted
+id: radix_primary_local_tasks
+theme: radix
+region: navbar_branding
 weight: -4
 provider: null
 plugin: local_tasks_block

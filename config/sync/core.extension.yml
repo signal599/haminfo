@@ -53,5 +53,6 @@ module:
 theme:
   olivero: 0
   claro: 0
+  radix: 0
   haminfo: 0
 profile: standard

@@ -1,15 +1,15 @@
-uuid: 4aa7a9e1-1a22-4bdd-b9be-557c3094e1c5
+uuid: 4ba953f7-4aaf-4d83-a0f2-9ee2bcab0fbb
 langcode: en
 status: true
 dependencies:
   theme:
-    - haminfo
+    - radix
 _core:
-  default_config_hash: icgxM89RYjSuGiO6cVsg4o9d5LD-P68PB4ZLZV14x_w
-id: haminfo_page_title
-theme: haminfo
-region: header
-weight: -2
+  default_config_hash: 6aOgWsNTXjqrDm98TXSAjP6qd2nCijD1xw45MrnbK-Y
+id: radix_page_title
+theme: radix
+region: navbar_branding
+weight: -5
 provider: null
 plugin: page_title_block
 settings:

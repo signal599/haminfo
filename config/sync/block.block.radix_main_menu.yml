@@ -1,4 +1,4 @@
-uuid: b0886eec-d1a4-41a1-9465-e73ffba02648
+uuid: de15d0ef-b682-4f43-bac9-ab01d977a065
 langcode: en
 status: true
 dependencies:
@@ -7,13 +7,13 @@ dependencies:
   module:
     - system
   theme:
-    - haminfo
+    - radix
 _core:
-  default_config_hash: FbMgINFS6pubriU2MY-EE2tiMcbOCuPrwvIBREXuqrw
-id: haminfo_main_menu
-theme: haminfo
-region: navbar_left
-weight: -5
+  default_config_hash: KWAiziL39uEzmOJEql_wbUP2RtqGceL3WM2CfxhMelE
+id: radix_main_menu
+theme: radix
+region: navbar_branding
+weight: 0
 provider: null
 plugin: 'system_menu_block:main'
 settings:
@@ -23,5 +23,5 @@ settings:
   provider: system
   level: 1
   depth: 2
-  expand_all_items: false
+  expand_all_items: true
 visibility: {  }

@@ -1,15 +1,15 @@
-uuid: 3478ccc1-4dbc-4b78-9443-c21420a86856
+uuid: c7b9217a-2eb9-4d1f-a116-4177f169d87a
 langcode: en
 status: true
 dependencies:
   theme:
     - haminfo
 _core:
-  default_config_hash: Q9_2whdOj1YIomfvsIfopROW4FT_X5pY0DjdOiOaQ5U
-id: haminfo_primary_admin_actions
+  default_config_hash: Mue4LerJBALxue6yThlCifVXPb1apmtwLAtAuaILhv0
+id: haminfo_local_actions
 theme: haminfo
-region: highlighted
-weight: -5
+region: header
+weight: -4
 provider: null
 plugin: local_actions_block
 settings:

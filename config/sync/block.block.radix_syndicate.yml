@@ -1,17 +1,17 @@
-uuid: a0f2de0d-31dd-4ef9-82f7-5704f141f46a
+uuid: 10679082-ef37-4c55-8d92-94c9379c84c8
 langcode: en
-status: false
+status: true
 dependencies:
   module:
     - node
   theme:
-    - haminfo
+    - radix
 _core:
   default_config_hash: 0gq3VPg-_UM69FCCWurLFIrrnIjC2HLKhwo9iQNtcUo
-id: haminfo_syndicate
-theme: haminfo
-region: social
-weight: -7
+id: radix_syndicate
+theme: radix
+region: navbar_branding
+weight: 0
 provider: null
 plugin: node_syndicate_block
 settings:

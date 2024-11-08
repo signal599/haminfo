@@ -1,0 +1,25 @@
+uuid: 8158860b-6a50-447e-be0a-6909f6e999df
+langcode: en
+status: true
+dependencies:
+  module:
+    - system
+  theme:
+    - haminfo
+_core:
+  default_config_hash: neUngdwfAPbdBREAAGGWfzr53GAB92JiSLObxkLAB_Y
+id: haminfo_branding
+theme: haminfo
+region: navbar_branding
+weight: -1
+provider: null
+plugin: system_branding_block
+settings:
+  id: system_branding_block
+  label: 'Site branding'
+  label_display: '0'
+  provider: system
+  use_site_logo: true
+  use_site_name: false
+  use_site_slogan: false
+visibility: {  }

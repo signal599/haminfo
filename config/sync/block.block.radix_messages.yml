@@ -1,17 +1,17 @@
-uuid: 38f98433-6ceb-4358-94ea-c1661cbc2521
+uuid: 8ca6d7ab-8d0a-4d88-9abe-e059fec733e7
 langcode: en
 status: true
 dependencies:
   module:
     - system
   theme:
-    - haminfo
+    - radix
 _core:
-  default_config_hash: hp8cgzXGWuK1GY2iRNdIzjRj1heeSiaVurrhBUJGRcI
-id: haminfo_messages
-theme: haminfo
-region: header
-weight: -3
+  default_config_hash: BZ5tpW7H8X4PVGRm3MImTIHd2tN0eF7zOtp4SpRYUA0
+id: radix_messages
+theme: radix
+region: navbar_branding
+weight: -5
 provider: null
 plugin: system_messages_block
 settings:

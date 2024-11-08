@@ -1,16 +1,16 @@
-uuid: d0f16402-8258-46ac-a56d-fc67a9ef35d6
+uuid: 746e300d-95a5-4958-844f-90403f9d0c1a
 langcode: en
 status: true
 dependencies:
   module:
     - search
   theme:
-    - haminfo
+    - radix
 _core:
   default_config_hash: yEBET0cqDbk8dkWzaJw-8CKft0961VBflsISoSR6Lj8
-id: haminfo_search_form_narrow
-theme: haminfo
-region: primary_menu
+id: radix_search_form_narrow
+theme: radix
+region: navbar_branding
 weight: -4
 provider: null
 plugin: search_form_block

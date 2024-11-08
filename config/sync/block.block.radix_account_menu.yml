@@ -1,4 +1,4 @@
-uuid: e30dbfed-cd4a-41df-b306-17250d194468
+uuid: 613d4ec2-37d4-4ab9-ad82-5e1ec0b53554
 langcode: en
 status: true
 dependencies:
@@ -7,12 +7,12 @@ dependencies:
   module:
     - system
   theme:
-    - haminfo
+    - radix
 _core:
   default_config_hash: gmxYWWHmgbe0Pnv8y48ZLSLH5mEHejOjAP6RLxUfdzU
-id: haminfo_account_menu
-theme: haminfo
-region: secondary_menu
+id: radix_account_menu
+theme: radix
+region: navbar_branding
 weight: -4
 provider: null
 plugin: 'system_menu_block:account'
