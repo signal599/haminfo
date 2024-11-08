@@ -1,0 +1,41 @@
+# Progress
+
+Progress components are built with two HTML elements, some CSS to set the width, and a few attributes.
+
+## Bootstrap Documentation
+
+https://getbootstrap.com/docs/5.3/components/progress/
+
+
+## Component Properties
+
+The Progress component takes a variety of properties to customize its appearance and content:
+
+- `progress_utility_classes` (array) (default: []): An array of utility classes to apply to the progress.
+- `progress_bar_utility_classes` (array) (default: []): An array of utility classes to apply to the progress bar.
+- `color` (string) (default: ''): The color of the progress bar.
+- `progress_attributes` (array) (default: []): An array of attributes to apply to the progress.
+- `progress_bar_attributes` (array) (default: []): An array of attributes to apply to the progress bar.
+- `label` (string) (default: ''): The label for the progress bar, also used for the aria label.
+- `striped` (bool) (default: false): Add stripes to the progress bar.
+- `animated` (bool) (default: false): Add animation to the progress bar.
+- `stacked` (bool) (default: false): Add multiple progress bars.
+- `height` (int) (default: 16): The height of the progress bar.
+- `valuenow` (int) (default: 0): The current value of the progress bar.
+- `valuemin` (int) (default: 0): The minimum value of the progress bar.
+- `valuemax` (int) (default: 100): The maximum value of the progress bar.
+
+## Usage:
+
+```twig
+{%
+  include 'radix:progress' with {
+    color: 'secondary',
+    animated: false,
+    striped: false,
+    label: '25% Complete',
+    height: 20,
+    valuenow: 60,
+  }
+%}
+```

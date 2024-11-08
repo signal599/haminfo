@@ -1,0 +1,35 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/modules/sdc/src/metadata.schema.json
+name: Media
+status: experimental
+description: 'A theme override for a media item display in Drupal. This includes configurations for media type, published status, and view mode.'
+props:
+  type: object
+  properties:
+    media_type:
+      type: string
+      title: Media Type
+      description: 'The bundle classification of the media object. It is automatically generated and cleaned for class addition.'
+    is_published:
+      type: boolean
+      title: Published Status
+      description: 'A flag indicating whether the media is published or unpublished. It is used to add a class "media--unpublished" when unpublished.'
+    media_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Utility Classes
+      description: 'A string of utility classes to add to the media item, such as "media--highlighted" or "media--sticky".'
+    view_mode:
+      type: string
+      title: View Mode
+      description: 'The view mode classification that is cleansed for class addition.'
+    media_attributes:
+      type: Drupal\Core\Template\Attribute
+      description: 'Any additional HTML attributes to add to the media item, such as classes or identifiers.'
+slots:
+  content:
+    type: array
+    description: 'The rendered media item content.'
+  media_content:
+    type: array
+    description: 'The media content block wrapper.'

@@ -1,0 +1,157 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/modules/sdc/src/metadata.schema.json
+name: Views view
+status: experimental
+description: Implementation for main view component.
+props:
+  type: object
+  properties:
+    content:
+      type: string
+      title: Content
+    views_attributes:
+      type: Drupal\Core\Template\Attribute
+      title: Views attributes
+    views_title_attributes:
+      type: Drupal\Core\Template\Attribute
+      title: Views title attributes
+    views_header_attributes:
+      type: Drupal\Core\Template\Attribute
+      title: Views header attributes
+    views_filters_attributes:
+      type: Drupal\Core\Template\Attribute
+      title: Views filters attributes
+    views_rows_attributes:
+      type: Drupal\Core\Template\Attribute
+      title: Views rows attributes
+    views_empty_attributes:
+      type: Drupal\Core\Template\Attribute
+      title: Views empty attributes 
+    views_footer_attributes:
+      type: Drupal\Core\Template\Attribute
+      title: Views footer attributes
+    views_attachment_before_attributes:
+      type: Drupal\Core\Template\Attribute
+      title: Views attachment before attributes
+    views_attachment_after_attributes:
+      type: Drupal\Core\Template\Attribute
+      title: Views attachment after attributes
+    views_pager_attributes: 
+      type: Drupal\Core\Template\Attribute
+      title: Views pager attributes
+    views_more_attributes:
+      type: Drupal\Core\Template\Attribute
+      title: Views more attributes
+    views_feed_icons_attributes:
+      type: Drupal\Core\Template\Attribute
+      title: Views feed icons attributes
+    views_title_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Views Title Utility Classes
+      default: []
+      description: An array of utility classes. Use to add extra Bootstrap utility classes or custom CSS classes.
+    views_header_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Views Header Utility Classes
+      default: []
+      description: An array of utility classes. Use to add extra Bootstrap utility classes or custom CSS classes.
+    views_filters_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Views Filters Utility Classes
+      default: []
+      description: An array of utility classes. Use to add extra Bootstrap utility classes or custom CSS classes.
+    views_rows_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Views Rows Utility Classes
+      default: []
+      description: An array of utility classes. Use to add extra Bootstrap utility classes or custom CSS classes.
+    views_empty_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Views Empty Utility Classes
+      default: []
+      description: An array of utility classes. Use to add extra Bootstrap utility classes or custom CSS classes.
+    views_footer_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Views Footer Utility Classes
+      default: []
+      description: An array of utility classes. Use to add extra Bootstrap utility classes or custom CSS classes.
+    views_attachment_before_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Views Attachment Before Utility Classes
+      default: []
+      description: An array of utility classes. Use to add extra Bootstrap utility classes or custom CSS classes.
+    views_attachment_after_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Views Attachment After Utility Classes
+      default: []
+      description: An array of utility classes. Use to add extra Bootstrap utility classes or custom CSS classes.
+    views_pager_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Views Pager Utility Classes
+      default: []
+      description: An array of utility classes. Use to add extra Bootstrap utility classes or custom CSS classes.
+    views_more_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Views More Utility Classes
+      default: []
+      description: An array of utility classes. Use to add extra Bootstrap utility classes or custom CSS classes.
+    views_feed_icons_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Views Feed Icons Utility Classes
+      default: []
+      description: An array of utility classes. Use to add extra Bootstrap utility classes or custom CSS classes.
+slots:
+  views_view_wrapper:
+    title: Views wrapper
+    description: The wrapper for the view.
+  views_view_title:
+    title: Views title
+    description: The title for the view.
+  views_header:
+    title: Views header
+    description: The header for the view.
+  views_filters:
+    title: Views filters
+    description: The filters for the view.
+  views_attachment_before:
+    title: Views attachment before
+    description: The attachment before the view.
+  views_rows:
+    title: Views rows
+    description: The rows for the view.
+  views_pager:
+    title: Views pager
+    description: The pager for the view.
+  views_attachment_after:
+    title: Views attachment after
+    description: The attachment after the view.
+  views_more:
+    title: Views more
+    description: The more link for the view.
+  views_footer:
+    title: Views footer
+    description: The footer for the view.
+  views_feed_icons:
+    title: Views feed icons
+    description: The feed icons for the view.

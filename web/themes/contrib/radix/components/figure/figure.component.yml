@@ -1,0 +1,28 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/modules/sdc/src/metadata.schema.json
+name: Figure
+status: experimental
+description: Figure component with alignment options
+props:
+  type: object
+  properties:
+    attributes:
+      type: Drupal\Core\Template\Attribute
+    figure_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Utility classes
+      description: Additional classes for the figure component
+    align:
+      type: string
+      title: Alignment
+      description: Alignment of the figure component (left|right|center)
+      enum: [left, right, center]
+    image:
+      type: string
+      title: Image
+      description: The image of the figure component
+    caption:
+      type: string
+      title: Caption
+      description: The caption of the figure component

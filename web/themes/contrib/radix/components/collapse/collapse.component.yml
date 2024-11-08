@@ -1,0 +1,60 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/modules/sdc/src/metadata.schema.json
+name: Collapse
+status: experimental
+description: 'Collapse component, see Bootstrap Documentation: https://getbootstrap.com/docs/5.3/components/collapse/'
+props:
+  type: object
+  properties:
+    title:
+      type: string
+      title: Title
+      description: Title text for the collapse component.
+      default: ''
+    button_html_tag:
+      type: string
+      title: The HTML tag to use for the button (button | a). Defaults to `button`.
+      default: button
+      enum:
+        - button
+        - a
+    id:
+      type: ['integer', 'string']
+      title: ID
+      description: Unique ID for the collapse component.
+      default: 0
+    direction:
+      type: string
+      title: Direction
+      description: Direction of the collapse component.
+      default: vertical
+      enum:
+        - vertical
+        - horizontal
+    collapsed:
+      type: boolean
+      title: Collapsed
+      description: True if the collapse component is initially collapsed.
+      default: true
+    content:
+      type: string
+      title: Content
+      description: Default content text for the collapse component.
+    collapse_content_classes:
+      type: array
+      title: Content Classes
+      description: Additional classes for the collapse content.
+      items:
+        type: string
+    collapse_content_utility_classes:
+      type: array
+      title: Content Utility Classes
+      description: Additional utility classes for the collapse content.
+      items:
+        type: string
+slots:
+  collapse_trigger:
+    title: Trigger
+    description: Placeholder for the trigger within the collapse component. defaults to a button.
+  collapse_content:
+    title: Content
+    description: Placeholder for content within the collapse component.

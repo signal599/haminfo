@@ -1,0 +1,137 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/modules/sdc/src/metadata.schema.json
+name: Modal
+status: experimental
+description: A Bootstrap Modal component that can be used for displaying content in a layered format, such as forms, messages, or custom content, with various customization options for size, behavior, and content.
+props:
+  type: object
+  properties:
+    size:
+      type: string
+      title: Size
+      description: Sets the size of the modal. Options include 'sm', 'lg', 'xl', and 'fullscreen'.
+      default: ''
+      enum:
+        - ''
+        - sm
+        - lg
+        - xl
+        - fullscreen
+    id:
+      type: string
+      title: ID
+      description: The unique identifier for the modal. A random ID is generated if not specified.
+    title_id:
+      type: string
+      title: Title ID
+      description: The unique identifier for the modal title. A random ID is generated if not specified.
+    fullscreen_responsive:
+      type: string
+      title: Fullscreen Responsive
+      description: Makes the modal fullscreen on specified breakpoints. Options are 'sm', 'md', 'lg', 'xl', 'xxl'.
+    static_backdrop:
+      type: boolean
+      title: Static Backdrop
+      description: If true, clicking the backdrop does not close the modal.
+    verticaly_centered:
+      type: boolean
+      title: Vertically Centered
+      description: If true, centers the modal vertically in the viewport.
+    scrollable:
+      type: boolean
+      title: Scrollable
+      description: If true, makes the modal's body scrollable if the content overflows.
+    header:
+      type: string
+      title: Header
+      description: Content for the modal's header, can be plain text or HTML.
+    body:
+      type: ['string', 'boolean']
+      title: Body
+      description: The main content of the modal, can contain text, forms, or any HTML content.
+    footer:
+      type: string
+      title: Footer
+      description: Content for the modal's footer, typically used for buttons or secondary information.
+    close_button:
+      type: boolean
+      title: Close Button
+      description: If true, displays a close button in the modal header.
+    animation:
+      type: boolean
+      title: Animation
+      description: If true, applies a fade animation to the modal.
+    keyboard:
+      type: boolean
+      title: Keyboard
+      description: If true, allows closing the modal with the escape key.
+    modal_attributes:
+      type: Drupal\Core\Template\Attribute
+      title: Modal Attributes
+      description: A list of HTML attributes for the modal.
+    modal_header_attributes:
+      type: Drupal\Core\Template\Attribute
+      title: Modal Attributes
+      description: A list of HTML attributes for the modal.
+    modal_body_attributes:
+      type: Drupal\Core\Template\Attribute
+      title: Modal Attributes
+      description: A list of HTML attributes for the modal.
+    modal_dialog_attributes:
+      type: Drupal\Core\Template\Attribute
+      title: Modal Dialog Attributes
+      description: A list of HTML attributes for the modal dialog.
+    modal_title_attributes:
+      type: Drupal\Core\Template\Attribute
+      title: Modal Title Attributes
+      description: A list of HTML attributes for the modal title.
+    title_tag:
+      type: string
+      title: Title Tag
+      description: The HTML tag to use for the modal title.
+      default: h5
+    modal_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Modal Utility Classes
+      description: An array of utility classes for the modal.
+    modal_dialog_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Modal Dialog Utility Classes
+      description: An array of utility classes for the modal dialog.
+    modal_header_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Modal Header Classes
+      description: An array of utility classes for the modal header.
+    modal_title_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Modal Title Classes
+      description: An array of utility classes for the modal title.
+    modal_body_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Modal Body Classes
+      description: An array of utility classes for the modal body.
+    modal_footer_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Modal Footer Classes
+      description: An array of utility classes for the modal footer.
+slots:
+  modal_header:
+    title: Header Slot
+    description: Slot for custom header content.
+  modal_body:
+    title: Body Slot
+    description: Slot for main body content.
+  modal_footer:
+    title: Footer Slot
+    description: Slot for footer content.

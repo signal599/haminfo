@@ -1,0 +1,24 @@
+{#
+/**
+ * @file
+ * Theme override for a 'textarea' form element.
+ *
+ * Available variables:
+ * - attributes: A list of HTML attributes for the textarea element.
+ * - value: The content of the textarea.
+ * - textarea_utility_classes: (optional) An array of additional classes for design and styling requirements.
+ *
+ * @see template_preprocess_textarea()
+ */
+#}
+{% apply spaceless %}
+
+{%
+  set textarea_classes = [
+    'form-control'
+  ]|merge(textarea_utility_classes ?: [])
+%}
+
+<textarea{{attributes.addClass(textarea_classes)}}>{{ value }}</textarea>
+
+{% endapply %}

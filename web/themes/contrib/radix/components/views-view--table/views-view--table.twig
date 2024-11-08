@@ -1,0 +1,125 @@
+{#
+/**
+ * @file
+ * Implementation for rendering a view as a table.
+ *
+ * Available variables:
+ * - attributes: HTML attributes for the table element, including 'class'.
+ * - title : The title for this group of rows.
+ * - header: An array of table header columns, each containing:
+ *   - attributes: HTML attributes for header elements.
+ *   - content: An array of HTML classes to apply to each header cell, indexed by key.
+ *   - default_classes: A flag indicating whether to use default classes.
+ * - caption_needed: A flag indicating whether the caption tag is required.
+ * - caption: The caption for this table.
+ * - accessibility_description: A description for extended table details.
+ * - accessibility_summary: A summary for the table details.
+ * - rows: An array of table rows, each row contains:
+ *   - attributes: HTML attributes for row elements.
+ *   - columns: An array of row columns, each column contains:
+ *     - attributes: HTML attributes for column elements.
+ *     - content: The column content.
+ *   - default_classes: A flag indicating whether to use default classes.
+ * - responsive: A flag indicating whether the table should be responsive.
+ * - sticky: A flag asserting whether the table header is sticky.
+ * - summary_element: A render array with table summary information (if available).
+ *
+ * @see template_preprocess_views_view_table()
+ *
+ * @ingroup themeable
+ */
+#}
+{% apply spaceless %}
+
+{%
+  set classes = [
+    'cols-' ~ header|length,
+    responsive ? 'responsive-enabled',
+    sticky ? 'sticky-header',
+    'table',
+    'table-bordered',
+  ]|merge(views_view__table_utility_classes ?: [])
+%}
+
+<div class="table-responsive">
+  <table{{attributes.addClass(classes)}}>
+    {% if caption_needed %}
+      <caption>
+        {{ caption ? caption : title }}
+
+        {% if (summary is not empty) or (description is not empty) %}
+          <details>
+            {% if summary is not empty %}
+              <summary>{{ summary }}</summary>
+            {% endif %}
+            {% if description is not empty %}
+              {{ description }}
+            {% endif %}
+          </details>
+        {% endif %}
+      </caption>
+    {% endif %}
+
+    {% if header %}
+      <thead class="bg-light">
+        <tr>
+          {% for key, column in header %}
+            {%
+              set column_classes = column.default_classes
+                ? ['views-field', 'views-field-' ~ fields[key]]
+                : []
+            %}
+
+            <th{{column.attributes.addClass(column_classes).setAttribute('scope','col')}}>
+              {% if column.wrapper_element %}
+                <{{column.wrapper_element}}>
+                  {% if column.url %}
+                    <a href="{{ column.url }}" title="{{ column.title }}">{{ column.content }}{{ column.sort_indicator }}</a>
+                  {% else %}
+                    {{ column.content }}{{ column.sort_indicator }}
+                  {% endif %}
+                </{{column.wrapper_element}}>
+              {% else %}
+                {% if column.url %}
+                  <a href="{{ column.url }}" title="{{ column.title }}">{{ column.content }}{{ column.sort_indicator }}</a>
+                {% else %}
+                  {{ column.content }}{{ column.sort_indicator }}
+                {% endif %}
+              {% endif %}
+            </th>
+          {% endfor %}
+        </tr>
+      </thead>
+    {% endif %}
+
+    <tbody>
+      {% for row in rows %}
+        <tr{{row.attributes}}>
+          {% for key, column in row.columns %}
+            {% set column_classes = column.default_classes ? ['views-field'] : [] %}
+
+            {% for field in column.fields %}
+              {% set column_classes = column_classes|merge(['views views-field-' ~ field]) %}
+            {% endfor %}
+
+            <td{{column.attributes.addClass(column_classes)}}>
+              {% if column.wrapper_element %}
+                <{{column.wrapper_element}}>
+                  {% for content in column.content %}
+                    {{ content.separator }}{{ content.field_output }}
+                  {% endfor %}
+                </{{column.wrapper_element}}>
+              {% else %}
+                {% for content in column.content %}
+                  {{- content.separator }}{{ content.field_output -}}
+                {% endfor %}
+              {% endif %}
+            </td>
+          {% endfor %}
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endapply %}

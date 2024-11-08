@@ -1,22 +1,40 @@
-name: HamInfo
-type: theme
-base theme: olivero
+name: haminfo
+description: ''
+screenshot: screenshot.png
+'alt text': 'haminfo theme screenshot'
 core_version_requirement: ^11
-
-libraries:
-  - 'haminfo/global-styling'
-
+engine: twig
+type: theme
+'base theme': radix
+starterkit: true
+dependencies:
+  - 'drupal:serialization'
+'interface translation project': haminfo
+'interface translation server pattern': themes/custom/haminfo/translations/%language.po
 regions:
+  navbar_branding: 'Navbar branding'
+  navbar_left: 'Navbar left'
+  navbar_right: 'Navbar right'
   header: Header
-  primary_menu: Primary menu
-  secondary_menu: Secondary menu
-  hero: Hero (full width)
-  highlighted: Highlighted
-  breadcrumb: Breadcrumb
-  social: Social Bar
-  content_above: Content Above
   content: Content
-  sidebar: Sidebar
-  content_below: Content Below
-  footer_top: Footer Top
-  footer_bottom: Footer Bottom
+  page_bottom: 'Page bottom'
+  footer: Footer
+libraries:
+  - haminfo/style
+ckeditor5-stylesheets:
+  - build/css/main.style.css
+libraries-extend:
+  core/drupal.ajax:
+    - haminfo/drupal.ajax
+  core/drupal.checkbox:
+    - haminfo/drupal.checkbox
+  core/drupal.message:
+    - haminfo/drupal.message
+  core/drupal.progress:
+    - haminfo/drupal.progress
+  clientside_validation_jquery/cv.jquery.validate:
+    - haminfo/jquery.validate
+version: 1.0.0
+project: radix
+datestamp: 1729163927
+generator: 'radix_starterkit:6.0.0-rc6'

@@ -1,0 +1,14 @@
+@import "../../src/scss/init";
+.alert {
+  z-index: 2;
+}
+// Issue #3386877: Fix placeholder conflict with BS5 and Drupal placeholder class.
+[data-drupal-messages] .placeholder,
+[data-drupal-messages-fallback] .placeholder {
+  background-color: initial;
+  cursor: initial;
+  display: initial;
+  min-height: initial;
+  opacity: initial;
+  vertical-align: initial;
+}

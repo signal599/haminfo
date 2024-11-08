@@ -1,0 +1,62 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/modules/sdc/src/metadata.schema.json
+name: Fieldset
+status: experimental
+description: Fieldset
+props:
+  type: object
+  properties:
+    attributes:
+      type: Drupal\Core\Template\Attribute
+      description: The HTML attributes for the fieldset element.
+    disabled:
+      type: ['null', 'boolean']
+      description: Boolean indicating whether the fieldset element is disabled.
+    errors:
+      type: ['array', 'string', 'null']
+      description: Any errors for this fieldset element.
+    required:
+      type: ['null', 'boolean']
+      description: Boolean indicating whether the fieldset element is required.
+    prefix:
+      type: ['array', 'string', 'null']
+      description: The content to add before the fieldset children.
+    suffix:
+      type: ['array', 'string', 'null']
+      description: The content to add after the fieldset children.
+    title_display:
+      type: ['array', 'string', 'null']
+      description: The display setting for the title.
+    description_display:
+      type: ['array', 'string', 'null']
+      description: The display setting for the description.
+    fieldset_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Fieldset Utility Classes
+      default: []
+      description: An array of utility classes. Use to add extra Bootstrap utility classes or custom CSS classes over to this component.
+    legend_title_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Legend Title Utility Classes
+      default: []
+      description: An array of utility classes. Use to add extra Bootstrap utility classes or custom CSS classes over to this component.
+    legend_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Legend Utility Classes
+      default: []
+      description: An array of utility classes. Use to add extra Bootstrap utility classes or custom CSS classes over to this component.
+slots:
+  children:
+    type: string
+    description: The rendered child elements of the fieldset.
+  fieldset_suffix:
+    type: string
+    description: The rendered suffix of the fieldset.
+  fieldset_prefix:
+    type: string
+    description: The rendered prefix of the fieldset.

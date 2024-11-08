@@ -1,0 +1,38 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/modules/sdc/src/metadata.schema.json
+name: Table
+status: experimental
+description: The structure and necessary styling for displaying a table.
+props:
+  type: object
+  properties:
+    caption:
+      type: [string, 'null']
+      title: Caption
+    colgroups:
+      type: array
+      title: Column Group
+    header:
+      type: array
+      title: Header
+    rows:
+      type: array
+      title: Body Rows
+    footer:
+      type: [array, string, 'null']
+      title: Footer
+slots:
+  table_caption:
+    title: Table caption
+    description: The caption of the table.
+  table_colgroup:
+    title: Table title
+    description: The title of the table.
+  table_header:
+    title: Table header
+    description: The header of the table.
+  table_body:
+    title: Table body
+    description: The body of the table.
+  table_footer:
+    title: Table footer
+    description: The footer of the table.

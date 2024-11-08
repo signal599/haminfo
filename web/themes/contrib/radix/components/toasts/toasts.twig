@@ -1,0 +1,129 @@
+{#
+/**
+ * @file
+ * Toast component based on Bootstrap's toasts.
+ *
+ * This component allows for the creation of toasts with various configurations.
+ *
+ * Features:
+ * - Optional wrapper with customizable classes and ARIA attributes.
+ * - Optional container for holding toasts, with customizable classes for placement and stacking.
+ * - Multiple toasts with support for headers, bodies, roles, and auto-hiding.
+ * - Delay control for auto-hide feature.
+ * - Optional body wrapper within each toast for additional styling.
+ * - Custom attributes for individual toasts for further customization.
+ * - Support for additional buttons within the toast body, utilizing the 'radix:button' component.
+ * - Integration with 'radix:close-button' for dismissible toasts.
+ *
+ * Usage example (see README.md for detailed examples)
+ *
+ * Available properties:
+ * - with_wrapper: Boolean indicating whether the toasts should be wrapped.
+ * - wrapper_classes: String of additional classes to add to the wrapper.
+ * - wrapper_aria_live: String for the ARIA live attribute of the wrapper.
+ * - with_container: Boolean indicating whether the toasts should be contained.
+ * - container_classes: String of additional classes to add to the container.
+ * - toasts: Array of toast objects with individual toast configurations.
+ * - attributes: Object containing additional attributes to add to the toast component.
+ */
+#}
+{% apply spaceless %}
+  {% set with_wrapper = with_wrapper|default(false) %}
+  {% set wrapper_classes = wrapper_classes|default('') %}
+  {% set wrapper_aria_live = wrapper_aria_live|default('polite') %}
+  {% set with_container = with_container|default(true) %}
+  {% set toasts = toasts|default([]) %}
+  {% set container_classes = 'toast-container' ~ (container_classes ? ' ' ~ container_classes : '') %}
+  {% set attributes = attributes|default(create_attribute()) %}
+  {% set autohide = autohide ?? false %}
+  {% set additional_buttons_classes = []|merge(additional_buttons_utility_classes ?: [
+    'd-flex',
+    'mt-2',
+    'pt-2',
+    'border-top',
+  ]) %}
+  {% set additional_buttons_attributes = additional_buttons_attributes ?: create_attribute() %}
+
+  {# Wrapper #}
+  {% if with_wrapper %}
+    <div {{ attributes.addClass(wrapper_classes).setAttribute('aria-live', wrapper_aria_live).setAttribute('aria-atomic', 'true') }}>
+  {% endif %}
+
+  {# Container #}
+  {% if with_container %}
+    <div class="{{ container_classes }}">
+  {% endif %}
+
+  {# Toasts #}
+  {% for toast in toasts %}
+    {% set toast_attributes = create_attribute(toast.attributes|default({})).addClass(['toast']).setAttribute('role', toast.role|default('alert')).setAttribute('aria-atomic', 'true') %}
+    {% if toast.autohide is defined %}
+      {% set toast_attributes = toast_attributes.setAttribute('data-bs-autohide', toast.autohide ? 'true' : 'false') %}
+    {% endif %}
+    {% if toast.delay %}
+      {% set toast_attributes = toast_attributes.setAttribute('data-bs-delay', toast.delay) %}
+    {% endif %}
+
+    <div {{ toast_attributes }}>
+    {# Toast Header #}
+    {% if toast.header %}
+      {# Apply header classes if any #}
+      {% set header_classes = toast.header.classes|default([]) %}
+      <div class="toast-header {{ header_classes|join(' ') }}">
+        {% if toast.header.title %}
+          <strong class="me-auto">{{ toast.header.title }}</strong>
+        {% endif %}
+
+        {% if toast.header.subtitle %}
+          <small class="text-muted">{{ toast.header.subtitle }}</small>
+        {% endif %}
+
+        {% if toast.with_close %}
+          {% include
+            'radix:close-button' with {
+              close_button_attributes: create_attribute()
+                .setAttribute('data-bs-dismiss', 'toast'),
+            }
+          %}
+        {% endif %}
+      </div>
+    {% endif %}
+
+      {# Toast Body #}
+      {% if toast.with_body_wrapper %}
+        <div class="{{ toast.body_wrapper_classes|default('') }}">
+      {% endif %}
+        <div class="toast-body">
+          {{ toast.body|default('') }}
+
+          {# Additional Buttons if needed #}
+          <div {{ additional_buttons_attributes.addClass(additional_buttons_classes) }}>
+            {% for button in toast.additional_buttons %}
+              {%
+                include 'radix:button' with {
+                  content: button.text,
+                  attributes: button.attributes|default(create_attribute()),
+                  color: button.color|default('primary'),
+                  outline: button.outline|default(false),
+                  button_utility_classes: button.button_utility_classes|default([]),
+                  button_html_tag: button.button_html_tag|default('button'),
+                  url: button.url|default(''),
+                }
+              %}
+            {% endfor %}
+          </div>
+        </div>
+      {% if toast.with_body_wrapper %}
+        </div>
+      {% endif %}
+    </div>
+  {% endfor %}
+
+  {% if with_container %}
+    </div>
+  {% endif %}
+
+  {% if with_wrapper %}
+    </div>
+  {% endif %}
+{% endapply %}

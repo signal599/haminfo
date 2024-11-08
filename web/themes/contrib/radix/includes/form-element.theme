@@ -1,0 +1,75 @@
+<?php
+
+/**
+ * @file
+ * Theme and preprocess functions for form elements.
+ */
+
+/**
+ * Implements hook_theme_suggestions_HOOK_alter() for form elements.
+ */
+function radix_theme_suggestions_form_element_alter(array &$suggestions, array $variables) {
+  $element = $variables['element'];
+
+  // Add a suggestion based on the element type.
+  if (isset($element['#type'])) {
+    $suggestions[] = $variables['theme_hook_original'] . '__' . $element['#type'];
+  }
+
+  // Add suggestions based on the form ID.
+  if (isset($element['#form_id'])) {
+    $suggestions[] = 'form_element__form_id__' . $element['#form_id'];
+    
+    if (isset($element['#type'])) {
+      $suggestions[] = 'form_element__form_id__' . $element['#form_id'] . '__type__' . $element['#type'];
+    }
+  }
+
+  // Add suggestions based on the element name.
+  if (isset($element['#name'])) {
+    $name = radixCleanIdentifier($element['#name']);
+    $suggestions[] = 'form_element__name__' . $name;
+    
+    if (isset($element['#type'])) {
+      $suggestions[] = 'form_element__name__' . $name . '__type__' . $element['#type'];
+    }
+  }
+
+  // Add suggestions based on the element ID.
+  if (isset($element['#id'])) {
+    $id = radixCleanIdentifier($element['#id']);
+    $suggestions[] = 'form_element__id__' . $id;
+    
+    if (isset($element['#type'])) {
+      $suggestions[] = 'form_element__id__' . $id . '__type__' . $element['#type'];
+    }
+  }
+
+  // Add suggestions for elements within Views.
+  if (isset($element['#context']['#view_id'])) {
+    $view_id = $element['#context']['#view_id'];
+    $display_id = $element['#context']['#display_id'] ?? 'default';
+
+    $suggestions[] = 'form_element__view__' . $view_id;
+    $suggestions[] = 'form_element__view__' . $view_id . '__display__' . $display_id;
+
+    if (isset($element['#type'])) {
+      $suggestions[] = 'form_element__view__' . $view_id . '__display__' . $display_id . '__type__' . $element['#type'];
+    }
+
+    if (isset($element['#name'])) {
+      $name = radixCleanIdentifier($element['#name']);
+      $suggestions[] = 'form_element__view__' . $view_id . '__display__' . $display_id . '__name__' . $name;
+    }
+  }
+
+  // Add suggestions based on custom attributes, if any.
+  if (isset($element['#attributes']['data-custom-wrapper'])) {
+    $custom = radixCleanIdentifier($element['#attributes']['data-custom-wrapper']);
+    $suggestions[] = 'form_element__custom__' . $custom;
+    
+    if (isset($element['#type'])) {
+      $suggestions[] = 'form_element__custom__' . $custom . '__type__' . $element['#type'];
+    }
+  }
+}

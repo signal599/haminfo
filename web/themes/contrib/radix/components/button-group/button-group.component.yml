@@ -1,0 +1,47 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/modules/sdc/src/metadata.schema.json
+name: Button Group
+status: experimental
+description: 'Creates a group of buttons or inputs.'
+props:
+  type: object
+  properties:
+    vertical:
+      type: boolean
+      title: Vertical
+      description: Whether to render the button group vertically.
+      default: false
+    size:
+      type: string
+      title: Size
+      description: The size of the button group.
+      enum:
+        - sm
+        - md
+        - lg
+      default: 'md'
+    aria_label:
+      type: string
+      title: Aria Label
+      description: The aria-label attribute of the button group.
+      default: ''
+    toolbar:
+      type: boolean
+      title: Toolbar
+      description: Whether to render the button group as a toolbar.
+      default: false
+    toolbar_aria_label:
+      type: string
+      title: Toolbar Aria Label
+      description: The aria-label attribute of the toolbar.
+      default: ''
+    items:
+      type: array
+      title: Items
+      description: An array of buttons or inputs.
+      default: []
+    button_group_attribute:
+      type: Drupal\Core\Template\Attribute
+slots:
+  content:
+    title: Content
+    description: Content text for the button group.

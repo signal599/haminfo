@@ -1,0 +1,5 @@
+# Schema for the configuration files of the radix_starterkit theme.
+
+radix_starterkit.settings:
+  type: theme_settings
+  label: 'radix_starterkit settings'

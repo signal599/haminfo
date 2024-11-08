@@ -1,0 +1,22 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/modules/sdc/src/metadata.schema.json
+name: Textarea
+status: experimental
+description: 'A themed component for a multiline form input control (textarea).'
+props:
+  description: 'The properties accepted by the Textarea component.'
+  type: object
+  properties:
+    attributes:
+      description: 'HTML attributes assigned to the textarea element, represented as a Drupal Attribute object.'
+      type: Drupal\Core\Template\Attribute
+    value:
+      description: 'The content of the textarea.'
+      type: string
+      title: 'Textarea Content'
+    table_utility_classes:
+      type: array
+      items:
+        type: string
+      description: 'Additional classes for custom design and styling requirements.'
+      title: 'Utility Classes'
+      default: []

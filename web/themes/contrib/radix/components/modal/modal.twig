@@ -1,0 +1,156 @@
+{#
+/**
+ * @file
+ * Enhanced template for Bootstrap Modal component.
+ *
+ * Available config:
+ * - size (string) default('') options: sm, lg, xl, fullscreen
+ * - id (boolean) (default: modal-random(1000))
+ * - title_id (string) (default: '')
+ * - fullscreen_responsive (string) (default: '') options: sm, md, lg, xl, xxl
+ * - static_backdrop (boolean) (default: false)
+ * - verticaly_centered (boolean) (default: false)
+ * - scrollable (boolean) (default: false)
+ * - header (string) (default: '')
+ * - body (string) (default: '')
+ * - footer (string) (default: '')
+ * - title_tag (string) (default: 'h5')
+ * - modal_header (block) (default: '')
+ * - modal_body (block) (default: '')
+ * - modal_footer (block) (default: '')
+ * - close_button (boolean) (default: true)
+ * - animation (boolean) (default: true)
+ * - keyboard (boolean) (default: true)
+ * - modal_attributes (drupal attribute) (default: create_attribute())
+ * - modal_dialog_attributes (drupal attribute) (default: create_attribute())
+ * - modal_header_attributes (drupal attribute) (default: create_attribute())
+ * - modal_title_attributes (drupal attribute) (default: create_attribute())
+ * - modal_body_attributes (drupal attribute) (default: create_attribute())
+ * - modal_utility_classes (array) (default: [])
+ * - modal_dialog_utility_classes (array) (default: [])
+ * - modal_header_utility_classes (array) (default: [])
+ * - modal_title_utility_classes (array) (default: [])
+ * - modal_body_utility_classes (array) (default: [])
+ * - modal_footer_utility_classes (array) (default: [])
+#}
+{% apply spaceless %}
+
+{% set modal_attributes = modal_attributes ?: create_attribute() %}
+{% set modal_dialog_attributes = modal_dialog_attributes ?: create_attribute() %}
+{% set body = body|default(true) %}
+{% set size =  size|default('') %}
+{% set id = id|default('modal-' ~ random(1000)) %}
+{% set title_id = title_id|default('title-' ~ id) %}
+{% set fullscreen_responsive =  fullscreen_responsive|default('') %}
+{% set static_backdrop = static_backdrop ?? false %}
+{% set verticaly_centered = verticaly_centered ?? false %}
+{% set scrollable = scrollable ?? false %}
+{% set close_button = close_button ?? true %}
+{% set animation = animation ?? true %}
+{% set keyboard = keyboard ?? true %}
+
+{%
+  set modal_classes = [
+    'modal',
+    animation ? 'fade' : ''
+  ]|merge(modal_utility_classes ?: [])
+%}
+
+{%
+  set modal_dialog_classes = [
+    'modal-dialog',
+    size ? 'modal-' ~ size,
+    fullscreen_responsive ? 'modal-fullscreen-' ~ fullscreen_responsive ~ '-down',
+    verticaly_centered ? 'modal-dialog-centered',
+    scrollable ? 'modal-dialog-scrollable',
+  ]|merge(modal_dialog_utility_classes ?: [])
+%}
+
+{%
+  set modal_body_classes = [
+    'modal-body',
+  ]|merge(modal_body_utility_classes ?: [])
+%}
+
+{%
+  set modal_header_classes = [
+    'modal-header',
+  ]|merge(modal_header_utility_classes ?: [])
+%}
+
+{%
+  set modal_footer_classes = [
+    'modal-footer',
+  ]|merge(modal_footer_utility_classes ?: [])
+%}
+
+{%
+  set modal_title_classes = [
+    'modal-title',
+  ]|merge(modal_title_utility_classes ?: [])
+%}
+
+{% set modal_body_attributes = modal_body_attributes ?: create_attribute() %}
+{% set modal_header_attributes = modal_header_attributes ?: create_attribute() %}
+{% set modal_title_attributes = modal_title_attributes ?: create_attribute() %}
+{% set modal_footer_attributes = modal_footer_attributes ?: create_attribute() %}
+
+{%
+  set modal_attributes = modal_attributes
+    .setAttribute('id', id)
+    .setAttribute('tabindex', '-1')
+    .setAttribute('aria-labelledby', title_id)
+    .setAttribute('aria-hidden', 'true')
+    .setAttribute('aria-modal', 'true')
+    .setAttribute('role', 'dialog')
+    .addClass(modal_classes)
+%}
+
+{% if static_backdrop %}
+  {% set modal_attributes = modal_attributes.setAttribute('data-bs-backdrop', 'static') %}
+{% endif %}
+
+{% if not keyboard %}
+  {% set modal_attributes = modal_attributes.setAttribute('data-bs-keyboard', 'false') %}
+{% endif %}
+
+<div {{ modal_attributes }}>
+  <div {{ modal_dialog_attributes.addClass(modal_dialog_classes) }}>
+    <div class="modal-content">
+      {% if header is not empty or close_button %}
+        <div {{ modal_header_attributes.addClass(modal_header_classes) }}>
+          {% block modal_header %}
+            {% if header is not empty %}
+              {% set title_tag = title_tag|default('h5') %}
+              <{{ title_tag }} {{ modal_title_attributes.addClass(modal_title_classes).setAttribute('id', title_id) }}>{{ header }}</{{ title_tag }}>
+            {% endif %}
+
+            {% if close_button %}
+              {% include 'radix:close-button' with {
+                close_button_attributes: close_button_attributes ?: create_attribute().setAttribute('data-bs-dismiss', 'modal')
+              } %}
+            {% endif %}
+          {% endblock %}
+        </div>
+      {% endif %}
+
+      {% if body is not empty %}
+        <div {{ modal_body_attributes.addClass(modal_body_classes) }}>
+          {% block modal_body %}
+            {{ body }}
+          {% endblock %}
+        </div>
+      {% endif %}
+
+      {% if footer is not empty %}
+        <div {{ modal_footer_attributes.addClass(modal_footer_classes) }}>
+          {% block modal_footer %}
+            {{ footer }}
+          {% endblock %}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% endapply %}

@@ -1,0 +1,74 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/modules/sdc/src/metadata.schema.json
+name: taxonomy
+status: experimental
+description: 'A component template for rendering taxonomy entities in Drupal.'
+props:
+  type: object
+  properties:
+    title_attributes:
+      type: Drupal\Core\Template\Attribute
+      description: 'This is used to add custom HTML attributes to the taxonomy title.'
+    taxonomy_attributes:
+      type: Drupal\Core\Template\Attribute
+      description: 'This is used to add custom HTML attributes to the taxonomy container.'
+    content_attributes:
+      type: Drupal\Core\Template\Attribute
+      description: 'This is used to add custom HTML attributes to the taxonomy content area.'
+    title_prefix:
+      type: array
+      title: 'Title prefix'
+      description: 'An array of additional output that may be displayed before the main title tag.'
+    title_suffix:
+      type: array
+      title: 'Title suffix'
+      description: 'An array of additional output that may be displayed after the main title tag.'
+    name:
+      type: string
+      description: 'The name of the taxonomy term.'
+    url:
+      type: string
+      description: 'The URL to the taxonomy term.'
+    taxonomy_classes:
+      type: array
+      items:
+        type: string
+      title: Classes
+      description: 'An array of classes to be added to the taxonomy container.'
+    taxonomy_content_classes:
+      type: array
+      items:
+        type: string
+      title: Content Classes
+      description: 'An array of classes to be added to the taxonomy content area.'
+    taxonomy_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Taxonomy Utility Classes
+    taxonomy_content_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Taxonomy Content Utility Classes
+    page:
+      type: boolean
+      description: 'Flag for the full page state.'
+    view_mode:
+      type: string
+      description: 'View mode, e.g. "full", "teaser", etc.'
+    heading_html_tag:
+      type: string
+      description: 'HTML tag to use for the taxonomy term title.'
+slots:
+  taxonomy_title_prefix:
+    title: 'Title prefix'
+    description: 'Additional output that may be displayed before the main title tag.'
+  taxonomy_title:
+    title: 'Title'
+    description: 'The title of the taxonomy term.'
+  taxonomy_title_suffix:
+    title: 'Title suffix'
+    description: 'Additional output that may be displayed after the main title tag.'
+  taxonomy_content:
+    title: 'Content'
+    description: 'The main content of the taxonomy term.'

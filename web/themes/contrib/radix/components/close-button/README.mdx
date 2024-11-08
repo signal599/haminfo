@@ -1,0 +1,27 @@
+# Close button
+
+A generic close button for dismissing content like modals and alerts. Provide an option to dismiss or close a component with `.btn-close`. Default styling is limited, but highly customizable. Modify the Sass variables to replace the default background-image. Be sure to include text for screen readers, as we’ve done with aria-label.
+
+## Bootstrap Documentation
+
+<https://getbootstrap.com/docs/5.3/components/close-button/>
+
+## Properties
+
+- Size: `size` (string) - Bootstrap button size class (default: `''`)
+- Disabled state: `disabled` (boolean) - Disabled button (default: `false`)
+
+## Usage
+
+An actual use case is within the Toasts component like so:
+
+```twig
+{%
+  include 'radix:close-button' with {
+    size: 'btn-sm',
+    disabled: false,
+    close_button_attributes: create_attribute()
+      .setAttribute('data-bs-dismiss', 'modal')
+  }
+%}
+```

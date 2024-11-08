@@ -1,0 +1,40 @@
+# Dropdown
+
+Toggle contextual overlays for displaying lists of links and more with the Bootstrap dropdown plugin.
+
+## Bootstrap Documentation
+
+[Bootstrap Dropdown Documentation](https://getbootstrap.com/docs/5.0/components/dropdowns/)
+
+## Component Properties
+
+The Dropdown component takes a variety of properties to customize its appearance and content:
+
+`dropdown_button_content` (required): Text for the dropdown button.
+`dropdown_button_html_tag` (optional): The HTML tag for the dropdown button.
+`dropdown_menu_utility_classes` (optional): An array of additional CSS classes to add to the dropdown menu.
+`dropdown_button_url` (optional): URL for the dropdown button.
+`dropdown_color` (optional): The color of the dropdown button (either 'primary', 'secondary', 'success', 'danger', 'warning', 'info', 'light', 'dark', 'white', 'link').
+`dropdown_size` (optional): The size of the dropdown button (either 'btn-sm', 'btn-lg').
+`split_button` (optional): Set to true if the dropdown should be a split button.
+`dropdown_item_utility_classes` (optional): An array of additional CSS classes to add to the dropdown items.
+`outline` (optional): Set to true if the dropdown should be an outline button.
+`items` (required): An array of items to display in the dropdown.
+`disabled` (optional): Set to true if the dropdown should be disabled.
+
+## Usage
+
+Here's an example of a Dropdown component usage:
+
+```twig
+{%
+  include 'radix:dropdown' with {
+    dropdown_button_content: "Dropdown",
+    dropdown_color: 'secondary',
+    dropdown_size: 'btn-sm',
+    split_button: true,
+    outline: true,
+    items: items
+  }
+%}
+```

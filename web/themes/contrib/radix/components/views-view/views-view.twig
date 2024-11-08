@@ -1,0 +1,213 @@
+{#
+/**
+ * @file
+ * Theme override for main view template.
+ *
+ * Available variables:
+ * - attributes: Remaining HTML attributes for the element.
+ * - css_name: A css-safe version of the view name.
+ * - css_class: The user-specified classes names, if any.
+ * - header: The optional header.
+ * - footer: The optional footer.
+ * - rows: The results of the view query, if any.
+ * - empty: The content to display if there are no rows.
+ * - pager: The optional pager next/prev links to display.
+ * - exposed: Exposed widget form/info to display.
+ * - feed_icons: Optional feed icons to display.
+ * - more: An optional link to the next page of results.
+ * - title: Title of the view, only used when displaying in the admin preview.
+ * - title_prefix: Additional output populated by modules, intended to be
+ *   displayed in front of the view title.
+ * - title_suffix: Additional output populated by modules, intended to be
+ *   displayed after the view title.
+ * - attachment_before: An optional attachment view to be displayed before the
+ *   view content.
+ * - attachment_after: An optional attachment view to be displayed after the
+ *   view content.
+ * - dom_id: Unique id for every view being printed to give unique class for
+ *   Javascript.
+ *
+ * @see template_preprocess_views_view()
+ */
+#}
+{% apply spaceless %}
+
+{% set views_attributes = attributes ?: create_attribute() %}
+{% set views_title_attributes = views_title_attributes ?: create_attribute() %}
+{% set views_header_attributes = views_header_attributes ?: create_attribute() %}
+{% set views_filters_attributes = views_filters_attributes ?: create_attribute() %}
+{% set views_rows_attributes = views_rows_attributes ?: create_attribute() %}
+{% set views_empty_attributes = views_empty_attributes ?: create_attribute() %}
+{% set views_footer_attributes = views_footer_attributes ?: create_attribute() %}
+{% set views_attachment_before_attributes = views_attachment_before_attributes ?: create_attribute() %}
+{% set views_attachment_after_attributes = views_attachment_after_attributes ?: create_attribute() %}
+{% set views_pager_attributes = views_pager_attributes ?: create_attribute() %}
+{% set views_more_attributes = views_more_attributes ?: create_attribute() %}
+{% set views_feed_icons_attributes = views_feed_icons_attributes ?: create_attribute() %}
+
+{%
+  set views_classes = [
+    'view',
+    'view-' ~ id|clean_class,
+    'view-id-' ~ id,
+    'view-display-id-' ~ display_id,
+    dom_id ? 'js-view-dom-id-' ~ dom_id,
+    css_name ? 'view-' ~ css_name,
+  ]|merge(view_view_utility_classes ?: [])
+%}
+
+{%
+  set views_title_classes = [
+    'view-title',
+  ]|merge(views_title_utility_classes ?: [])
+%}
+
+{%
+  set views_header_classes = [
+    'view-header',
+  ]|merge(views_header_utility_classes ?: [])
+%}
+
+{%
+  set views_filters_classes = [
+    'view-filters',
+  ]|merge(views_filters_utility_classes ?: [])
+ %}
+
+{%
+  set views_rows_classes = [
+    'view-content',
+  ]|merge(views_rows_utility_classes ?: [])
+%}
+
+{%
+  set views_empty_classes = [
+    'view-empty',
+  ]|merge(views_empty_utility_classes ?: [])
+%}
+
+{%
+  set views_footer_classes = [
+    'view-footer',
+  ]|merge(views_footer_utility_classes ?: [])
+%}
+
+{%
+  set views_attachment_before_classes = [
+    'attachment',
+    'attachment-before',
+  ]|merge(views_attachment_before_utility_classes ?: [])
+%}
+
+{%
+  set views_attachment_after_classes = [
+    'attachment',
+    'attachment-after',
+  ]|merge(views_attachment_after_utility_classes ?: [])
+%}
+
+{%
+  set views_pager_classes = [
+    'pager',
+  ]|merge(views_pager_utility_classes ?: [])
+%}
+
+{%
+  set views_more_classes = ['']|merge(views_more_utility_classes ?: [])
+%}
+
+{%
+  set views_feed_icons_classes = [
+    'feed-icons',
+  ]|merge(views_feed_icons_utility_classes ?: [])
+%}
+
+<div {{ views_attributes.addClass(views_classes) }}>
+  {% block views_view_wrapper %}
+    {{ title_prefix }}
+    {% block views_view_title %}
+      {% if title %}
+        <div {{ views_title_attributes.addClass(views_title_classes) }}>
+          {{ title }}
+        </div>
+      {% endif %}
+    {% endblock %}
+    {{ title_suffix }}
+
+    {% block views_header %}
+      {% if header %}
+        <div {{ views_header_attributes.addClass(views_header_classes) }}>
+          {{ header }}
+        </div>
+      {% endif %}
+    {% endblock %}
+
+    {% block views_filters %}
+      {% if exposed %}
+        <div {{ views_filters_attributes.addClass(views_filters_classes) }}>
+          {{ exposed }}
+        </div>
+      {% endif %}
+    {% endblock %}
+
+    {% block views_attachment_before %}
+      {% if attachment_before %}
+        <div {{ views_attachment_before_attributes.addClass(views_attachment_before_classes) }}>
+          {{ attachment_before }}
+        </div>
+      {% endif %}
+    {% endblock %}
+
+    {% block views_rows %}
+      {% if rows %}
+        <div {{ views_rows_attributes.addClass(views_rows_classes) }}>
+          {{ rows }}
+        </div>
+      {% elseif empty %}
+        <div {{ views_empty_attributes.addClass(views_empty_classes) }}>
+          {{ empty }}
+        </div>
+      {% endif %}
+    {% endblock %}
+
+    {% block views_pager %}
+      {% if pager %}
+        <div {{ views_pager_attributes.addClass(views_pager_classes) }}>
+          {{ pager }}
+        </div>
+      {% endif %}
+    {% endblock %}
+
+    {% block views_attachment_after %}
+      {% if attachment_after %}
+        <div {{ views_attachment_after_attributes.addClass(views_attachment_after_classes) }}>
+          {{ attachment_after }}
+        </div>
+      {% endif %}
+    {% endblock %}
+
+    {% block views_more %}
+      {% if more %}
+        {{ more|add_class(views_more_classes) }}
+      {% endif %}
+    {% endblock %}
+
+    {% block views_footer %}
+      {% if footer %}
+        <div {{ views_footer_attributes.addClass(views_footer_classes) }}>
+          {{ footer }}
+        </div>
+      {% endif %}
+    {% endblock %}
+
+    {% block views_feed_icons %}
+      {% if feed_icons %}
+        <div {{ views_feed_icons_attributes.addClass(views_feed_icons_classes) }}>
+          {{ feed_icons }}
+        </div>
+      {% endif %}
+    {% endblock %}
+  {% endblock %}
+</div>
+
+{% endapply %}

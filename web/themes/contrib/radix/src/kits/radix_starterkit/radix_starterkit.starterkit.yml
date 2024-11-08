@@ -1,0 +1,11 @@
+name: Radix Starter Kit
+type: theme
+description: 'A starter kit for creating subthemes based on the Radix theme.'
+core_version_requirement: ^10.3 || ^11
+base theme: radix
+hidden: true
+starterkit:
+  replace_patterns:
+    - 'radix_starterkit'
+  exclude_files:
+    - 'radix_starterkit.starterkit.yml'

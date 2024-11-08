@@ -1,0 +1,47 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/modules/sdc/src/metadata.schema.json
+name: Comment
+status: experimental
+description: The structure and ncessary styling for displaying a comment.
+props:
+  type: object
+  properties:
+    attributes:
+      type: Drupal\Core\Template\Attribute
+    content_attributes:
+      type: Drupal\Core\Template\Attribute
+    classes:
+      type: array
+      title: Comment CSS Classes
+    new_indicator_timestamp:
+      type: integer
+      title: New Indicator Timestamp
+    user_picture:
+      type: string
+      title: User picture URL
+    user_picture_alt:
+      type: string
+      title: User Picture Alt Text
+    submitted:
+      type: string
+      title: Submitted Comment Information
+    permalink:
+      type: string
+      title: Permalink
+    title:
+      type: string
+      title: Comment Title
+    title_prefix:
+      type: array
+      title: Title Prefix
+    title_suffix:
+      type: array
+      title: Title Suffix
+    title_attributes:
+      type: Drupal\Core\Template\Attribute
+    parent:
+      type: string
+      title: Parent Comment
+slots:
+  content:
+    title: Content
+    description: Comment content block.

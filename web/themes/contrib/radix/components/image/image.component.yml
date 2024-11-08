@@ -1,0 +1,69 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/modules/sdc/src/metadata.schema.json
+name: Image
+status: experimental
+description: A visually versatile image component with configurable attributes such as alignment, responsiveness, thumbnail style, and rounded edges.
+props:
+  type: object
+  properties:
+    src:
+      type: ['string', 'null']
+      title: Image Source
+      description: The URL or path to the image file.
+    alt:
+      type: ['string', 'null']
+      title: Alternative Text
+      description: The alternative text for the image, essential for accessibility.
+    title:
+      type: ['string', 'null']
+      title: Image Title
+      description: The title attribute for the image, providing additional context or tooltip.
+    width:
+      type: ['string', 'null', 'integer']
+      title: Image Width
+      description: '(Optional) The width of the image in pixels. This attribute is used to specify the width of the image in pixels.'
+    height:
+      type: ['string', 'null', 'integer']
+      title: Image Height
+      description: '(Optional) The height of the image in pixels. This attribute is used to specify the height of the image in pixels.'
+    loading:
+      type: ['string', 'null']
+      title: Image Loading
+      description: '(Optional) Determines how the image should be loaded. Options include `auto`, `lazy`, and `eager`. The `lazy` value defers loading of the image until it reaches a calculated distance from the viewport.'
+      enum:
+        - auto
+        - lazy
+        - eager
+      default: auto
+    align:
+      type: ['string', 'null']
+      title: Image Alignment
+      description: '(Optional) Determines how the images align, varying from `start`, `center`, to `end`. Helper float classes or text alignment classes assist alignment. Block-level images can be centered using the .mx-auto margin utility class.'
+      enum:
+        - ''
+        - start
+        - center
+        - end
+      default: ''
+    responsive:
+      type: boolean
+      title: Responsive Image
+      description: '(Optional) When set to true, image becomes responsive with .img-fluid class. This applies `max-width: 100%` and `height: auto`, ensuring the image scales with its parent width.'
+    thumbnails:
+      type: boolean
+      title: Image Thumbnails
+      description: '(Optional) Provides an option to use .img-thumbnail to give an image a rounded 1px border appearance.'
+    rounded:
+      type: boolean
+      title: Rounded Image
+      description: '(Optional) When true, the image will have rounded corners using the `.rounded` class.'
+    image_utility_classes:
+      type: array
+      title: Utility Classes
+      items:
+        type: ['string', 'null']
+      default: []
+      description: 'Additional Bootstrap utility or custom CSS classes to be applied to the image.'
+    attributes:
+      type: Drupal\Core\Template\Attribute
+      title: HTML Attributes
+      description: 'HTML attributes for the image tag. They are represented as a Drupal Attribute object.'

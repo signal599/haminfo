@@ -1,0 +1,66 @@
+{#
+/**
+  * @file
+  * Collapse component.
+  *
+  * Bootstrap Documentation
+  * https://getbootstrap.com/docs/5.3/components/collapse/
+  *
+  * Available properties:
+  * - title (string) (default: '')
+  * - button_html_tag (string) (default: 'button')
+  * - id (int) (default: random(1000))
+  * - collapsed (boolean) (default: true)
+  * - direction: (string) (default: 'vertical')
+  * - content (block) (default: '')
+  *
+  * usage example: @see README.md
+  *
+  */
+#}
+{% apply spaceless %}
+
+{% set id = id|default(random(1000)) %}
+{% set collapsed = collapsed ?? true %}
+{% set direction = direction ?? 'vertical' %}
+{%
+  set collapse_content_classes = [
+    'collapse',
+    collapsed ? '' : 'show',
+    direction == 'horizontal' ? 'collapse-horizontal' : '',
+  ]|merge(collapse_content_utility_classes ?: [])
+%}
+
+{% set collapse_content_attributes = collapse_content_attributes ?: create_attribute() %}
+
+<div class="collapse-container">
+  {%
+    set button_attributes = create_attribute()
+      .setAttribute('data-bs-toggle', 'collapse')
+      .setAttribute('aria-expanded', collapsed ? 'false' : 'true')
+      .setAttribute('aria-controls', 'collapse-' ~ id)
+  %}
+
+  {% if button_html_tag == 'a' %}
+    {% set button_attributes = button_attributes.setAttribute('href', url ?? '') %}
+  {% else %}
+    {% set button_attributes = button_attributes.setAttribute('data-bs-target', '#collapse-' ~ id) %}
+  {% endif %}
+
+  {% block collapse_trigger %}
+    {%
+      include 'radix:button' with {
+        content: title,
+        button_html_tag: button_html_tag,
+      }
+    %}
+  {% endblock %}
+
+  <div id="collapse-{{ id }}" {{ collapse_content_attributes.addClass(collapse_content_classes) }}>
+    {% block collapse_content %}
+      {{ content }}
+    {% endblock %}
+  </div>
+</div>
+
+{% endapply %}

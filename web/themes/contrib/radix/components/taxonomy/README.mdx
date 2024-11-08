@@ -1,0 +1,51 @@
+# Taxonomy
+
+A template for rendering a Taxonomy Term in Drupal.
+
+## Key Features
+
+- **Dynamic Class Application**: Automatically applies classes based on taxonomy term characteristics like vocabulary and view mode.
+- **Vocabulary and View Mode Specific Styling**: Facilitates unique styling for different vocabularies and view modes.
+- **Flexible Content Rendering**: Allows for customizable rendering of taxonomy term content and fields.
+
+## Customization Options
+
+- **Vocabulary-Based Styling**: Customize the appearance of terms based on their vocabulary.
+- **View Mode Adaptation**: Adjust styling for different view modes like 'full', 'teaser', etc.
+- **Custom Attributes**: Apply custom attributes to the taxonomy wrapper, title, and content areas.
+
+## Available Variables
+
+- `url`: URL of the current term.
+- `name`: (optional) Name of the current term.
+- `content`: Items for the content of the term (fields and description).
+- `attributes`: HTML attributes for the wrapper.
+- `page`: Flag for the full page state.
+- `term`: The taxonomy term entity.
+- `view_mode`: View mode, e.g. 'full', 'teaser', etc.
+
+## Blocks
+The template provides several blocks that can be extended or overridden:
+
+- `taxonomy_title_prefix`
+- `taxonomy_title`
+- `taxonomy_title_suffix`
+- `taxonomy_content`
+
+These blocks allow for fine-grained control over the rendering and overriding of different parts of the taxonomy term component.
+
+## Usage
+```twig
+{%
+include 'radix:taxonomy' with {
+  name: term_name,
+  url: term_url,
+  content: term_content,
+  attributes,
+  title_attributes,
+  content_attributes,
+  view_mode,
+  term: taxonomy_term_entity,
+}
+%}
+```

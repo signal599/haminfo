@@ -1,0 +1,11 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/modules/sdc/src/metadata.schema.json
+name: Select
+status: experimental
+description: A component representing a dropdown select input in a form, styled and customizable.
+props:
+  description: The properties that the Select component accepts.
+  type: object
+  properties:
+    select_attributes:
+      description: The HTML attributes for the component's <select> tag, represented as a Drupal Attribute object.
+      type: Drupal\Core\Template\Attribute

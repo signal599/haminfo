@@ -1,0 +1,34 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/modules/sdc/src/metadata.schema.json
+name: Details
+status: experimental
+description: The details element is used to create a disclosure widget from which the user can obtain additional information or controls.
+props:
+  type: object
+  properties:
+    title:
+      type: string
+      description: The title text for the details element.
+    required:
+      type: [boolean, 'null']
+      description: Specifies if the details element is required.
+    attributes:
+      type: Drupal\Core\Template\Attribute
+      description: HTML attributes for the details element.
+    summary_attributes:
+      type: Drupal\Core\Template\Attribute
+      description: HTML attributes for the summary element.
+    content_attributes:
+      type: Drupal\Core\Template\Attribute
+      description: HTML attributes for the details content.
+    errors:
+      type: ['array', 'string', 'null']
+      description: Any errors for this details element, may not be set.
+    description:
+      type: string
+      description: The description of the details element.
+    children:
+      type: string
+      description: The rendered child elements of the details element.
+    value:
+      type: string
+      description: The value of the details element.

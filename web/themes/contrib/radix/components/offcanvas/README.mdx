@@ -1,0 +1,45 @@
+# Offcanvas
+
+Build hidden sidebars into your project for navigation, shopping carts, and more with a few classes and our JavaScript plugin..
+
+## Bootstrap Documentation
+
+[Bootstrap Offcanvas Documentation](https://getbootstrap.com/docs/5.3/components/offcanvas/)
+
+
+## Component Properties
+
+The Offcanvas component takes a variety of properties to customize its appearance and content:
+
+- `offcanvas_title` (string) (default: ''): Offcanvas title.
+- `offcanvas_title_tag` (string) (default: 'h5'): Offcanvas title tag.
+- `offcanvas_content` (string) (default: ''): Offcanvas content.
+- `offcanvas_button_content` (string) (default: ''): Offcanvas button content.
+- `close_button` (bool) (default: true): Close button.
+- `body_scrolling` (bool) (default: false): Body scrolling.
+- `offcanvas_title_attributes` (array) (default: []): Offcanvas title attributes.
+- `offcanvas_content_attributes` (array) (default: []): Offcanvas content attributes.
+- `offcanvas_button_attributes` (array) (default: []): Offcanvas button attributes.
+- `offcanvas_utility_classes` (array) (default: []): Offcanvas utility classes.
+- `offcanvas_title_utility_classes` (array) (default: []): Offcanvas title utility classes.
+- `offcanvas_content_utility_classes` (array) (default: []): Offcanvas content utility classes.
+- `offcanvas_button_utility_classes` (array) (default: []): Offcanvas button utility classes.
+- `offcanvas_attributes` (array) (default: []): Offcanvas attributes.
+- `offcanvas_button_attributes` (array) (default: []): Offcanvas button attributes.
+- `offcanvas_button_utility_classes` (array) (default: []): Offcanvas button utility classes.
+- `backdrop` (bool) (default: true): Backdrop.
+
+## Usage
+
+```twig
+{%
+  include 'radix:offcanvas' with {
+    offcanvas_title_tag: "h4",
+    offcanvas_title: "Offcanvas",
+    offcanvas_content: "Some text as placeholder.",
+    offcanvas_button_content: "Toggler Button",
+    close_button: true,
+    body_scrolling: true,
+  }
+%}
+```

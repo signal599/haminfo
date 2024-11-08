@@ -1,0 +1,40 @@
+{#
+/**
+ * @file
+ * Template for a Dropdown menu component.
+ */
+#}
+{% apply spaceless %}
+
+{%
+  set dropdown_menu_classes = [
+    'dropdown-menu',
+  ]|merge(dropdown_menu_utility_classes ?: [])
+%}
+
+{% if (items|length) > 0 %}
+  <ul class="{{ dropdown_menu_classes|join(' ') }}">
+    {% for item in items %}
+      {% set nav_link_classes = ['dropdown-item', item.in_active_trail ? 'active' : ''] %}
+
+      {% if item.url.options.attributes.class is iterable %}
+        {% set nav_link_classes = nav_link_classes|merge(item.url.options.attributes.class) %}
+      {% elseif item.url.options.attributes.class %}
+        {% set nav_link_classes = nav_link_classes|merge([item.url.options.attributes.class]) %}
+      {% endif %}
+
+      <li class="dropdown{% if item.below %} {{ dropdown_direction }}{% endif %}">
+        <a href="{{ item.url }}" class="{{ nav_link_classes|merge(item.below ? ['dropdown-toggle'] : [])|join(' ') }}" {% if item.below %}data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false"{% endif %}>{{ item.title }}</a>
+        {% if item.below %}
+          {%
+            include 'radix:dropdown-menu' with {
+              items: item.below,
+            }
+          %}
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+{% endapply %}

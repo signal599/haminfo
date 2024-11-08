@@ -1,0 +1,47 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/modules/sdc/src/metadata.schema.json
+name: Form Element
+status: experimental
+description: The structure and necessary styling for displaying a form element.
+props:
+  type: object
+  properties:
+    form_element_attributes:
+      type: Drupal\Core\Template\Attribute
+      description: HTML attributes for the containing element.
+    errors:
+      type: ['array', 'string', 'null']
+      description: Any errors for this form element.
+    prefix:
+      type: ['array', 'string', 'null']
+      description: The form element prefix.
+    suffix:
+      type: ['array', 'string', 'null']
+      description: The form element suffix.
+    required:
+      type: ['null', 'boolean']
+      description: The required marker, or empty if the associated form element is not required.
+    type:
+      type: ['array', 'string', 'null']
+      description: The type of the element.
+    name:
+      type: ['array', 'string', 'null']
+      description: The name of the element.
+    label:
+      type: ['array', 'string', 'null']
+      description: A rendered label element.
+    label_display:
+      type: ['array', 'string', 'null']
+      description: Label display setting.
+    description_display:
+      type: ['array', 'string', 'null']
+      description: Description display setting.
+    disabled:
+      type: ['array', 'string', 'null']
+      description: True if the element is disabled.
+    title_display:
+      type: ['array', 'string', 'null']
+      description: Title display setting.
+slots:
+  children:
+    type: string
+    description: The form element content.

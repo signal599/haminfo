@@ -1,0 +1,62 @@
+# Accordion
+
+Toggle the visibility of content across your project with a few classes and our JavaScript plugins.
+
+## Bootstrap Documentation
+
+[Bootstrap Collapse Documentation](https://getbootstrap.com/docs/5.3/components/collapse/)
+
+## Component Properties
+
+- `title`: (string) The text displayed on the collapse trigger button. It is the label for the collapsible content.
+- `button_html_tag` (optional): (string) Specifies the HTML tag to be used for the collapse trigger. It can be either `button` or `a` (anchor). Defaults to button.
+- `id` (optional): (integer) A unique identifier for the collapse component. This is important for accessibility and JavaScript functionality.
+- `direction` (optional): (string) The direction in which the content will collapse. Can be `vertical` or `horizontal`. Defaults to `vertical`.
+- `collapsed` (optional): (boolean) Indicates whether the collapsible content is initially collapsed. Defaults to true, meaning the content starts in a collapsed state.
+- `content`: (string/block) The content that will be shown when the collapse component is expanded. This can be a simple text string, HTML, or other Drupal blocks.
+
+## Usage
+
+**Example #1:** Simple text based collapse.
+
+```twig
+  {%
+    include 'radix:collapse' with {
+      title: 'Read More About This Topic',
+      button_html_tag: 'button',
+      id: '123',
+      direction: 'vertical',
+      content: 'This is detailed content about the topic, which can be text, images, or other Drupal blocks.'
+    }
+  %}
+```
+
+**Example #2:** More common with block overrides.
+
+```twig
+{%
+  embed 'radix:collapse' with {
+    title: 'Show the card!',
+    button_html_tag: 'button',
+    id: 'collapse-card',
+  }
+%}
+  {% block collapse_content %}
+    {%
+      include 'radix:card' with {
+        card_title_tag: 'h4',
+        card_title: 'The title',
+        card_header: 'CARD HEADER',
+        card_footer: 'The card footer',
+        card_body_tag: 'div',
+        card_body: 'This is the card body',
+        card_text_tag: 'p',
+        card_link_text: 'Read more...',
+        card_border: false,
+        card_utility_classes: ['col-4'],
+        card_image_cap: 'bottom',
+      }
+    %}
+  {% endblock %}
+{% endembed %}
+```

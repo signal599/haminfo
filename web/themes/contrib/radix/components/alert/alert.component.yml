@@ -1,0 +1,42 @@
+$schema: https://git.drupalcode.org/project/sdc/-/raw/1.x/src/metadata.schema.json
+name: Alert
+status: stable
+description: Provide contextual feedback messages for typical user actions with the handful of available and flexible alert messages.
+props:
+  type: object
+  required:
+    - type
+  properties:
+    type:
+      type: string
+      description: The type of the alert (primary, secondary, success, danger, warning, info, light, dark).
+      enum:
+        - primary
+        - secondary
+        - success
+        - danger
+        - warning
+        - info
+        - light
+        - dark
+      default: primary
+    dismissible:
+      type: boolean
+    heading:
+      type: string
+    alert_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Alert Utility Classes
+      default: []
+      description: An array of utility classes. Use to add extra Bootstrap utility classes or custom CSS classes over to this component.
+    attributes:
+      type: Drupal\Core\Template\Attribute
+slots:
+  alert_heading:
+    title: Alert Heading
+    description: The heading of the alert.
+  content:
+    title: Alert Content
+    description: The content of the alert.

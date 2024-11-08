@@ -1,0 +1,55 @@
+{#
+/**
+ * @file
+ * Theme override for an image component.
+ *
+ * Available properties:
+ * - align: (optional) Determines how the image is aligned. Can be 'start', 'center', or 'end'.
+ * - responsive: (optional) Makes the image responsive if set to true. Default img class is `.img-fluid`.
+ * - thumbnails: (optional) Adds a thumbnail style to the image if set to true. Class added is `.img-thumbnail`.
+ * - rounded: (optional) Applies rounded corners to the image if set to true. Class added is `.rounded`.
+ * - image_utility_classes: (optional) A list of additional classes to be added to the image's class attribute.
+ * - src: (required) The image source URL.
+ * - alt: (optional) The alt text for the image.
+ * - title: (optional) The title text for the image.
+ * - loading: (optional) The loading attribute for the image. Default is 'auto'.
+ * - width: (optional) The width of the image.
+ * - height: (optional) The height of the image.
+ *
+ * Available variables:
+ * - attributes: HTML attributes for the image tag.
+ */
+#}
+{% apply spaceless %}
+
+{% set fallback_attributes = create_attribute() %}
+{% set fallback_attributes = fallback_attributes
+  .setAttribute('src', src ?: '')
+  .setAttribute('alt', alt ?: '')
+  .setAttribute('title', title ?: '')
+  .setAttribute('width', width ?: '')
+  .setAttribute('height', height ?: '')
+  .setAttribute('loading', loading ?: 'auto')  
+%}
+
+{% set image_attributes = fallback_attributes.merge(attributes ?: []) %}
+
+{%
+  set align_classes = {
+    start: ['float-start'],
+    center: ['mx-auto', 'd-block'],
+    end: ['float-end'],
+  }
+%}
+
+{% set image_classes = [
+  align ? align_classes[align]|join(' ') : '',
+  responsive ? 'img-fluid' : '',
+  thumbnails ? 'img-thumbnail' : '',
+  rounded ? 'rounded' : '',
+]|merge(image_utility_classes ?: [])
+%}
+
+<img {{ image_attributes.addClass(image_classes) }} />
+
+{% endapply %}

@@ -1,0 +1,110 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/modules/sdc/src/metadata.schema.json
+name: Offcanvas
+status: experimental
+description: Build hidden sidebars into your project for navigation, shopping carts, and more with a few classes and our JavaScript plugin.
+props:
+  type: object
+  properties:
+    offcanvas_title_tag:
+      type: string
+      default: h5
+      enum:
+        - h1
+        - h2
+        - h3
+        - h4
+        - h5
+        - h6
+      description: 'The tag for the offcanvas title.'
+    offcanvas_title:
+      type: string
+      default: ''
+      description: 'The offcanvas title.'
+    offcanvas_title_utility_classes:
+      type: array
+      items:
+        type: string
+      default: [] 
+      description: 'Utility classes for the offcanvas title.'
+    offcanvas_content:
+      type: string
+      default: ''
+      description: 'The offcanvas content.'
+    offcanvas_button_content:
+      type: string
+      default: ''
+      description: 'The offcanvas button content.'
+    show_by_default:
+      type: boolean
+      default: false
+      description: 'Whether the offcanvas is shown by default.'
+    offcanvas_utility_classes:
+      type: array
+      items:
+        type: string
+      default: [] 
+      description: 'Utility classes for the offcanvas.'
+    offcanvas_header_utility_classes:
+      type: array
+      items:
+        type: string
+      default: [] 
+      description: 'Utility classes for the offcanvas header.'
+    offcanvas_body_utility_classes:
+      type: array
+      items:
+        type: string
+      default: [] 
+      description: 'Utility classes for the offcanvas body.'
+    backdrop: 
+      type: 'string'
+      default: 'true'
+      enum:
+        - 'true'
+        - 'false'
+        - 'static'
+      description: 'Whether the offcanvas has a backdrop.'
+    body_scrolling: 
+      type: boolean
+      default: false
+      description: 'Whether the body is scrolling when the offcanvas is open.'
+    offcanvas_id:
+      type: string
+      default: ''
+      description: 'The offcanvas id.'
+    placement:
+      type: string
+      default: 'start'
+      enum:
+        - 'start'
+        - 'end'
+        - 'top'
+        - 'bottom'
+      description: 'The offcanvas placement.'
+    close_button:
+      type: boolean
+      default: true
+      description: 'Whether the offcanvas has a close button.'
+    offcanvas_attributes:
+      type: Drupal\Core\Template\Attribute
+      description: 'HTML attributes for the offcanvas element.'
+    offcanvas_title_attributes: 
+      type: Drupal\Core\Template\Attribute
+      description: 'HTML attributes for the offcanvas title element.'
+    offcanvas_body_attributes:
+      type: Drupal\Core\Template\Attribute
+      description: 'HTML attributes for the offcanvas body element.'
+    offcanvas_button_attributes:
+      type: Drupal\Core\Template\Attribute
+      description: 'HTML attributes for the offcanvas button element.'
+slots: 
+  offcanvas_header:
+    title: 'Offcanvas header'
+    description: 'Offcanvas header.'
+  offcanvas_body:
+    title: 'Offcanvas body'
+    description: 'Offcanvas body.'
+  offcanvas_toggler:
+    title: 'Offcanvas toggler'
+    description: 'Offcanvas toggler.'
+

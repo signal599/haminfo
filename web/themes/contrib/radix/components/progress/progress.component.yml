@@ -1,0 +1,76 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/modules/sdc/src/metadata.schema.json
+name: Progress
+status: experimental
+description: Progress components are built with two HTML elements, some CSS to set the width, and a few attributes.
+props:
+  type: object
+  properties:
+    progress_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Progress Utility Classes
+      default: []
+      description: An array of utility classes. Use to add extra Bootstrap utility classes or custom CSS classes over to this component.
+    progress_bar_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Progress Bar Utility Classes
+      default: []
+      description: An array of utility classes. Use to add extra Bootstrap utility classes or custom CSS classes over to this component.
+    color:
+      type: string
+      title: Progress Bar Color
+      description: The color of the progress bar.
+      default: ''
+      enum:
+        - primary
+        - secondary
+        - success
+        - danger
+        - warning
+        - info
+        - light
+        - dark
+    label:
+      type: ['string', 'integer', 'null']
+      title: Aria Label
+      description: Aria label for the progress bar.
+      default: ''
+    stacked:
+      type: boolean
+      title: Stacked
+      description: True if the progress bar should be stacked.
+      default: false
+    valuenow:
+      type: ['integer', 'string', 'null']
+      title: Value Now
+      description: The current value of the progress bar.
+      default: 0
+    valuemins:
+      type: integer
+      title: Value Mins
+      description: The minimum value of the progress bar.
+      default: 0
+    valuemax:
+      type: integer
+      title: Value Max
+      description: The maximum value of the progress bar.
+      default: 100
+    height:
+      type: integer
+      title: Height
+      description: The height of the progress bar.
+      default: 16
+    striped:
+      type: boolean
+      title: Striped
+      description: True if the progress bar should be striped.
+      default: true
+    animated:
+      type: boolean
+      title: Animated
+      description: True if the progress bar should be animated.
+      default: true
+

@@ -1,0 +1,68 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/modules/sdc/src/metadata.schema.json
+name: Heading
+status: experimental
+description: 'All HTML headings, `<h1>` through `<h6>`, are available.'
+props:
+  type: object
+  properties:
+    heading_html_tag:
+      type: string
+      title: HTML tag
+      description: HTML header tag (h1, h2, h3, h4, h5, h6)
+      default: h1
+      enum:
+        - div
+        - h1
+        - h2
+        - h3
+        - h4
+        - h5
+        - h6
+    display:
+      type: string
+      title: Display Heading
+      description: When you need a heading to stand out, consider using a display heading—a larger, slightly more opinionated heading style.
+      default: ''
+      enum:
+        - ''
+        - display-1
+        - display-2
+        - display-3
+        - display-4
+        - display-5
+        - display-6
+    heading_classes:
+      type: array
+      items:
+        type: string
+      title: Classes
+      default: []
+      description: An array of classes to add to the heading, merges display and heading utility classes.
+    heading_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Utility Classes
+      default: []
+      description: An array of utility classes. Use to add extra Bootstrap utility classes or custom CSS classes over to this component.
+    heading_link_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Link Utility Classes
+      default: []
+      description: An array of utility classes. Use to add extra Bootstrap utility classes or custom CSS classes over to the heading link.
+    title_link:
+      type: ['string', 'boolean']
+      title: Title Link
+      description: Link URL for the title.
+    heading_attributes:
+      type: Drupal\Core\Template\Attribute
+    content:
+      type: string
+      title: Content
+      description: Content text for the heading.
+slots:
+  heading_content:
+    title: Content
+    description: Content text for the heading.

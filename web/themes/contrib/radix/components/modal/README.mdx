@@ -1,0 +1,99 @@
+# Modal
+
+Use Bootstrap’s JavaScript modal plugin to add dialogs to your site for lightboxes, user notifications, or completely custom content.
+
+## Bootstrap Documentation
+
+https://getbootstrap.com/docs/5.3/components/modal/
+
+## Available Properties:
+
+- `size`: Sets the size of the modal. Accepts 'sm', 'lg', 'xl', or 'fullscreen'.
+- `id`: The unique identifier for the modal. A random ID is generated if not specified.
+- `title_id`: The unique identifier for the modal title. A random ID is generated if not specified.
+- `fullscreen_responsive`: Makes the modal fullscreen on specified breakpoints. Options are 'sm', 'md', 'lg', 'xl', 'xxl'.
+- `static_backdrop`: If true, clicking the backdrop does not close the modal.
+- `verticaly_centered`: If true, centers the modal vertically in the viewport.
+- `scrollable`: If true, makes the modal's body scrollable if the content overflows.
+- `header`: Content for the modal's header, can be plain text or HTML.
+- `body`: The main content of the modal, can contain text, forms, or any HTML content.
+- `footer`: Content for the modal's footer, typically used for buttons or secondary information.
+- `title_tag`: The HTML tag for the modal title. Default is 'h5'.
+- `close_button`: If true, displays a close button in the modal header.
+- `animation`: The animation effect for the modal. Options are 'fade', 'slide', or 'none'.
+- `keyboard`: If true, the modal can be closed by pressing the escape key.
+- `modal_attributes`: A list of HTML attributes for the modal.
+- `modal_dialog_attributes`: A list of HTML attributes for the modal dialog.
+- `modal_header_attributes`: A list of HTML attributes for the modal header.
+- `modal_title_attributes`: A list of HTML attributes for the modal title.
+- `modal_body_attributes`: A list of HTML attributes for the modal body.
+- `close_button_attributes`: A list of HTML attributes for the close button.
+- `modal_utility_classes`: An array of utility classes for additional styling.
+- `modal_dialog_utility_classes`: An array of utility classes for additional styling on the modal dialog.
+- `modal_header_utility_classes`: An array of utility classes for additional styling on the modal header.
+- `modal_title_utility_classes`: An array of utility classes for additional styling on the modal title.
+- `modal_body_utility_classes`: An array of utility classes for additional styling on the modal body.
+- `modal_footer_utility_classes`: An array of utility classes for additional styling on the modal footer.
+
+## Available Slots:
+- `modal_header`: Content for the modal header.
+- `modal_body`: Content for the modal body.
+- `modal_footer`: Content for the modal footer.
+
+## Examples
+
+**Example #1:** A basic modal with a header, body, and footer.
+
+```twig
+{% include 'radix:modal' with {
+  header: 'Modal Title',
+  body: 'The modal content that goes here.',
+  footer: 'Modal footer text goes here.',
+  static_backdrop: true,
+  close_button: true,
+  verticaly_centered: true,
+  id: 'modal-login',
+  size: 'lg',
+  title_tag: 'h3',
+  modal_dialog_utility_classes: [
+    'text-center',
+  ],
+  modal_header_utility_classes: [
+    'border-bottom-0',
+    'p-3',
+  ],
+  modal_title_utility_classes: [
+    'fs-2',
+  ],
+  modal_body_utility_classes: [
+    'py-4', 
+    'px-lg-9',
+  ],
+  close_button_utility_classes: [
+    'rounded-5',
+    'bg-gray',
+    'p-2',
+  ],
+  modal_footer_utility_classes: [
+    'border-top-0',
+    'p-3',
+  ]
+} %}
+```
+
+**Example #2**: Here's the example for the button triggering the modal:
+
+```twig
+{% include 'radix:button' with {
+  color: 'primary',
+  outline: true,
+  id: 'modal-login--trigger',
+  content: 'Button text',
+  button_attributes: create_attribute().setAttribute('data-bs-toggle', 'modal').setAttribute('data-bs-target', '#modal-login'),
+  button_utility_classes: [
+    'mb-2',
+    'mb-md-0',
+    'btn-outline-white',
+  ]
+} %}
+```

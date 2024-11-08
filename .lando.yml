@@ -8,3 +8,20 @@ services:
   appserver:
     config:
       php: lando-config/php.ini
+  node:
+    type: node:20
+
+tooling:
+  npm:
+    service: node
+    cmd: npm
+
+  theme-install:
+    service: node
+    dir: /app/web/themes/custom/haminfo
+    cmd: npm install
+
+  theme-watch:
+    service: node
+    dir: /app/web/themes/custom/haminfo
+    cmd: npm run watch

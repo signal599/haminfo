@@ -1,0 +1,137 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/modules/sdc/src/metadata.schema.json
+name: Toasts
+status: experimental
+description: 'Toasts component, see Bootstrap Documentation: https://getbootstrap.com/docs/5.3/components/toasts/'
+props:
+  type: object
+  properties:
+    with_wrapper:
+      type: boolean
+      title: With Wrapper
+      description: True if the toast has an additional wrapper element.
+      default: false
+    wrapper_classes:
+      type: string
+      title: Wrapper Classes
+      description: Additional classes to add to the toast wrapper.
+      default: ''
+    wrapper_aria_live:
+      type: string
+      title: Wrapper ARIA Live
+      description: ARIA live attribute for the toast wrapper.
+      default: 'polite'
+    with_container:
+      type: boolean
+      title: With Container
+      description: True if the toast should be contained within a div element.
+      default: true
+    container_classes:
+      type: string
+      title: Container Classes
+      description: Additional classes to add to the toast container.
+      default: ''
+    additional_buttons_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Accordion Utility Classes
+      default: []
+      description: An array of utility classes. Use to add extra Bootstrap utility classes or custom CSS classes over to this component.
+    toasts:
+      type: array
+      title: Toasts
+      description: An array of toast objects each containing its own set of properties.
+      items:
+        type: object
+        properties:
+          header:
+            type: object
+            title: Header
+            description: The header object for the toast with title, subtitle, and optional classes.
+            properties:
+              title:
+                type: string
+                title: Title
+                description: The title displayed in the toast header.
+                default: ''
+              subtitle:
+                type: string
+                title: Subtitle
+                description: The subtitle displayed in the toast header.
+                default: ''
+              classes:
+                type: string
+                title: Classes
+                description: Additional classes for styling the toast header.
+                default: ''
+          body:
+            type: string
+            title: Body
+            description: The body content of the toast.
+            default: ''
+          role:
+            type: string
+            title: Role
+            description: ARIA role for the toast.
+            default: 'alert'
+          with_close:
+            type: boolean
+            title: With Close Button
+            description: True if the toast includes a close button.
+            default: true
+          autohide:
+            type: boolean
+            title: Autohide
+            description: True if the toast should automatically hide.
+            default: true
+          delay:
+            type: integer
+            title: Delay
+            description: The amount of time in milliseconds before the toast is automatically hidden.
+            default: 5000
+          with_body_wrapper:
+            type: boolean
+            title: With Body Wrapper
+            description: True if the body of the toast has an additional wrapper element.
+            default: false
+          body_wrapper_classes:
+            type: string
+            title: Body Wrapper Classes
+            description: Additional classes for the body wrapper of the toast.
+            default: ''
+          attributes:
+            type: object
+            title: Attributes
+            description: Additional HTML attributes for the toast element.
+            default: {}
+          additional_buttons:
+            type: array
+            title: Additional Buttons
+            description: An array of additional button objects to include in the toast body.
+            items:
+              type: object
+              properties:
+                text:
+                  type: string
+                  title: Text
+                  description: The display text of the button.
+                  default: ''
+                color:
+                  type: string
+                  title: Color
+                  description: The Bootstrap color scheme for the button.
+                  default: 'primary'
+                outline:
+                  type: boolean
+                  title: Outline
+                  description: True if the button should use the outline style.
+                  default: false
+                attributes:
+                  type: object
+                  title: Attributes
+                  description: Additional HTML attributes for the button element.
+                  default: {}
+slots:
+  content:
+    title: Content
+    description: Default content text for the toast.

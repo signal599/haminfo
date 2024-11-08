@@ -1,0 +1,24 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/modules/sdc/src/metadata.schema.json
+name: Field Comment
+status: experimental
+description: The structure and necessary styling for displaying a field comment section.
+props:
+  type: object
+  properties:
+    field_comment_attributes:
+      type: Drupal\Core\Template\Attribute
+      description: The attributes for the field comment section.
+    title_prefix:
+      type: array
+      title: title prefix
+      description: The prefix for the title of the field comment section.
+    title_suffix:
+      type: array
+      title: title suffix
+      description: The suffix for the title of the field comment section.
+    comments:
+      type: string
+      description: The comments for the field.
+    comment_form:
+      type: string
+      description: The comment form for the field.

@@ -1,0 +1,39 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/modules/sdc/src/metadata.schema.json
+name: Radios
+status: experimental
+description: A component representing a group of radio buttons in a form, styled and customizable.
+props:
+  description: The properties that the Radios component accepts.
+  type: object
+  properties:
+    attributes:
+      description: HTML attributes for the component wrapper element, represented as a Attribute object from Drupal.
+      type: Drupal\Core\Template\Attribute
+slots:
+  children:
+    description: The radio buttons that are part of the Radios component.
+    type: array
+    items:
+      type: object
+      properties:
+        attributes:
+          description: HTML attributes for the radio button element, represented as a Attribute object from Drupal.
+          type: Drupal\Core\Template\Attribute
+        checked:
+          description: Whether the radio button is checked.
+          type: boolean
+        disabled:
+          description: Whether the radio button is disabled.
+          type: boolean
+        id:
+          description: The unique identifier for the radio button.
+          type: string
+        label:
+          description: The label for the radio button.
+          type: string
+        name:
+          description: The name of the radio button group.
+          type: string
+        value:
+          description: The value of the radio button.
+          type: string

@@ -1,0 +1,38 @@
+{#
+/**
+ * @file
+ * Theme override for a 'select' form element.
+ *
+ * Available variables:
+ * - attributes: HTML attributes for the <select> tag.
+ * - options: The list of options (including optgroups). Each option contains:
+ *   - type: (either 'option' or 'optgroup')
+ *   - label: The label of the option or optgroup.
+ *   - value: (optional for 'optgroup') The value of the option.
+ *   - selected: (optional) If TRUE, this option is selected.
+ *   - options: (only for 'optgroup') The options contained within the optgroup.
+ *
+ * @see template_preprocess_select()
+ */
+#}
+{% apply spaceless %}
+
+{% set classes = ['form-control'] %}
+{% set select_attributes = attributes ?: create_attribute() %}
+
+<select {{select_attributes.addClass(classes)}}>
+  {% for option in options %}
+    {# Handle option groups #}
+    {% if option.type == 'optgroup' %}
+      <optgroup label="{{ option.label }}">
+        {% for sub_option in option.options %}
+          <option value="{{ sub_option.value }}" {{ sub_option.selected ? ' selected="selected"' }}>{{ sub_option.label }}</option>
+        {% endfor %}
+      </optgroup>
+      {# Handle individual options #}
+    {% elseif option.type == 'option' %}
+      <option value="{{ option.value }}" {{ option.selected ? ' selected="selected"' }}>{{ option.label }}</option>
+    {% endif %}
+  {% endfor %}
+</select>
+{% endapply %}

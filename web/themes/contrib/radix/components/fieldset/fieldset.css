@@ -1,0 +1,7 @@
+.fieldset label.form-required::after {
+  display: inline-block;
+  margin-inline: 0.15em;
+  content: "*";
+  color: var(--bs-form-invalid-color);
+  font-size: 0.875rem;
+}

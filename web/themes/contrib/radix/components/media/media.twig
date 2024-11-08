@@ -1,0 +1,37 @@
+{#
+/**
+ * @file
+ * Theme override for displaying a media item.
+ *
+ * Available variables:
+ * - media: A media item object with controlled access to its properties and methods.
+ * - name: The designated name of the media item.
+ * - content: The pre-structured media content ready for output.
+ *
+ * @see template_preprocess_media()
+ * @ingroup themeable
+ */
+#}
+{% apply spaceless %}
+
+{%
+  set classes = [
+    'media',
+    'media--type-' ~ media.bundle()|clean_class,
+    not media.isPublished() ? 'media--unpublished',
+    view_mode ? 'media--view-mode-' ~ view_mode|clean_class,
+  ]|merge(media_utility_classes ?: [])
+%}
+
+{% set media_attributes = attributes ?: create_attribute() %}
+
+<div {{media_attributes.addClass(classes)}}>
+  {{ title_suffix.contextual_links }}
+  {% block media_content %}
+    {% if content %}
+      {{ content }}
+    {% endif %}
+  {% endblock %}
+</div>
+
+{% endapply %}

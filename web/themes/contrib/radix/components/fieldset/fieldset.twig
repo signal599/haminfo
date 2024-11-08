@@ -1,0 +1,127 @@
+{#
+/**
+ * @file
+ * Override for a fieldset element and its children.
+ *
+ * Available variables:
+ * - disabled: Boolean indicating whether the fieldset element is disabled.
+ * - attributes: HTML attributes for the fieldset element.
+ * - errors: (optional) Any errors for this fieldset element, may not be set.
+ * - required: Boolean indicating whether the fieldset element is required.
+ * - title_display: The display setting for the fieldset title.
+ * - description_display: The display setting for the fieldset description.
+ * - fieldset_utility_classes: An array of utility classes to add to the fieldset element.
+ * - legend_utility_classes: An array of utility classes to add to the legend element.
+ * - fieldset_content_utility_classes: An array of utility classes to add to the fieldset content element.
+ * - fieldset_content_attributes: HTML attributes for the fieldset content element.
+ * - fieldset_description_utility_classes: An array of utility classes to add to the fieldset description element.
+ * - fieldset_description_attributes: HTML attributes for the fieldset description element.
+ * - prefix_utility_classes: An array of utility classes to add to the prefix element.
+ * - suffix_utility_classes: An array of utility classes to add to the suffix element.
+ * - legend: The legend element containing the following properties:
+ *   - title: Title of the fieldset, intended for use as the text of the legend.
+ *   - attributes: HTML attributes to apply to the legend.
+ * - description: The description element containing the following properties:
+ *   - content: The description content of the fieldset.
+ *   - attributes: HTML attributes to apply to the description container.
+ * - children: The rendered child elements of the fieldset.
+ * - prefix: The content to add before the fieldset children.
+ * - suffix: The content to add after the fieldset children.
+ *
+ * @see template_preprocess_fieldset()
+ */
+#}
+{% apply spaceless %}
+
+{%
+  set fieldset_classes = [
+    'js-form-item',
+    'form-item',
+    'form-wrapper',
+    'js-form-wrapper',
+  ]|merge(fieldset_utility_classes ?: [])
+%}
+
+{%
+  set legend_classes = [
+    'fieldset-legend',
+  ]|merge(legend_utility_classes ?: [])
+%}
+
+{%
+  set legend_title_classes = [
+    required ? 'js-form-required form-required' : '',
+  ]|merge(legend_title_utility_classes ?: [])
+%}
+
+{%
+  set fieldset_description_classes = [
+    'js-form-item',
+    'form-item',
+    'form-wrapper',
+    'js-form-wrapper',
+  ]|merge(fieldset_description_utility_classes ?: [])
+%}
+
+{%
+  set prefix_classes = [
+    'fieldset-prefix',
+  ]|merge(prefix_utility_classes ?: [])
+%}
+
+{%
+  set suffix_classes = [
+    'fieldset-prefix',
+  ]|merge(suffix_utility_classes ?: [])
+%}
+
+{% set fieldset_content_classes = fieldset_content_utility_classes|default(['mb-3']) %}
+{% set disabled_attr = (disabled is defined and disabled) ? 'disabled' : '' %}
+
+{% set fieldset_content_attributes = fieldset_content_attributes ?: create_attribute() %}
+{% set fieldset_legend_title_attributes = fieldset_legend_title_attributes ?: create_attribute() %}
+{% set fieldset_prefix_attributes = fieldset_prefix_attributes ?: create_attribute() %}
+{% set fieldset_suffix_attributes = fieldset_suffix_attributes ?: create_attribute() %}
+
+
+<fieldset {{ attributes.addClass(fieldset_classes).setAttribute(disabled_attr, disabled_attr) }}>
+  {% if title_display != 'none' %}
+    <legend {{ legend.attributes.addClass(legend_classes) }}>
+      <label {{ fieldset_legend_title_attributes.addClass(legend_title_classes) }}>{{ legend.title }}</label>
+    </legend>
+  {% endif %}
+
+  <div {{ fieldset_content_attributes.addClass(fieldset_content_classes) }}>
+    {% if description_display == 'before' and description.content %}
+      <small {{description.attributes.addClass('description','form-text','text-muted')}}>{{ description.content }}</small>
+    {% endif %}
+
+    {% if errors %}
+      <div class="invalid-feedback">
+        {{ errors }}
+      </div>
+    {% endif %}
+
+    {% block fieldset_prefix %}
+      {% if prefix %}
+        <span {{ fieldset_prefix_attributes.addClass(prefix_classes) }}>{{ prefix }}</span>
+      {% endif %}
+    {% endblock %}
+
+    {% block children %}
+      {{ children }}
+    {% endblock %}
+
+    {% block fieldset_suffix %}
+      {% if suffix %}
+        <span {{ fieldset_suffix_attributes.addClass(suffix_classes) }}>{{ suffix }}</span>
+      {% endif %}
+    {% endblock %}
+
+    {% if description_display in ['after', 'invisible'] and description.content %}
+      <small {{description.attributes.addClass(fieldset_description_classes)}}>{{ description.content }}</small>
+    {% endif %}
+  </div>
+</fieldset>
+
+{% endapply %}

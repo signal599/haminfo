@@ -1,0 +1,118 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/modules/sdc/src/metadata.schema.json
+name: Dropdown
+status: experimental
+description: Toggle contextual overlays for displaying lists of links and more with the Bootstrap dropdown plugin.
+props:
+  type: object
+  properties:
+    items:
+      type: array
+      title: Menu Items
+      items:
+        type: object
+        properties:
+          title:
+            type: string
+            title: Menu item title
+          url:
+            type: ['object', 'string']
+            properties:
+              options:
+                type: object
+                properties:
+                  attributes:
+                    type: object
+                    properties:
+                      class:
+                        type: string
+                        title: CSS class
+          in_active_trail:
+            type: boolean
+            title: Is item in active trail
+    dropdown_button_content:
+      type: string
+      title: Dropdown button content
+    dropdown_button_attributes:
+      type: Drupal\Core\Template\Attribute
+    dropdown_button_html_tag:
+      type: string
+      title: The HTML tag to use for the button (button | a). Defaults to `button`.
+      default: button
+      enum:
+        - button
+        - a
+    dropdown_button_url:
+      type: string
+      title: Dropdown button URL
+    dropdown_size:
+      type: string
+      title: Size
+      description: Bootstrap button size
+      default: ''
+      enum:
+        - null
+        - ''
+        - btn-sm
+        - btn-lg
+    split_button:
+      type: boolean
+      title: Split button
+      description: Split button
+      default: false
+    dropdown_utility_classes:
+      type: array
+      items:
+        type: string
+        title: Dropdown utility classes
+    dropdown_item_utility_classes:
+      type: array
+      items:
+        type: string
+        title: Dropdown item utility classes
+    dropdown_button_utility_classes:
+      type: array
+      items:
+        type: string
+        title: Dropdown button utility classes
+    dropdown_menu_utility_classes:
+      type: array
+      items:
+        type: string
+        title: Dropdown menu utility classes
+    dropdown_color:
+      type: string
+      title: Color
+      description: Bootstrap includes several predefined button styles, each serving its own semantic purpose, with a few extras thrown in for more control.
+      default: ''
+      enum:
+        - ''
+        - primary
+        - secondary
+        - success
+        - danger
+        - warning
+        - info
+        - dark
+        - light
+        - link
+    outline:
+      type: boolean
+      title: Outline
+      description: In need of a button, but not the hefty background colors they bring? Replace the default modifier classes with the .btn-outline-* ones to remove all background images and colors on any button.
+      default: false
+    disabled:
+      type: boolean
+      title: Disabled
+      description: Disabled button
+      default: false
+    dropdown_item_attributes:
+      type: Drupal\Core\Template\Attribute
+    dropdown_menu_attributes:
+      type: Drupal\Core\Template\Attribute
+slots:
+  dropdown_toggler:
+    type: string
+    title: Dropdown toggler
+  dropdown_menu:
+    type: string
+    title: Dropdown menu
