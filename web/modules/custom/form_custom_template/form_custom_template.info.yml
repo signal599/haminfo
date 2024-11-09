@@ -1,0 +1,5 @@
+name: 'Form custom template'
+type: module
+description: 'Help with custom form templates'
+package: Custom
+core_version_requirement: '>= 9'

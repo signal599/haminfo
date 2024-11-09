@@ -1,0 +1,76 @@
+<?php
+
+/**
+ * @file
+ * Module file for Form Custom Template.
+ */
+
+use Drupal\Core\Render\Element;
+
+/**
+ * Implements hook_theme().
+ */
+function form_custom_template_theme($existing, $type, $theme, $path) {
+  return [
+    'form_content' => [
+      'render element' => 'elements'
+    ],
+  ];
+}
+
+
+/**
+ * Prepares variables for form custom templates.
+ *
+ * Default template: form-content.html.twig.
+ *
+ * @param array $variables
+ * An associative array containing:
+ *    - content: An array of the visible custom form elements.
+ *    - hidden: An array of the hidden system form elements
+ */
+function template_preprocess_form_content(&$variables) {
+  $element = $variables['elements'];
+
+  $hidden_keys = [
+    'form_build_id' => 1,
+    'form_token' => 1,
+    'form_id' => 1,
+  ];
+
+  $hidden = [];
+  $content = [];
+
+  foreach (Element::children($element) as $key) {
+    if (isset($hidden_keys[$key])) {
+      $hidden[$key] = $element[$key];
+    }
+    else {
+      $content[$key] = $element[$key];
+    }
+  }
+
+  $variables['content'] = $content;
+  $variables['hidden'] = $hidden;
+}
+
+/**
+ * Implements hook_theme_suggests_HOOK() for form content.
+ */
+function form_custom_template_theme_suggestions_form_content(array $variables) {
+  $form_id = $variables['elements']['#form_id'];
+  $suggestions = [];
+
+  // Add more specific suggestions.
+  $parts = explode('.', $form_id);
+  if ($parts > 1) {
+    // Form id contains a dot. Use the last part as a suggestion.
+    $last = end($parts);
+    $suggestions[] = "form_content__{$last}";
+  }
+
+  // Use full form id  as a suggestion.
+  $suggestions[] = "form_content__{$form_id}";
+
+  return $suggestions;
+}

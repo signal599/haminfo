@@ -1,0 +1,25 @@
+uuid: 505f0a73-1e50-40fe-b169-1fec1a5d77d2
+langcode: en
+status: true
+dependencies:
+  module:
+    - ham_station
+    - system
+  theme:
+    - haminfo
+id: haminfo_hammapreport
+theme: haminfo
+region: content
+weight: 0
+provider: null
+plugin: ham_map_report
+settings:
+  id: ham_map_report
+  label: 'Ham map report'
+  label_display: '0'
+  provider: ham_station
+visibility:
+  request_path:
+    id: request_path
+    negate: false
+    pages: /ham-map-info

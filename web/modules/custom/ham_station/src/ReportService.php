@@ -82,7 +82,7 @@ class ReportService {
       '#header' => ['State', 'New', 'Successful', 'Not Found', 'PO Box'],
       '#rows' => $rows,
       '#footer' => [$totals],
-      '#attributes' => ['class' => ['geocode-report']],
+      '#attributes' => ['class' => ['table', 'table-striped', 'table-map-report']],
     ];
   }
 

@@ -21,6 +21,8 @@ class HamMapForm extends FormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    $form['#theme'] = 'form_content';
+
     $form['query_type'] = [
       '#type' => 'radios',
       '#options' => [
@@ -54,6 +56,7 @@ class HamMapForm extends FormBase {
     $form['submit'] = [
       '#type' => 'submit',
       '#value' => $this->t('Show the map'),
+      '#attributes' => ['class' => ['btn', 'btn-primary']],
     ];
 
     $form['show_gridlabels'] = [
