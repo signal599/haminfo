@@ -6,6 +6,7 @@ use Drupal\Component\Uuid\UuidInterface;
 use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\File\FileSystem;
+use Drupal\Core\File\FileSystemInterface;
 use Drupal\Core\Messenger\Messenger;
 use Drupal\Core\Session\AccountProxyInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
@@ -361,7 +362,7 @@ class ExportHelper {
   private function openFile($batch_uuid) {
     $uri = $this->getFileUri($batch_uuid);
     $dir = dirname($uri);
-    $this->fileSystem->prepareDirectory($dir, FileSystem::CREATE_DIRECTORY | FileSystem::MODIFY_PERMISSIONS);
+    $this->fileSystem->prepareDirectory($dir, FileSystemInterface::CREATE_DIRECTORY | FileSystem::MODIFY_PERMISSIONS);
     return Writer::createFromPath($this->getFileUri($batch_uuid), 'a');
   }
 

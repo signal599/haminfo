@@ -158,19 +158,19 @@ class ExportForm extends FormBase {
     $batch = [
       'operations' => [
         [
-          [$this, 'processBatch1'], [
+          [self::class, 'processBatch1'], [
             $form_state->getValue('state'),
             $form_state->getValue('zip'),
           ],
         ],
         [
-          [$this, 'processBatch2'], [
+          [self::class, 'processBatch2'], [
             $form_state->getValue('delimiter'),
             $form_state->getValue('enclosure'),
           ],
         ],
       ],
-      'finished' => [$this, 'finishedBatch'],
+      'finished' => [self::class, 'finishedBatch'],
       'title' => $this->t('Exporting to file'),
       'init_message' => $this->t('Counting…'),
       'progress_message' => $this->t('Exporting…'),
@@ -189,8 +189,9 @@ class ExportForm extends FormBase {
    * @param array $context
    *   Context.
    */
-  public function processBatch1($state, $zip, array &$context) {
-    $this->exportHelper->processBatch1($state, $zip, $context);
+  public static function processBatch1($state, $zip, array &$context) {
+    \Drupal::service('ham_station.export_service')
+      ->processBatch1($state, $zip, $context);
   }
 
   /**
@@ -203,8 +204,9 @@ class ExportForm extends FormBase {
    * @param array $context
    *   Context.
    */
-  public function processBatch2($delimiter, $enclosure, array &$context) {
-    $this->exportHelper->processBatch2($delimiter, $enclosure, $context);
+  public static function processBatch2($delimiter, $enclosure, array &$context) {
+    \Drupal::service('ham_station.export_service')
+      ->processBatch2($delimiter, $enclosure, $context);
   }
 
   /**
@@ -220,8 +222,9 @@ class ExportForm extends FormBase {
    * @return \Symfony\Component\HttpFoundation\RedirectResponse|null
    *   Redirect response.
    */
-  public function finishedBatch($success, array $results, array $operations) {
-    return $this->exportHelper->finishedBatch($success, $results, $operations);
+  public static function finishedBatch($success, array $results, array $operations) {
+    return \Drupal::service('ham_station.export_service')
+      ->finishedBatch($success, $results, $operations);
   }
 
 }
