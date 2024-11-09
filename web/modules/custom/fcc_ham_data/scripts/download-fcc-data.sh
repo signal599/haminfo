@@ -1,12 +1,9 @@
 #!/bin/bash
 
-cd ../web
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+WEB_ROOT=$SCRIPT_DIR/../../../../../web
 
-../vendor/bin/drush fcc_ham_data:truncate hd
-../vendor/bin/drush fcc_ham_data:truncate en
-../vendor/bin/drush fcc_ham_data:truncate am
-
-cd ../downloads
+cd $WEB_ROOT/../downloads
 
 rm l_amat.zip
 rm HD.dat
