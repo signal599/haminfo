@@ -1,0 +1,25 @@
+uuid: a6ac0172-c462-4544-b8ae-0d1037814a07
+langcode: en
+status: true
+dependencies:
+  config:
+    - system.menu.main
+  module:
+    - system
+  theme:
+    - haminfo
+id: haminfo_mainnavigation
+theme: haminfo
+region: navbar_left
+weight: -3
+provider: null
+plugin: 'system_menu_block:main'
+settings:
+  id: 'system_menu_block:main'
+  label: 'Main navigation'
+  label_display: '0'
+  provider: system
+  level: 1
+  depth: 0
+  expand_all_items: false
+visibility: {  }
