@@ -1,0 +1,14 @@
+uuid: bd5d5ae8-4947-42fa-8e06-aa2f6f253ceb
+langcode: en
+status: true
+dependencies:
+  config:
+    - user.role.exporter
+  module:
+    - user
+id: user_remove_role_action.exporter
+label: 'Remove the Exporter role from the selected user(s)'
+type: user
+plugin: user_remove_role_action
+configuration:
+  rid: exporter
