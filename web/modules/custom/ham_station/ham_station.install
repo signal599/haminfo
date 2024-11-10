@@ -21,6 +21,18 @@ function ham_station_update_8002() {
   );
 }
 
+function ham_station_update_8003() {
+  $db = \Drupal::database();
+
+  $db->schema()->createTable(
+    ExportHelper::EXPORT_TABLE_SORT,
+    ham_station_schema()[ExportHelper::EXPORT_TABLE_SORT]
+  );
+
+  $db->schema()->dropIndex(ExportHelper::EXPORT_TABLE, 'sort_order');
+  $db->schema()->dropField(ExportHelper::EXPORT_TABLE, 'sort_order');
+}
+
 /**
  * Implements hook_schema();
  */
@@ -92,6 +104,26 @@ function ham_station_schema() {
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
+      ],
+    ],
+    'primary key' => ['batch_uuid', 'id'],
+  ];
+
+  $schema[ExportHelper::EXPORT_TABLE_SORT] = [
+    'fields' => [
+      'batch_uuid' => [
+        'type' => 'varchar',
+        'not null' => TRUE,
+        'length' => 255,
+      ],
+      'id' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ],
+      'sort_order' => [
+        'type' => 'int',
+        'unsigned' => TRUE,
       ],
     ],
     'primary key' => ['batch_uuid', 'id'],

@@ -20,6 +20,8 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 class ExportHelper {
 
   const EXPORT_TABLE = 'ham_station_export';
+  const EXPORT_TABLE_SORT = 'ham_station_sort';
+
   const BATCH_SIZE = 1000;
 
   use StringTranslationTrait;
@@ -215,11 +217,15 @@ class ExportHelper {
    */
   private function getExportQuery($batch_uuid, $sort_order_start, $length = NULL) {
     $query = $this->dbConnection
-      ->select(self::EXPORT_TABLE, 'ex')
-      ->fields('ex', ['callsign', 'first_name', 'last_name', 'address', 'city', 'state', 'zip', 'operator_class', 'is_club', 'latitude', 'longitude', 'sort_order'])
+      ->select(self::EXPORT_TABLE, 'ex');
+
+    $query->innerJoin(self::EXPORT_TABLE_SORT, 'es', 'es.batch_uuid = ex.batch_uuid AND es.id = ex.id');
+
+    $query->fields('ex', ['callsign', 'first_name', 'last_name', 'address', 'city', 'state', 'zip', 'operator_class', 'is_club', 'latitude', 'longitude'])
+      ->fields('es', ['sort_order'])
       ->condition('ex.batch_uuid', $batch_uuid)
-      ->condition('ex.sort_order', $sort_order_start, '>=')
-      ->orderBy('ex.sort_order');
+      ->condition('es.sort_order', $sort_order_start, '>=')
+      ->orderBy('es.sort_order');
 
     if (!empty($length)) {
       $query->range(0, $length);
@@ -255,6 +261,11 @@ class ExportHelper {
       ->delete(self::EXPORT_TABLE)
       ->condition('batch_uuid', $batch_uuid)
       ->execute();
+
+    $this->dbConnection
+      ->delete(self::EXPORT_TABLE_SORT)
+      ->condition('batch_uuid', $batch_uuid)
+      ->execute();
   }
 
   /**
@@ -264,18 +275,24 @@ class ExportHelper {
    *   Batch uuid.
    */
   private function sortResult($batch_uuid) {
-    // This lets the export to file operation query batches just by sort_order
-    // and the final result with be sorted.
-    $this->dbConnection->query('SET @sort_order := 0');
+    // This builds an index table which lets the export to file operation query
+    // batches by sort_order and the final result with be sorted.
+
+    $this->dbConnection->delete(self::EXPORT_TABLE_SORT)
+      ->condition('batch_uuid', $batch_uuid)
+      ->execute();
+
     $sql = '
-      UPDATE ham_station_export
-      SET sort_order = @sort_order := @sort_order + 1
-      WHERE batch_uuid = :uuid
-      ORDER by state, last_name, first_name, callsign, id';
+    INSERT INTO ham_station_sort
+    (batch_uuid, id, sort_order)
+    SELECT batch_uuid, id,
+    ROW_NUMBER() OVER w as sort_order
+    FROM ham_station_export
+    WHERE batch_uuid = :uuid
+    WINDOW w AS (ORDER BY state, last_name, first_name, callsign, id)';
 
     $this->dbConnection
-      ->prepareQuery($sql)
-      ->execute([':uuid' => $batch_uuid]);
+      ->query($sql, ['uuid' => $batch_uuid]);
   }
 
   /**
