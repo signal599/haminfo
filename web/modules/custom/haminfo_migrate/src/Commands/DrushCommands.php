@@ -51,7 +51,6 @@ class DrushCommands extends Base {
 
       $user->addRole('exporter');
       $user->save();
-      break;
     }
   }
 
