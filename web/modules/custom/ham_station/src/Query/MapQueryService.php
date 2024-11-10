@@ -106,7 +106,7 @@ class MapQueryService {
 
   private function getMapDataByZipCode($zipcode) {
     $result = $this->googleGeocoder->geocodePostalCode($zipcode);
-    
+
     if (empty($result)) {
       $this->errorMessage = t('We can\'t find a location for that zip code.');
       return NULL;
@@ -143,14 +143,15 @@ class MapQueryService {
 
     $locator = [];
 
-    $locator[] = chr($upper_a + ($lng / 20));
-    $locator[] = chr($upper_a + ($lat / 10));
+    // Based on https://gist.github.com/Nilpo/ae13bf9b359d37ddcec12f237f4d1100.
+    $locator[] = chr($upper_a + intval($lng / 20));
+    $locator[] = chr($upper_a + intval($lat / 10));
 
-    $locator[] = chr($zero + (($lng % 20) / 2));
-    $locator[] = chr($zero + ($lat % 10));
+    $locator[] = chr($zero + intval(intval($lng) % 20 / 2));
+    $locator[] = chr($zero + intval(intval($lat) % 10 / 1));
 
-    $locator[] = chr($lower_a + fmod($lng, 2) * 12);
-    $locator[] = chr($lower_a + fmod($lat, 1) * 24);
+    $locator[] = chr($lower_a + intval(($lng - intval($lng / 2) * 2) * 12));
+    $locator[] = chr($lower_a + intval(($lat - intval($lat / 1) * 1) * 24));
 
     return implode('', $locator);
   }
@@ -301,7 +302,7 @@ class MapQueryService {
         );
         $location->addAddress($address);
         $address_map[$row->id] = count($location->getAddresses()) - 1;
-      }    
+      }
       else {
         $address = $location->getAddresses()[$address_map[$row->id]];
       }
