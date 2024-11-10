@@ -10,7 +10,7 @@ dependencies:
 id: haminfo_hammapreport
 theme: haminfo
 region: content
-weight: 0
+weight: -2
 provider: null
 plugin: ham_map_report
 settings:

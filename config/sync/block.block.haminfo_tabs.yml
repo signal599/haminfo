@@ -1,0 +1,20 @@
+uuid: 8c8d7738-c05e-4df8-80bb-c76c3ef611f7
+langcode: en
+status: true
+dependencies:
+  theme:
+    - haminfo
+id: haminfo_tabs
+theme: haminfo
+region: content
+weight: -4
+provider: null
+plugin: local_tasks_block
+settings:
+  id: local_tasks_block
+  label: Tabs
+  label_display: '0'
+  provider: core
+  primary: true
+  secondary: true
+visibility: {  }
