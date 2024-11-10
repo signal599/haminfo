@@ -23,7 +23,6 @@
         "drupal/core-project-message": "^11.0",
         "drupal/core-recommended": "^11.0",
         "drupal/radix": "^6.0@RC",
-        "drupal/redirect": "^1.10",
         "drupal/smtp": "^1.4",
         "drush/drush": "^13.3",
         "league/csv": "^9.18.0"
