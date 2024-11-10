@@ -1,0 +1,6 @@
+services:
+  haminfo_migrate.commands:
+    class: \Drupal\haminfo_migrate\Commands\DrushCommands
+    arguments: ['@entity_type.manager']
+    tags:
+      - { name: drush.command }

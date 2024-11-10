@@ -1,0 +1,6 @@
+name: 'Haminfo migrate'
+type: module
+description: 'Simple migration from the old site'
+core: 8.x
+package: 'Custom'
+core_version_requirement: ^11
