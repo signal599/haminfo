@@ -21,6 +21,9 @@ function ham_station_update_8002() {
   );
 }
 
+/**
+ * Create sort / index table for export.
+ */
 function ham_station_update_8003() {
   $db = \Drupal::database();
 
