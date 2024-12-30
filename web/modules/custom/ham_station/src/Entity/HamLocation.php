@@ -39,7 +39,7 @@ use Drupal\user\UserInterface;
  *   label_callback = "ham_station_location_label_callback",
  *   entity_keys = {
  *     "id" = "id",
- *     "label" = "name",
+ *     "label" = "id",
  *     "uuid" = "uuid",
  *     "uid" = "user_id",
  *     "langcode" = "langcode",

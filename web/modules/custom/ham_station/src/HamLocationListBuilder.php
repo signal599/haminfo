@@ -28,12 +28,12 @@ class HamLocationListBuilder extends EntityListBuilder {
    */
   public function buildRow(EntityInterface $entity) {
     /* @var $entity \Drupal\ham_station\Entity\HamLocation */
-    $row['id'] = $entity->id();
-    $row['coords'] = Link::createFromRoute(
-      $entity->label(),
+    $row['id'] = Link::createFromRoute(
+      $entity->id(),
       'entity.ham_location.edit_form',
       ['ham_location' => $entity->id()]
     );
+    $row['coords'] = "{$entity->get('latitude')->value} | {$entity->get('longitude')->value}";
     return $row + parent::buildRow($entity);
   }
 
