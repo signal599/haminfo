@@ -1,6 +1,0 @@
-
-.form-item label.form-required::after {
-  margin-inline: 0.15em;
-  content: "*";
-  color: var(--bs-form-invalid-color);
-}
