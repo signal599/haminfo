@@ -40,7 +40,8 @@ const hamstationApp = (function ($) {
       let map_container = document.querySelector('.map-container');
 
       map = new google.maps.Map(map_container, {
-        zoom: 14
+        zoom: 14,
+        zoomControl: true,
       });
 
       map.addListener('center_changed', function () {
