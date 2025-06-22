@@ -90,13 +90,11 @@ class MapQueryService {
   private function getMapDataByCallsign($callsign) {
     $callsign = strtoupper($callsign);
     $result = $this->callsignQuery($callsign);
+    $error = $result['error'] ?? NULL;
 
-    if (isset($result['error'])) {
-      $this->errorMessage = $result['error'];
-      return NULL;
-    }
-
-    return $this->getMapDataCentered($result['lat'], $result['lng'], $callsign);
+    return empty($error)
+      ? $this->getMapDataCentered($result['lat'], $result['lng'], $callsign)
+      : MapQueryResult::createForError($error);
   }
 
   private function getMapDataByGridsquare($code) {
@@ -106,13 +104,11 @@ class MapQueryService {
 
   private function getMapDataByZipCode($zipcode) {
     $result = $this->googleGeocoder->geocodePostalCode($zipcode);
+    $error = $result['error'] ?? NULL;
 
-    if (empty($result)) {
-      $this->errorMessage = t('We can\'t find a location for that zip code.');
-      return NULL;
-    }
-
-    return $this->getMapDataCentered($result['lat'], $result['lng']);
+    return empty($error)
+      ? $this->getMapDataCentered($result['lat'], $result['lng'])
+      : MapQueryResult::createForError($error);
   }
 
   private function getMapDataCentered($lat, $lng, $callsign = NULL) {

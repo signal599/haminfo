@@ -7,6 +7,7 @@ use Drupal\Core\Block\BlockManagerInterface;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Link;
+use Drupal\ham_station\AjaxCommands\MapQueryCommand;
 use Drupal\ham_station\Form\HamMapForm;
 use Drupal\ham_station\Query\MapQueryService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -116,16 +117,15 @@ class DefaultController extends ControllerBase {
 
     $result = $this->mapQueryService->mapQuery($query_type, $query_value);
 
-    if (empty($result)) {
-      return new JsonResponse([
-        'error' => $this->mapQueryService->getErrorMessage(),
-      ]);
-    }
-
-    $data = $this->serializer->serialize($result, 'json');
-
     $response = new AjaxResponse();
-    $response->setJson($data);
+    $cmd = new MapQueryCommand($result);
+    $response->addCommand($cmd);
+
+    // Use Symfony serializer.
+    // By default the command uses json_encode which doesn't handle objects well.
+    $response->setJson(
+      $this->serializer->serialize([$cmd->render()], 'json')
+    );
 
     return $response;
   }

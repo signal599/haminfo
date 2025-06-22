@@ -55,8 +55,10 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       submit: {queryType: 'c', value: 'KT1F'}
     });
 
-    ajax.success = (response) => {
-      console.log(response);
+    Drupal.AjaxCommands.prototype.hamMapQuery = (ajax, response, status) => {
+      if (status === 'success') {
+        console.log(response.result);
+      }
     };
 
     ajax.execute();
