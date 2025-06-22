@@ -19,8 +19,6 @@ class MapQueryService {
    */
   private $subsquares = [];
 
-  private $errorMessage;
-
   const DIRECTION_NORTH = 0;
   const DIRECTION_EAST = 1;
   const DIRECTION_SOUTH = 2;
@@ -335,10 +333,6 @@ class MapQueryService {
     }
 
     return [$result, $query_callsign_idx];
-  }
-
-  public function getErrorMessage() {
-    return $this->errorMessage;
   }
 
   private function buildSubsquares($lat, $lng) {
