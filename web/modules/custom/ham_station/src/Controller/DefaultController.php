@@ -2,6 +2,7 @@
 
 namespace Drupal\ham_station\Controller;
 
+use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Block\BlockManagerInterface;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Controller\ControllerBase;
@@ -123,7 +124,7 @@ class DefaultController extends ControllerBase {
 
     $data = $this->serializer->serialize($result, 'json');
 
-    $response = new JsonResponse();
+    $response = new AjaxResponse();
     $response->setJson($data);
 
     return $response;
