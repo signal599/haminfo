@@ -1,7 +1,9 @@
 Drupal.hamApp = (Drupal, hsSettings) => {
   const formElement = document.querySelector('.ham-map-form');
   const mapContainer = document.querySelector('.map-container');
-  let map;
+  let googleMap;
+  const locations = new Map();
+  const mapMarkers = new Map();
 
   const setQueryType = (queryType) => {
     const labels = {
@@ -29,36 +31,119 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     return formElement.querySelector('input[name=query_type]:checked').value;
   }
 
-  const createMap = () => {
-      if (map) {
-        return;
-      }
-
-      map = new google.maps.Map(mapContainer, {
-        zoom: 14,
-        zoomControl: true,
-      });
+  const createGoogleMap = () => {
+    googleMap = new google.maps.Map(mapContainer, {
+      zoom: 14,
+      zoomControl: true,
+    });
 
       // map.addListener('center_changed', function () {
       //   mapCenterChangedListener(map.getCenter());
       // });
-    }
+  }
 
   const doInitialQuery = () => {
 
   };
 
-  const refreshMap = () => {
+  const setMapCenter = (response) => {
+    googleMap.setCenter({lat: response.mapCenterLat, lng: response.mapCenterLng});
+  }
+
+  const setLocations = (response) => {
+    locations.clear();
+    response.locations.forEach(location => {
+      locations.set(location.id, true);
+    });
+  };
+
+    const getStationCountForLocation = (location) => {
+      let stationCount = 0;
+      location.addresses.forEach(address => {
+        address.stations.forEach(station => stationCount++);
+      });
+
+      return stationCount;
+    }
+
+    const markerLabel = (location) => {
+      const stationCount = getStationCountForLocation(location);
+      return location.addresses[0].stations[0].callsign + (stationCount > 1 ? '+' : '');
+    }
+
+    const drawMarkers = (response) => {
+      // Remove markers for locations no longer on the map.
+      for (const [id, marker] of mapMarkers) {
+        if (!locations.has(id)) {
+          marker.setMap(null);
+          mapMarkers.delete(id);
+        }
+      }
+
+  //      removeQueriedCallsign();
+
+      // Add new markers.
+      response.locations.forEach(location => {
+        if (!mapMarkers.has(location.id)) {
+          drawMarker(location);
+        }
+      });
+
+  //      openQueriedCallsign();
+    }
+
+    const drawMarker = (location) => {
+      if (location.addresses.length === 0) {
+        return;
+      }
+
+      const marker = new google.maps.Marker({
+        position: {lat: location.lat, lng: location.lng},
+        map: googleMap,
+        label: markerLabel(location)
+      });
+
+      mapMarkers.set(location.id, marker);
+
+      // marker.addListener('click', e => {
+      //   openInfowindow(location, marker);
+      // });
+    }
+
+  const processSuccessResponse = (response) => {
+    setLocations(response);
+    drawMarkers(response);
+    setMapCenter(response);
+    mapContainer.classList.remove('hidden');
+  };
+
+  const processErrorResponse = (error) => {
+    console.log(error);
+  };
+
+  const mapAjaxRequest = (query) => {
     const ajax = Drupal.ajax({
       url: '/ham-map-ajax',
       httpMethod: 'POST',
-      submit: {queryType: 'c', value: 'KT1F'}
+      submit: query,
+      progress: { type: 'throbber', message: 'Processing...' },
+      element: formElement.querySelector('.processing'),
     });
 
     Drupal.AjaxCommands.prototype.hamMapQuery = (ajax, response, status) => {
-      if (status === 'success') {
-        console.log(response.result);
+      if (status !== 'success') {
+        processError('Sorry, something went wrong.')
+        return;
       }
+
+      console.log(ajax);
+
+      if (response.result.error) {
+        processErrorResponse(response.result.error);
+        return;
+      }
+
+      processSuccessResponse(response.result);
     };
 
     ajax.execute();
@@ -72,10 +157,11 @@ Drupal.hamApp = (Drupal, hsSettings) => {
 
   formElement.addEventListener('submit', event => {
     event.preventDefault();
-    refreshMap();
+    mapAjaxRequest({queryType: 'c', value: 'KT1F'});
   });
 
   formElement.querySelector('.query-other input').focus();
+  createGoogleMap();
 };
 
 (function (Drupal, once) {
