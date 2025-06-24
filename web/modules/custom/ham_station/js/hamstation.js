@@ -2,8 +2,9 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   const formElement = document.querySelector('.ham-map-form');
   const mapContainer = document.querySelector('.map-container');
   let googleMap;
-  const locations = new Map();
   const mapMarkers = new Map();
+  let placesLocation;
+  let addressKeyCode;
 
   const setQueryType = (queryType) => {
     const labels = {
@@ -50,21 +51,23 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     googleMap.setCenter({lat: response.mapCenterLat, lng: response.mapCenterLng});
   }
 
-  const setLocations = (response) => {
-    locations.clear();
+  const setLocationsMap = (response) => {
+    const map = new Map();
     response.locations.forEach(location => {
-      locations.set(location.id, true);
+      map.set(location.id, true);
     });
+
+    response.locationsMap = map;
   };
 
-    const getStationCountForLocation = (location) => {
-      let stationCount = 0;
-      location.addresses.forEach(address => {
-        address.stations.forEach(station => stationCount++);
-      });
+  const getStationCountForLocation = (location) => {
+    let stationCount = 0;
+    location.addresses.forEach(address => {
+      address.stations.forEach(station => stationCount++);
+    });
 
-      return stationCount;
-    }
+    return stationCount;
+  }
 
     const markerLabel = (location) => {
       const stationCount = getStationCountForLocation(location);
@@ -74,7 +77,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     const drawMarkers = (response) => {
       // Remove markers for locations no longer on the map.
       for (const [id, marker] of mapMarkers) {
-        if (!locations.has(id)) {
+        if (!response.locationsMap.has(id)) {
           marker.setMap(null);
           mapMarkers.delete(id);
         }
@@ -110,15 +113,89 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       // });
     }
 
+  const validateAndBuildQuery = () => {
+    const queryType = getQueryType();
+    let query;
+
+    if ('cgz'.indexOf(queryType) > -1) {
+      const element = formElement.querySelector('input[name=query');
+      const value = element.value.trim();
+
+      if (queryType === 'c') {
+        query = buildCallsignQuery(value);
+      }
+      else if (queryType === 'g') {
+        query = buildGridsquareQuery(value);
+      }
+      else if (queryType === 'z') {
+        query = buildZipcodeQuery(value);
+      }
+
+      if (!query.error) {
+        element.value = query.value;
+      }
+    }
+    else {
+      query = buildAddressQuery();
+    }
+
+    return query;
+  };
+
+  const buildCallsignQuery = (value) => {
+    value = value.toUpperCase();
+
+    return value
+      ? {queryType: 'c', value}
+      : {error: 'Please enter a callsign.'};
+  };
+
+  const buildGridsquareQuery = (value) => {
+    if (!value.match(/^[A-R]{2}\d\d[a-x]{2}$/i)) {
+      return {error: 'Please enter a six character gridsquare.'};
+    }
+
+    return {
+      queryType:'g',
+      value: value.substring(0, 2).toUpperCase() + value.substring(2, 4) + value.substring(4).toLowerCase(),
+    };
+  }
+
+  const buildZipcodeQuery = (value) => {
+    if (!value.match(/^\d{5}$/)) {
+      return {error: 'Please enter a five digit zip code.'};
+    }
+
+    return {queryType:'z', value};
+  }
+
+  const buildAddressQuery = () => {
+    if (!placesLocation) {
+      return {error: 'qq'};
+    }
+
+    return {
+      queryType:'latlng',
+      value: `${placesLocation.lat()},${placesLocation.lng()}}`
+    }
+  }
+
+  const showError = (error) => {
+    const element = formElement.querySelector('.error-message');
+    element.innerHTML = error;
+    if (error) {
+      element.classList.remove('hidden');
+    }
+    else {
+      element.classList.add('hidden');
+    }
+  }
+
   const processSuccessResponse = (response) => {
-    setLocations(response);
+    setLocationsMap(response);
     drawMarkers(response);
     setMapCenter(response);
     mapContainer.classList.remove('hidden');
-  };
-
-  const processErrorResponse = (error) => {
-    console.log(error);
   };
 
   const mapAjaxRequest = (query) => {
@@ -132,14 +209,12 @@ Drupal.hamApp = (Drupal, hsSettings) => {
 
     Drupal.AjaxCommands.prototype.hamMapQuery = (ajax, response, status) => {
       if (status !== 'success') {
-        processError('Sorry, something went wrong.')
+        showError('Sorry, something went wrong.')
         return;
       }
 
-      console.log(ajax);
-
       if (response.result.error) {
-        processErrorResponse(response.result.error);
+        showError(response.result.error);
         return;
       }
 
@@ -155,11 +230,46 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     }
   });
 
-  formElement.addEventListener('submit', event => {
-    event.preventDefault();
-    mapAjaxRequest({queryType: 'c', value: 'KT1F'});
+  const submitQuery = () => {
+    query = validateAndBuildQuery();
+    if (query.error) {
+      showError(query.error);
+    }
+    else {
+      mapAjaxRequest(query);
+    }
+  };
+
+  formElement.querySelector('input[name=address]').addEventListener('keyup', event => {
+    addressKeyCode = event.code;
+    if (addressKeyCode === 'Enter' && placesLocation) {
+      submitQuery();
+    }
   });
 
+  formElement.addEventListener('submit', event => {
+    event.preventDefault();
+    if (document.activeElement.getAttribute('id') !== 'edit-address') {
+      submitQuery();
+    }
+  });
+
+  const setupPlaces = () => {
+    const places = new google.maps.places.Autocomplete(
+      formElement.querySelector('input[name=address]')
+    );
+
+    places.setFields(['geometry.location']);
+
+    places.addListener('place_changed', () => {
+      placesLocation = places.getPlace().geometry.location;
+      if (addressKeyCode === 'Enter') {
+        submitQuery();
+      }
+    });
+  }
+
+  setupPlaces();
   formElement.querySelector('.query-other input').focus();
   createGoogleMap();
 };
