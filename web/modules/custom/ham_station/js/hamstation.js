@@ -32,10 +32,12 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     return formElement.querySelector('input[name=query_type]:checked').value;
   }
 
-  const createGoogleMap = () => {
-    googleMap = new google.maps.Map(mapContainer, {
+  const createGoogleMap = async () => {
+    const { Map } = await google.maps.importLibrary('maps');
+    googleMap = new Map(mapContainer, {
       zoom: 14,
       zoomControl: true,
+      mapId: 'ham-stations',
     });
 
       // map.addListener('center_changed', function () {
@@ -96,14 +98,15 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     }
 
     const drawMarker = (location) => {
+      return;
       if (location.addresses.length === 0) {
         return;
       }
 
-      const marker = new google.maps.Marker({
+      const marker = new google.maps.marker.AdvancedMarkerElement({
         position: {lat: location.lat, lng: location.lng},
         map: googleMap,
-        label: markerLabel(location)
+        title: markerLabel(location)
       });
 
       mapMarkers.set(location.id, marker);
@@ -255,6 +258,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   });
 
   const setupPlaces = () => {
+    return;
     const places = new google.maps.places.Autocomplete(
       formElement.querySelector('input[name=address]')
     );

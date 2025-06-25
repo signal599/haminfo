@@ -1,0 +1,74 @@
+{#
+/**
+ * @file
+ * Default theme implementation for the primary structure of a Drupal page.
+ *
+ * Variables:
+ * - logged_in: A flag indicating the user's logged-in status.
+ * - root_path: The root path of the current page (e.g., 'node', 'admin', 'user').
+ * - node_type: The content type for the current node (if the page represents a node).
+ * - head_title: An array of text elements that comprise the head_title variable.
+ *   May contain any of the following:
+ *   - title: The current page title.
+ *   - name: The site name.
+ *   - slogan: The site slogan.
+ * - page_top: Initial rendered markup, displayed before 'page'.
+ * - page: The primary page's rendered markup.
+ * - page_bottom: Final rendered markup, displayed after 'page'.
+ * - db_offline: A flag indicating if the database is offline.
+ * - placeholder_token: The token for generating head, css, js, and js-bottom placeholders.
+  * - body_utility_classes: A list of utility classes to add to the body element.
+ *
+ * @see template_preprocess_html()
+ * @ingroup themeable
+ */
+#}
+{%
+  set body_classes = [
+    root_path ? 'path-' ~ root_path|clean_class : 'path-frontpage',
+    language ? 'language--' ~ language|clean_class,
+  ]|merge(body_utility_classes ?: [])
+%}
+
+<!DOCTYPE html>
+<html {{html_attributes}}>
+  <head>
+    {% block head_start %}
+      {{ head_start }}
+    {% endblock %}
+    <head-placeholder token="{{ placeholder_token }}">
+    <title>{{ head_title|safe_join(' | ') }}</title>
+    <css-placeholder token="{{ placeholder_token }}">
+    <js-placeholder token="{{ placeholder_token }}">
+    {% block head_end %}
+      {{ head_end }}
+    {% endblock %}
+  </head>
+  <body {{attributes.addClass(body_classes)}}>
+    {% block body_start %}
+      {{ body_start }}
+    {% endblock %}
+    {#
+      This hyperlink facilitates keyboard navigation, allowing users to
+      easily skip to the main content section defined in 'page.html.twig'.
+    #}
+    <a href="#main-content" class="visually-hidden focusable">
+      {{ 'Skip to main content'|t }}
+    </a>
+
+    {{ page_top }}
+    {{ page }}
+    {{ page_bottom }}
+
+    <script>
+      (g=>{var h,a,k,p="The Google Maps JavaScript API",c="google",l="importLibrary",q="__ib__",m=document,b=window;b=b[c]||(b[c]={});var d=b.maps||(b.maps={}),r=new Set,e=new URLSearchParams,u=()=>h||(h=new Promise(async(f,n)=>{await (a=m.createElement("script"));e.set("libraries",[...r]+"");for(k in g)e.set(k.replace(/[A-Z]/g,t=>"_"+t[0].toLowerCase()),g[k]);e.set("callback",c+".maps."+q);a.src=`https://maps.${c}apis.com/maps/api/js?`+e;d[q]=f;a.onerror=()=>h=n(Error(p+" could not load."));a.nonce=m.querySelector("script[nonce]")?.nonce||"";m.head.append(a)}));d[l]?console.warn(p+" only loads once. Ignoring:",g):d[l]=(f,...n)=>r.add(f)&&u().then(()=>d[l](f,...n))})({
+        key: "AIzaSyCos70OOrLhGXL_UKs4uXvYIDYFR90-CPQ",
+      });
+    </script>
+
+    <js-bottom-placeholder token="{{ placeholder_token }}">
+    {% block body_end %}
+      {{ body_end }}
+    {% endblock %}
+  </body>
+</html>
