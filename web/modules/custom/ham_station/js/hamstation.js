@@ -5,6 +5,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   const mapMarkers = new Map();
   let placesLocation;
   let addressKeyCode;
+  let MarkerConstructor;
 
   const setQueryType = (queryType) => {
     const labels = {
@@ -34,6 +35,8 @@ Drupal.hamApp = (Drupal, hsSettings) => {
 
   const createGoogleMap = async () => {
     const { Map } = await google.maps.importLibrary('maps');
+    const { AdvancedMarkerElement } = await google.maps.importLibrary('marker');
+    MarkerConstructor = AdvancedMarkerElement;
     googleMap = new Map(mapContainer, {
       zoom: 14,
       zoomControl: true,
@@ -98,12 +101,11 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     }
 
     const drawMarker = (location) => {
-      return;
       if (location.addresses.length === 0) {
         return;
       }
 
-      const marker = new google.maps.marker.AdvancedMarkerElement({
+      const marker = new MarkerConstructor({
         position: {lat: location.lat, lng: location.lng},
         map: googleMap,
         title: markerLabel(location)
@@ -243,12 +245,12 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     }
   };
 
-  formElement.querySelector('input[name=address]').addEventListener('keyup', event => {
-    addressKeyCode = event.code;
-    if (addressKeyCode === 'Enter' && placesLocation) {
-      submitQuery();
-    }
-  });
+  // formElement.querySelector('input[name=address]').addEventListener('keyup', event => {
+  //   addressKeyCode = event.code;
+  //   if (addressKeyCode === 'Enter' && placesLocation) {
+  //     submitQuery();
+  //   }
+  // });
 
   formElement.addEventListener('submit', event => {
     event.preventDefault();
@@ -267,14 +269,15 @@ Drupal.hamApp = (Drupal, hsSettings) => {
 
     places.addListener('place_changed', () => {
       placesLocation = places.getPlace().geometry.location;
-      if (addressKeyCode === 'Enter') {
-        submitQuery();
-      }
+      // if (addressKeyCode === 'Enter') {
+      //   submitQuery();
+      // }
     });
   }
 
   setupPlaces();
   formElement.querySelector('.query-other input').focus();
+  //loadGoogleLibraries();
   createGoogleMap();
 };
 
