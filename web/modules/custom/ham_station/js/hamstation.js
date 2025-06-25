@@ -34,14 +34,26 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   }
 
   const createGoogleMap = async () => {
-    const { Map } = await google.maps.importLibrary('maps');
-    const { AdvancedMarkerElement } = await google.maps.importLibrary('marker');
+    const [{ Map }, { AdvancedMarkerElement }, { PlaceAutocompleteElement }] = await Promise.all([
+        google.maps.importLibrary('maps'),
+        google.maps.importLibrary('marker'),
+        google.maps.importLibrary('places')
+    ]);
+
     MarkerConstructor = AdvancedMarkerElement;
+
     googleMap = new Map(mapContainer, {
       zoom: 14,
       zoomControl: true,
       mapId: 'ham-stations',
     });
+
+    const placeAutocomplete = new PlaceAutocompleteElement();
+    const addressWrapper = formElement.querySelector('.query-address');
+    const oldInput = addressWrapper.querySelector('input');
+    const oldId = oldInput.id;
+    addressWrapper.replaceChild(placeAutocomplete, oldInput);
+    placeAutocomplete.id = oldId;
 
       // map.addListener('center_changed', function () {
       //   mapCenterChangedListener(map.getCenter());
