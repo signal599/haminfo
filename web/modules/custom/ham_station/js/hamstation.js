@@ -6,8 +6,9 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   let placesLocation;
   let MarkerConstructor;
   let centerMovedTimerId;
-  let setCenter = false;
-  let processCenterChange = false;
+  let setCenterEnabled = false;
+  let centerChangedEnabled = false;
+  let activeInfoWindow;
 
   const setQueryType = (queryType) => {
     const labels = {
@@ -36,8 +37,8 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   }
 
   const mapCenterChanged = () => {
-    if (!processCenterChange) {
-      processCenterChange = true;
+    if (!centerChangedEnabled) {
+      centerChangedEnabled = true;
       return;
     }
 
@@ -47,7 +48,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
 
     centerMovedTimerId = setTimeout(() => {
       const location = googleMap.getCenter();
-      setCenter = false;
+      setCenterEnabled = false;
       mapAjaxRequest({queryType:'latlng', value:`${location.lat()},${location.lng()}}`}, false);
     }, 2000);
   }
@@ -85,7 +86,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   }
 
   const setMapCenter = (response) => {
-    processCenterChange = false;
+    centerChangedEnabled = false;
     googleMap.setCenter({lat: response.mapCenterLat, lng: response.mapCenterLng});
   }
 
@@ -138,18 +139,107 @@ Drupal.hamApp = (Drupal, hsSettings) => {
         return;
       }
 
+      // Workaround because AdvancedMarkerElement doesn't have labels like legacy did.
+      let glyphLabel = document.createElement('div');
+      glyphLabel.style = 'color: #000000; font-size: 14px;';
+      glyphLabel.innerText = markerLabel(location);
+      let iconImage = new google.maps.marker.PinElement({
+        glyph: glyphLabel,
+      });
+
       const marker = new MarkerConstructor({
         position: {lat: location.lat, lng: location.lng},
         map: googleMap,
-        title: markerLabel(location)
+        content: iconImage.element
       });
 
       mapMarkers.set(location.id, marker);
 
-      // marker.addListener('click', e => {
-      //   openInfowindow(location, marker);
-      // });
+      marker.addListener('click', e => {
+        openInfoWindow(location, marker);
+      });
     }
+
+  const openInfoWindow = (location, marker) => {
+    clearInfoWindow();
+
+    const addresses = [];
+    const lastIndex = location.addresses.length - 1;
+    const multi = location.addresses.length > 1;
+
+    location.addresses.forEach((address, index) => {
+      let classes = ['address'];
+      if (multi) {
+        if (index === 0) {
+          classes.push('first');
+        }
+        else if(index === lastIndex)
+        {
+          classes.push('last');
+        }
+      }
+      addresses.push(`<div class="${classes.join(' ')}">${writeAddress(address)}</div>`);
+    });
+
+    let classes = ['infowindow'];
+    if (multi) {
+      classes.push('multi');
+    }
+
+    const infoWindow = new google.maps.InfoWindow({
+      content: `<div class="${classes.join(' ')}">${addresses.join('')}</div>`,
+      zIndex: 99
+    });
+
+    infoWindow.open(googleMap, marker);
+    activeInfoWindow = infoWindow;
+
+    infoWindow.addListener('closeclick', () => {
+      activeInfoWindow = null;
+    });
+  };
+
+  const clearInfoWindow = () => {
+    if (activeInfoWindow) {
+      activeInfoWindow.close();
+      activeInfoWindow = null;
+    }
+  }
+
+  const writeAddress = (address) => {
+    const stations = [];
+    const lastIndex = address.stations.length - 1;
+    const multi = address.stations.length > 1;
+
+    address.stations.forEach((station, index) => {
+      let classes = ['station'];
+      if (multi) {
+        if (index === 0) {
+          classes.push('first');
+        }
+        else if(index === lastIndex)
+        {
+          classes.push('last');
+        }
+      }
+      stations.push(`<div class="${classes.join(' ')}">${writeStation(station)}</div>`)
+    });
+
+    const address2 = address.address2 ? address.address2 + '<br>' : '';
+
+    return `<div class="stations">${stations.join('')}</div><div>
+      ${address.address1}<br>
+      ${address2}
+      ${address.city}, ${address.state} ${address.zip}</div>`;
+  }
+
+  const writeStation = (station) => {
+    const opclass = station.operatorClass ? (' ' + station.operatorClass) : '';
+
+    return `
+    <span>${station.callsign}</span> <a href="https://www.qrz.com/db/${station.callsign}" target="_blank">qrz.com</a>${opclass}<br>
+    ${station.name}`;
+  }
 
   const validateAndBuildQuery = () => {
     const queryType = getQueryType();
@@ -232,7 +322,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   const processSuccessResponse = (response) => {
     setLocationsMap(response);
     drawMarkers(response);
-    if (setCenter) {
+    if (setCenterEnabled) {
       setMapCenter(response);
     }
     mapContainer.classList.remove('hidden');
@@ -278,7 +368,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       showError(query.error);
     }
     else {
-      setCenter = true;
+      setCenterEnabled = true;
       mapAjaxRequest(query);
     }
   };
