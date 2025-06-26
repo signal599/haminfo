@@ -4,8 +4,10 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   let googleMap;
   const mapMarkers = new Map();
   let placesLocation;
-  let addressKeyCode;
   let MarkerConstructor;
+  let centerMovedTimerId;
+  let setCenter = false;
+  let processCenterChange = false;
 
   const setQueryType = (queryType) => {
     const labels = {
@@ -33,11 +35,28 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     return formElement.querySelector('input[name=query_type]:checked').value;
   }
 
+  const mapCenterChanged = () => {
+    if (!processCenterChange) {
+      processCenterChange = true;
+      return;
+    }
+
+    if (centerMovedTimerId) {
+      clearTimeout(centerMovedTimerId);
+    }
+
+    centerMovedTimerId = setTimeout(() => {
+      const location = googleMap.getCenter();
+      setCenter = false;
+      mapAjaxRequest({queryType:'latlng', value:`${location.lat()},${location.lng()}}`}, false);
+    }, 2000);
+  }
+
   const createGoogleMap = async () => {
     const [{ Map }, { AdvancedMarkerElement }, { PlaceAutocompleteElement }] = await Promise.all([
-        google.maps.importLibrary('maps'),
-        google.maps.importLibrary('marker'),
-        google.maps.importLibrary('places')
+      google.maps.importLibrary('maps'),
+      google.maps.importLibrary('marker'),
+      google.maps.importLibrary('places')
     ]);
 
     MarkerConstructor = AdvancedMarkerElement;
@@ -48,23 +67,25 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       mapId: 'ham-stations',
     });
 
-    const placeAutocomplete = new PlaceAutocompleteElement();
+    const placeAutocomplete = new PlaceAutocompleteElement({includedRegionCodes: ['us']});
     const addressWrapper = formElement.querySelector('.query-address');
     const oldInput = addressWrapper.querySelector('input');
     const oldId = oldInput.id;
     addressWrapper.replaceChild(placeAutocomplete, oldInput);
     placeAutocomplete.id = oldId;
 
-      // map.addListener('center_changed', function () {
-      //   mapCenterChangedListener(map.getCenter());
-      // });
+    placeAutocomplete.addEventListener('gmp-select', async ({ placePrediction }) => {
+      const place = placePrediction.toPlace();
+      await place.fetchFields({ fields: ['location'] });
+      placesLocation = place.location;
+      submitQuery();
+    });
+
+    googleMap.addListener('center_changed', mapCenterChanged);
   }
 
-  const doInitialQuery = () => {
-
-  };
-
   const setMapCenter = (response) => {
+    processCenterChange = false;
     googleMap.setCenter({lat: response.mapCenterLat, lng: response.mapCenterLng});
   }
 
@@ -188,7 +209,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
 
   const buildAddressQuery = () => {
     if (!placesLocation) {
-      return {error: 'qq'};
+      return {error: ''};
     }
 
     return {
@@ -211,7 +232,9 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   const processSuccessResponse = (response) => {
     setLocationsMap(response);
     drawMarkers(response);
-    setMapCenter(response);
+    if (setCenter) {
+      setMapCenter(response);
+    }
     mapContainer.classList.remove('hidden');
   };
 
@@ -248,49 +271,28 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   });
 
   const submitQuery = () => {
+    showError('');
     query = validateAndBuildQuery();
+
     if (query.error) {
       showError(query.error);
     }
     else {
+      setCenter = true;
       mapAjaxRequest(query);
     }
   };
 
-  // formElement.querySelector('input[name=address]').addEventListener('keyup', event => {
-  //   addressKeyCode = event.code;
-  //   if (addressKeyCode === 'Enter' && placesLocation) {
-  //     submitQuery();
-  //   }
-  // });
-
   formElement.addEventListener('submit', event => {
     event.preventDefault();
-    if (document.activeElement.getAttribute('id') !== 'edit-address') {
-      submitQuery();
-    }
+    submitQuery(true);
   });
 
-  const setupPlaces = () => {
-    return;
-    const places = new google.maps.places.Autocomplete(
-      formElement.querySelector('input[name=address]')
-    );
-
-    places.setFields(['geometry.location']);
-
-    places.addListener('place_changed', () => {
-      placesLocation = places.getPlace().geometry.location;
-      // if (addressKeyCode === 'Enter') {
-      //   submitQuery();
-      // }
-    });
-  }
-
-  setupPlaces();
+  const addressRadio = formElement.querySelector('input[name=query_type][value=a]');
+  addressRadio.disabled = true;
   formElement.querySelector('.query-other input').focus();
-  //loadGoogleLibraries();
   createGoogleMap();
+  addressRadio.disabled = false;
 };
 
 (function (Drupal, once) {
