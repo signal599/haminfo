@@ -4,3 +4,10 @@
  * @file
  * Custom theme hooks.
  */
+
+ /**
+ * Implements hook_preocess_HOOK() for html.
+ */
+function haminfo_preprocess_html(&$variables) {
+  $variables['google_maps_key'] = \Drupal::config('ham_station.settings')->get('google_maps_api_key');
+}

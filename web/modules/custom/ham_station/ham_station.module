@@ -6,7 +6,6 @@
  */
 
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\views\ViewExecutable;
 use \Drupal\ham_station\Entity\HamLocation;
 
 /**
