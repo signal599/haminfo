@@ -9,6 +9,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   let setCenterEnabled = false;
   let centerChangedEnabled = false;
   let activeInfoWindow;
+  let rectangles = [];
 
   const setQueryType = (queryType) => {
     const labels = {
@@ -122,8 +123,6 @@ Drupal.hamApp = (Drupal, hsSettings) => {
         }
       }
 
-  //      removeQueriedCallsign();
-
       // Add new markers.
       response.locations.forEach(location => {
         if (!mapMarkers.has(location.id)) {
@@ -131,7 +130,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
         }
       });
 
-  //      openQueriedCallsign();
+      openQueriedCallsign(response);
     }
 
     const drawMarker = (location) => {
@@ -160,8 +159,19 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       });
     }
 
+    const openQueriedCallsign = (response) => {
+      if (response.queryCallsignIdx === null) {
+        return;
+      }
+
+      const location = response.locations[response.queryCallsignIdx];
+      const marker = mapMarkers.get(location.id);
+
+      openInfoWindow(location, marker);
+    }
+
   const openInfoWindow = (location, marker) => {
-    clearInfoWindow();
+    closeInfoWindow();
 
     const addresses = [];
     const lastIndex = location.addresses.length - 1;
@@ -199,7 +209,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     });
   };
 
-  const clearInfoWindow = () => {
+  const closeInfoWindow = () => {
     if (activeInfoWindow) {
       activeInfoWindow.close();
       activeInfoWindow = null;
@@ -239,6 +249,41 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     return `
     <span>${station.callsign}</span> <a href="https://www.qrz.com/db/${station.callsign}" target="_blank">qrz.com</a>${opclass}<br>
     ${station.name}`;
+  }
+
+  const clearRectangles = () => {
+    rectangles.forEach((el, index) => {
+      rectangles[index].setMap(null);
+      rectangles[index] = null;
+    });
+
+    rectangles = [];
+  }
+
+  const drawGridsquares = (response, show) => {
+    clearRectangles();
+
+    if (show) {
+      response.subsquares.forEach(x => x.forEach(y => drawGridsquare(y)));
+    }
+  }
+
+  const drawGridsquare = (subsquare) => {
+    const rectangle = new google.maps.Rectangle({
+      strokeColor: '#000000',
+      strokeOpacity: 0.5,
+      strokeWeight: 1,
+      fillOpacity: 0,
+      map: googleMap,
+      bounds: {
+        north: subsquare.latNorth,
+        south: subsquare.latSouth,
+        east: subsquare.lngEast,
+        west: subsquare.lngWest
+      }
+    });
+
+    rectangles.push(rectangle);
   }
 
   const validateAndBuildQuery = () => {
@@ -320,11 +365,16 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   }
 
   const processSuccessResponse = (response) => {
+    console.log(response);
+    closeInfoWindow();
     setLocationsMap(response);
-    drawMarkers(response);
+
     if (setCenterEnabled) {
       setMapCenter(response);
     }
+
+    drawMarkers(response);
+    drawGridsquares(response, true);
     mapContainer.classList.remove('hidden');
   };
 
