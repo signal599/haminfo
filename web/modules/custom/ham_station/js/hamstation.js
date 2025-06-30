@@ -11,6 +11,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   let rectangles = [];
   let gridLabels = [];
   const googleLibs = {};
+  let queryResult;
 
   const loadMapsLibrary = async () => {
     const [{ Map, OverlayView }, { AdvancedMarkerElement }] = await Promise.all([
@@ -20,7 +21,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
 
     googleLibs.Map = Map;
     googleLibs.AdvancedMarkerElement = AdvancedMarkerElement;
-    googleLibs.TxtOverlay = Drupal.googleMapTxtOverlay(OverlayView);
+    googleLibs.TxtOverlay = googleMapTxtOverlay(OverlayView);
   }
 
   const loadPlacesLibrary = async () => {
@@ -93,18 +94,18 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     }, 2000);
   }
 
-  const setMapCenter = (response) => {
+  const setMapCenter = () => {
     centerChangedEnabled = false;
-    googleMap.setCenter({lat: response.mapCenterLat, lng: response.mapCenterLng});
+    googleMap.setCenter({lat: queryResult.mapCenterLat, lng: queryResult.mapCenterLng});
   }
 
-  const setLocationsMap = (response) => {
+  const setLocationsMap = () => {
     const map = new Map();
-    response.locations.forEach(location => {
+    queryResult.locations.forEach(location => {
       map.set(location.id, true);
     });
 
-    response.locationsMap = map;
+    queryResult.locationsMap = map;
   };
 
   const getStationCountForLocation = (location) => {
@@ -121,23 +122,23 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       return location.addresses[0].stations[0].callsign + (stationCount > 1 ? '+' : '');
     }
 
-    const drawMarkers = (response) => {
+    const drawMarkers = () => {
       // Remove markers for locations no longer on the map.
       for (const [id, marker] of mapMarkers) {
-        if (!response.locationsMap.has(id)) {
+        if (!queryResult.locationsMap.has(id)) {
           marker.setMap(null);
           mapMarkers.delete(id);
         }
       }
 
       // Add new markers.
-      response.locations.forEach(location => {
+      queryResult.locations.forEach(location => {
         if (!mapMarkers.has(location.id)) {
           drawMarker(location);
         }
       });
 
-      openQueriedCallsign(response);
+      openQueriedCallsign();
     }
 
     const drawMarker = (location) => {
@@ -166,12 +167,12 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       });
     }
 
-    const openQueriedCallsign = (response) => {
-      if (response.queryCallsignIdx === null) {
+    const openQueriedCallsign = () => {
+      if (queryResult.queryCallsignIdx === null) {
         return;
       }
 
-      const location = response.locations[response.queryCallsignIdx];
+      const location = queryResult.locations[queryResult.queryCallsignIdx];
       const marker = mapMarkers.get(location.id);
 
       openInfoWindow(location, marker);
@@ -267,11 +268,11 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     rectangles = [];
   }
 
-  const drawGridsquares = (response, show) => {
+  const drawGridsquares = (show) => {
     clearRectangles();
 
     if (show) {
-      response.subsquares.forEach(x => x.forEach(y => drawGridsquare(y)));
+      queryResult.subsquares.forEach(x => x.forEach(y => drawGridsquare(y)));
     }
   }
 
@@ -302,18 +303,18 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     gridLabels = [];
   }
 
-  const writeGridlabels = (response, show) => {
+  const writeGridlabels = (show) => {
     clearGridLabels();
 
     if (show) {
-      response.subsquares.forEach(x => x.forEach(y => writeGridLabel(y)));
+      queryResult.subsquares.forEach(x => x.forEach(y => writeGridLabel(y)));
     }
   }
 
   const writeGridLabel = (subsquare) => {
-    if (subsquare.code !== 'FN42dt') {
-      return;
-    }
+    // if (subsquare.code !== 'FN42dt') {
+    //   return;
+    // }
     gridLabels.push(new googleLibs.TxtOverlay(subsquare.latCenter, subsquare.lngCenter, subsquare.code, 'grid-marker', googleMap));
   }
 
@@ -395,7 +396,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     }
   }
 
-  const processSuccessResponse = async (response) => {
+  const processSuccessResponse = async (result) => {
     if (!googleMap) {
       await loadMapsLibrary();
 
@@ -408,16 +409,17 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       googleMap.addListener('center_changed', mapCenterChanged)
     }
 
+    queryResult = result;
     closeInfoWindow();
-    setLocationsMap(response);
+    setLocationsMap();
 
     if (setCenterEnabled) {
-      setMapCenter(response);
+      setMapCenter();
     }
 
-    drawMarkers(response);
-    drawGridsquares(response, true);
-    writeGridlabels(response, true);
+    drawMarkers();
+    drawGridsquares(getShowGrid());
+    writeGridlabels(getShowGrid());
     mapContainer.classList.remove('hidden');
   };
 
@@ -471,91 +473,76 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     submitQuery(true);
   });
 
+  const getShowGrid = () => {
+    return formElement.querySelector('input[name=show_gridlabels]').checked;
+  };
+
+  formElement.querySelector('input[name=show_gridlabels]').addEventListener('click', event => {
+    if (event.target.checked) {
+      drawGridsquares(true);
+      writeGridlabels(true);
+    }
+    else {
+      clearGridLabels();
+      clearRectangles();
+    }
+  });
+
   formElement.querySelector('.query-other input').focus();
 };
 
-Drupal.googleMapTxtOverlay = (OverlayView) => {
+const googleMapTxtOverlay = (OverlayView) => {
     function TxtOverlay(lat, lng, txt, cls, map) {
-      console.log(lat, lng);
-      // Now initialize all properties.
-      this.pos = new google.maps.LatLng(lat, lng);
-      this.txt_ = txt;
-      this.cls_ = cls;
-      this.map_ = map;
-
-      // We define a property to hold the image's
-      // div. We'll actually create this div
-      // upon receipt of the add() method so we'll
-      // leave it null for now.
-      this.div_ = null;
-
-      // Explicitly call setMap() on this overlay
+      this.position = new google.maps.LatLng(lat, lng);
+      this.content = txt;
+      this.cssClass = cls;
+      this.map = map;
+      this.div = null;
       this.setMap(map);
     }
 
     TxtOverlay.prototype = new OverlayView();
 
     TxtOverlay.prototype.onAdd = function() {
+      const div = document.createElement('div');
+      div.style.position = 'absolute';
+      div.className = this.cssClass;
+      div.innerHTML = this.content;
 
-      // Note: an overlay's receipt of onAdd() indicates that
-      // the map's panes are now available for attaching
-      // the overlay to the map via the DOM.
-
-      // Create the DIV and set some basic attributes.
-      var div = document.createElement('DIV');
-      div.className = this.cls_;
-
-      div.innerHTML = this.txt_;
-
-      // Set the overlay's div_ property to this DIV
-      this.div_ = div;
-      var overlayProjection = this.getProjection();
-      var position = overlayProjection.fromLatLngToDivPixel(this.pos);
-      div.style.left = position.x + 'px';
-      div.style.top = position.y + 'px';
-      // We add an overlay to a map via one of the map's panes.
-
-      var panes = this.getPanes();
+      const panes = this.getPanes();
       panes.floatPane.appendChild(div);
+      this.div = div;
     }
+
     TxtOverlay.prototype.draw = function() {
+      const overlayProjection = this.getProjection();
+      const position = overlayProjection.fromLatLngToDivPixel(this.position);
 
-
-        var overlayProjection = this.getProjection();
-
-        // Retrieve the southwest and northeast coordinates of this overlay
-        // in latlngs and convert them to pixels coordinates.
-        // We'll use these coordinates to resize the DIV.
-        var position = overlayProjection.fromLatLngToDivPixel(this.pos);
-
-
-        var div = this.div_;
-        div.style.left = position.x + 'px';
-        div.style.top = position.y + 'px';
-
-
-
-      }
-      //Optional: helper methods for removing and toggling the text overlay.
-    TxtOverlay.prototype.onRemove = function() {
-      this.div_.parentNode.removeChild(this.div_);
-      this.div_ = null;
+      const div = this.div;
+      div.style.left = `${position.x - 35}px`;
+      div.style.top = `${position.y}px`;
     }
+
+    TxtOverlay.prototype.onRemove = function() {
+      this.div.parentNode.removeChild(this.div);
+      this.div = null;
+    }
+
     TxtOverlay.prototype.hide = function() {
-      if (this.div_) {
-        this.div_.style.visibility = "hidden";
+      if (this.div) {
+        this.div.style.visibility = 'hidden';
       }
     }
 
     TxtOverlay.prototype.show = function() {
-      if (this.div_) {
-        this.div_.style.visibility = "visible";
+      if (this.div) {
+        this.div.style.visibility = 'visible';
       }
     }
 
     TxtOverlay.prototype.toggle = function() {
-      if (this.div_) {
-        if (this.div_.style.visibility == "hidden") {
+      if (this.div) {
+        if (this.div.style.visibility == 'hidden') {
           this.show();
         } else {
           this.hide();
@@ -567,7 +554,7 @@ Drupal.googleMapTxtOverlay = (OverlayView) => {
       if (this.getMap()) {
         this.setMap(null);
       } else {
-        this.setMap(this.map_);
+        this.setMap(this.map);
       }
     }
 
