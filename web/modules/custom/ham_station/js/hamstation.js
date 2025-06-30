@@ -4,12 +4,45 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   let googleMap;
   const mapMarkers = new Map();
   let placesLocation;
-  let MarkerConstructor;
   let centerMovedTimerId;
   let setCenterEnabled = false;
   let centerChangedEnabled = false;
   let activeInfoWindow;
   let rectangles = [];
+  let gridLabels = [];
+  const googleLibs = {};
+
+  const loadMapsLibrary = async () => {
+    const [{ Map, OverlayView }, { AdvancedMarkerElement }] = await Promise.all([
+      google.maps.importLibrary('maps'),
+      google.maps.importLibrary('marker'),
+    ]);
+
+    googleLibs.Map = Map;
+    googleLibs.AdvancedMarkerElement = AdvancedMarkerElement;
+    googleLibs.TxtOverlay = Drupal.googleMapTxtOverlay(OverlayView);
+  }
+
+  const loadPlacesLibrary = async () => {
+    const { PlaceAutocompleteElement } = await google.maps.importLibrary('places');
+
+    const placeAutocomplete = new PlaceAutocompleteElement({includedRegionCodes: ['us']});
+    const addressWrapper = formElement.querySelector('.query-address');
+    const oldInput = addressWrapper.querySelector('input');
+    const oldId = oldInput.id;
+    addressWrapper.replaceChild(placeAutocomplete, oldInput);
+    placeAutocomplete.id = oldId;
+    addressWrapper.classList.remove('hidden');
+
+    placeAutocomplete.addEventListener('gmp-select', async ({ placePrediction }) => {
+      const place = placePrediction.toPlace();
+      await place.fetchFields({ fields: ['location'] });
+      placesLocation = place.location;
+      submitQuery();
+    });
+
+    googleLibs.placesLoaded = true;
+  };
 
   const setQueryType = (queryType) => {
     const labels = {
@@ -30,7 +63,13 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     }
 
     other.classList.add('hidden');
-    address.classList.remove('hidden');
+
+    if (googleLibs.placesLoaded) {
+      address.classList.remove('hidden');
+      return;
+    }
+
+    loadPlacesLibrary();
   }
 
   const getQueryType = () => {
@@ -52,38 +91,6 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       setCenterEnabled = false;
       mapAjaxRequest({queryType:'latlng', value:`${location.lat()},${location.lng()}}`}, false);
     }, 2000);
-  }
-
-  const createGoogleMap = async () => {
-    const [{ Map }, { AdvancedMarkerElement }, { PlaceAutocompleteElement }] = await Promise.all([
-      google.maps.importLibrary('maps'),
-      google.maps.importLibrary('marker'),
-      google.maps.importLibrary('places')
-    ]);
-
-    MarkerConstructor = AdvancedMarkerElement;
-
-    googleMap = new Map(mapContainer, {
-      zoom: 14,
-      zoomControl: true,
-      mapId: 'ham-stations',
-    });
-
-    const placeAutocomplete = new PlaceAutocompleteElement({includedRegionCodes: ['us']});
-    const addressWrapper = formElement.querySelector('.query-address');
-    const oldInput = addressWrapper.querySelector('input');
-    const oldId = oldInput.id;
-    addressWrapper.replaceChild(placeAutocomplete, oldInput);
-    placeAutocomplete.id = oldId;
-
-    placeAutocomplete.addEventListener('gmp-select', async ({ placePrediction }) => {
-      const place = placePrediction.toPlace();
-      await place.fetchFields({ fields: ['location'] });
-      placesLocation = place.location;
-      submitQuery();
-    });
-
-    googleMap.addListener('center_changed', mapCenterChanged);
   }
 
   const setMapCenter = (response) => {
@@ -146,7 +153,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
         glyph: glyphLabel,
       });
 
-      const marker = new MarkerConstructor({
+      const marker = new googleLibs.AdvancedMarkerElement({
         position: {lat: location.lat, lng: location.lng},
         map: googleMap,
         content: iconImage.element
@@ -286,6 +293,30 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     rectangles.push(rectangle);
   }
 
+  const clearGridLabels = () => {
+    gridLabels.forEach((el, index) => {
+      gridLabels[index].setMap(null);
+      gridLabels[index] = null;
+    });
+
+    gridLabels = [];
+  }
+
+  const writeGridlabels = (response, show) => {
+    clearGridLabels();
+
+    if (show) {
+      response.subsquares.forEach(x => x.forEach(y => writeGridLabel(y)));
+    }
+  }
+
+  const writeGridLabel = (subsquare) => {
+    if (subsquare.code !== 'FN42dt') {
+      return;
+    }
+    gridLabels.push(new googleLibs.TxtOverlay(subsquare.latCenter, subsquare.lngCenter, subsquare.code, 'grid-marker', googleMap));
+  }
+
   const validateAndBuildQuery = () => {
     const queryType = getQueryType();
     let query;
@@ -364,8 +395,19 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     }
   }
 
-  const processSuccessResponse = (response) => {
-    console.log(response);
+  const processSuccessResponse = async (response) => {
+    if (!googleMap) {
+      await loadMapsLibrary();
+
+      googleMap = new googleLibs.Map(mapContainer, {
+        zoom: 14,
+        zoomControl: true,
+        mapId: 'ham-stations',
+      });
+
+      googleMap.addListener('center_changed', mapCenterChanged)
+    }
+
     closeInfoWindow();
     setLocationsMap(response);
 
@@ -375,6 +417,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
 
     drawMarkers(response);
     drawGridsquares(response, true);
+    writeGridlabels(response, true);
     mapContainer.classList.remove('hidden');
   };
 
@@ -428,11 +471,107 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     submitQuery(true);
   });
 
-  const addressRadio = formElement.querySelector('input[name=query_type][value=a]');
-  addressRadio.disabled = true;
   formElement.querySelector('.query-other input').focus();
-  createGoogleMap();
-  addressRadio.disabled = false;
+};
+
+Drupal.googleMapTxtOverlay = (OverlayView) => {
+    function TxtOverlay(lat, lng, txt, cls, map) {
+      console.log(lat, lng);
+      // Now initialize all properties.
+      this.pos = new google.maps.LatLng(lat, lng);
+      this.txt_ = txt;
+      this.cls_ = cls;
+      this.map_ = map;
+
+      // We define a property to hold the image's
+      // div. We'll actually create this div
+      // upon receipt of the add() method so we'll
+      // leave it null for now.
+      this.div_ = null;
+
+      // Explicitly call setMap() on this overlay
+      this.setMap(map);
+    }
+
+    TxtOverlay.prototype = new OverlayView();
+
+    TxtOverlay.prototype.onAdd = function() {
+
+      // Note: an overlay's receipt of onAdd() indicates that
+      // the map's panes are now available for attaching
+      // the overlay to the map via the DOM.
+
+      // Create the DIV and set some basic attributes.
+      var div = document.createElement('DIV');
+      div.className = this.cls_;
+
+      div.innerHTML = this.txt_;
+
+      // Set the overlay's div_ property to this DIV
+      this.div_ = div;
+      var overlayProjection = this.getProjection();
+      var position = overlayProjection.fromLatLngToDivPixel(this.pos);
+      div.style.left = position.x + 'px';
+      div.style.top = position.y + 'px';
+      // We add an overlay to a map via one of the map's panes.
+
+      var panes = this.getPanes();
+      panes.floatPane.appendChild(div);
+    }
+    TxtOverlay.prototype.draw = function() {
+
+
+        var overlayProjection = this.getProjection();
+
+        // Retrieve the southwest and northeast coordinates of this overlay
+        // in latlngs and convert them to pixels coordinates.
+        // We'll use these coordinates to resize the DIV.
+        var position = overlayProjection.fromLatLngToDivPixel(this.pos);
+
+
+        var div = this.div_;
+        div.style.left = position.x + 'px';
+        div.style.top = position.y + 'px';
+
+
+
+      }
+      //Optional: helper methods for removing and toggling the text overlay.
+    TxtOverlay.prototype.onRemove = function() {
+      this.div_.parentNode.removeChild(this.div_);
+      this.div_ = null;
+    }
+    TxtOverlay.prototype.hide = function() {
+      if (this.div_) {
+        this.div_.style.visibility = "hidden";
+      }
+    }
+
+    TxtOverlay.prototype.show = function() {
+      if (this.div_) {
+        this.div_.style.visibility = "visible";
+      }
+    }
+
+    TxtOverlay.prototype.toggle = function() {
+      if (this.div_) {
+        if (this.div_.style.visibility == "hidden") {
+          this.show();
+        } else {
+          this.hide();
+        }
+      }
+    }
+
+    TxtOverlay.prototype.toggleDOM = function() {
+      if (this.getMap()) {
+        this.setMap(null);
+      } else {
+        this.setMap(this.map_);
+      }
+    }
+
+    return TxtOverlay;
 };
 
 (function (Drupal, once) {
