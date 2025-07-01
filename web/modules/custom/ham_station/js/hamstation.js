@@ -14,14 +14,22 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   let queryResult;
 
   const loadMapsLibrary = async () => {
-    const [{ Map, OverlayView }, { AdvancedMarkerElement }] = await Promise.all([
+    const [
+      { Map, InfoWindow, OverlayView, Rectangle },
+      { AdvancedMarkerElement, PinElement },
+      { LatLng }
+    ] = await Promise.all([
       google.maps.importLibrary('maps'),
       google.maps.importLibrary('marker'),
+      google.maps.importLibrary('core'),
     ]);
 
     googleLibs.Map = Map;
+    googleLibs.InfoWindow = InfoWindow;
     googleLibs.AdvancedMarkerElement = AdvancedMarkerElement;
-    googleLibs.TxtOverlay = googleMapTxtOverlay(OverlayView);
+    googleLibs.PinElement = PinElement;
+    googleLibs.Rectangle = Rectangle;
+    googleLibs.TxtOverlay = googleMapTxtOverlay(OverlayView, LatLng, gridLabelClick);
   }
 
   const loadPlacesLibrary = async () => {
@@ -150,7 +158,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       let glyphLabel = document.createElement('div');
       glyphLabel.style = 'color: #000000; font-size: 14px;';
       glyphLabel.innerText = markerLabel(location);
-      let iconImage = new google.maps.marker.PinElement({
+      let iconImage = new googleLibs.PinElement({
         glyph: glyphLabel,
       });
 
@@ -204,7 +212,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       classes.push('multi');
     }
 
-    const infoWindow = new google.maps.InfoWindow({
+    const infoWindow = new googleLibs.InfoWindow({
       content: `<div class="${classes.join(' ')}">${addresses.join('')}</div>`,
       zIndex: 99
     });
@@ -277,7 +285,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   }
 
   const drawGridsquare = (subsquare) => {
-    const rectangle = new google.maps.Rectangle({
+    const rectangle = new googleLibs.Rectangle({
       strokeColor: '#000000',
       strokeOpacity: 0.5,
       strokeWeight: 1,
@@ -312,10 +320,14 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   }
 
   const writeGridLabel = (subsquare) => {
-    // if (subsquare.code !== 'FN42dt') {
-    //   return;
-    // }
     gridLabels.push(new googleLibs.TxtOverlay(subsquare.latCenter, subsquare.lngCenter, subsquare.code, 'grid-marker', googleMap));
+  }
+
+  const gridLabelClick = (event) => {
+    setQueryType('g');
+    formElement.querySelector('input[name=query_type][value=g]').checked = true;
+    formElement.querySelector('input[name=query]').value = event.target.innerHTML;
+    submitQuery();
   }
 
   const validateAndBuildQuery = () => {
@@ -491,9 +503,10 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   formElement.querySelector('.query-other input').focus();
 };
 
-const googleMapTxtOverlay = (OverlayView) => {
-    function TxtOverlay(lat, lng, txt, cls, map) {
-      this.position = new google.maps.LatLng(lat, lng);
+const googleMapTxtOverlay = (OverlayView, LatLng, gridClickHandler) => {
+
+  function TxtOverlay(lat, lng, txt, cls, map) {
+      this.position = new LatLng(lat, lng);
       this.content = txt;
       this.cssClass = cls;
       this.map = map;
@@ -511,6 +524,8 @@ const googleMapTxtOverlay = (OverlayView) => {
 
       const panes = this.getPanes();
       panes.floatPane.appendChild(div);
+
+      div.addEventListener('click', gridClickHandler);
       this.div = div;
     }
 
