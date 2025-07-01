@@ -29,7 +29,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     googleLibs.AdvancedMarkerElement = AdvancedMarkerElement;
     googleLibs.PinElement = PinElement;
     googleLibs.Rectangle = Rectangle;
-    googleLibs.TxtOverlay = googleMapTxtOverlay(OverlayView, LatLng, gridLabelClick);
+    googleLibs.TxtOverlay = googleMapTxtOverlay(OverlayView, LatLng, gridClickHandler);
   }
 
   const loadPlacesLibrary = async () => {
@@ -47,7 +47,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       const place = placePrediction.toPlace();
       await place.fetchFields({ fields: ['location'] });
       placesLocation = place.location;
-      submitQuery();
+      submitQueryFromForm();
     });
 
     googleLibs.placesLoaded = true;
@@ -327,10 +327,10 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     gridLabels.push(new googleLibs.TxtOverlay(subsquare.latCenter, subsquare.lngCenter, subsquare.code, 'grid-marker', googleMap));
   }
 
-  const gridLabelClick = (event) => {
+  const gridClickHandler = (event) => {
     setQueryType('g', true);
     formElement.querySelector('input[name=query]').value = event.target.innerHTML;
-    submitQuery();
+    submitQueryFromForm();
   }
 
   const validateAndBuildQuery = () => {
@@ -425,7 +425,6 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     }
 
     queryResult = result;
-    closeInfoWindow();
     setLocationsMap();
 
     if (setCenterEnabled) {
@@ -433,8 +432,9 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     }
 
     drawMarkers();
-    drawGridsquares(getShowGrid());
-    writeGridlabels(getShowGrid());
+    const showGrid = getShowGrid();
+    drawGridsquares(showGrid);
+    writeGridlabels(showGrid);
     mapContainer.classList.remove('hidden');
   };
 
@@ -484,7 +484,8 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     }
   });
 
-  const submitQuery = () => {
+  const submitQueryFromForm = () => {
+    closeInfoWindow();
     showError('');
     query = validateAndBuildQuery();
 
@@ -500,7 +501,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
 
   formElement.addEventListener('submit', event => {
     event.preventDefault();
-    submitQuery(true);
+    submitQueryFromForm();
   });
 
   const getShowGrid = () => {
@@ -525,7 +526,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
 
     setQueryType(hsSettings.query_type, true);
     formElement.querySelector('input[name=query]').value = hsSettings.query_value;
-    submitQuery();
+    submitQueryFromForm();
   };
 
   formElement.querySelector('input[name=query]').focus();
