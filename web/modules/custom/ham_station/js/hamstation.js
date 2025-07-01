@@ -159,8 +159,8 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       }
 
       // Workaround because AdvancedMarkerElement doesn't have labels like legacy did.
-      let glyphLabel = document.createElement('div');
-      glyphLabel.style = 'color: #000000; font-size: 14px;';
+      const glyphLabel = document.createElement('div');
+      glyphLabel.className = 'marker-label';
       glyphLabel.innerText = markerLabel(location);
       let iconImage = new googleLibs.PinElement({
         glyph: glyphLabel,
@@ -218,7 +218,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
 
     const infoWindow = new googleLibs.InfoWindow({
       content: `<div class="${classes.join(' ')}">${addresses.join('')}</div>`,
-      zIndex: 99
+      zIndex: 99,
     });
 
     infoWindow.open(googleMap, marker);
@@ -547,11 +547,8 @@ const googleMapTxtOverlay = (OverlayView, LatLng, gridClickHandler) => {
 
     TxtOverlay.prototype.onAdd = function() {
       const element = document.createElement('a');
-      element.style.position = 'absolute';
       element.className = this.cssClass;
       element.innerHTML = this.content;
-      element.style.textDecoration = 'none';
-      element.style.color = '#000000';
 
       const panes = this.getPanes();
       panes.floatPane.appendChild(element);
