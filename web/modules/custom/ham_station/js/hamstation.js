@@ -53,12 +53,16 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     googleLibs.placesLoaded = true;
   };
 
-  const setQueryType = (queryType) => {
+  const setQueryType = (queryType, setRadio = false) => {
     const labels = {
       c: ['Callsign', 'Enter a callsign.'],
       g: ['Gridsquare', 'Enter a six character grid subsquare.'],
       z: ['Zip code', 'Enter a five digit zip code.']
     };
+
+    if (setRadio) {
+      formElement.querySelector(`input[name=query_type][value=${queryType}]`).checked = true;
+    }
 
     const address = formElement.querySelector('.query-address');
     const other = formElement.querySelector('.query-other');
@@ -324,8 +328,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   }
 
   const gridLabelClick = (event) => {
-    setQueryType('g');
-    formElement.querySelector('input[name=query_type][value=g]').checked = true;
+    setQueryType('g', true);
     formElement.querySelector('input[name=query]').value = event.target.innerHTML;
     submitQuery();
   }
@@ -435,7 +438,21 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     mapContainer.classList.remove('hidden');
   };
 
+  const setUrl = (query) => {
+      let path = '/map';
+
+      if (query.queryType === 'c') {
+        path = `${path}/${query.value}`;
+      }
+      else if ('gz'.indexOf(query.queryType) > -1) {
+        path = `${path}/${query.queryType}/${query.value}`;
+      }
+
+      window.history.pushState({}, null, path);
+  };
+
   const mapAjaxRequest = (query) => {
+
     const ajax = Drupal.ajax({
       url: '/ham-map-ajax',
       httpMethod: 'POST',
@@ -476,6 +493,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     }
     else {
       setCenterEnabled = true;
+      setUrl(query);
       mapAjaxRequest(query);
     }
   };
@@ -500,7 +518,18 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     }
   });
 
-  formElement.querySelector('.query-other input').focus();
+  const initialQuery = () => {
+    if (!hsSettings.query_type) {
+      return;
+    }
+
+    setQueryType(hsSettings.query_type, true);
+    formElement.querySelector('input[name=query]').value = hsSettings.query_value;
+    submitQuery();
+  };
+
+  formElement.querySelector('input[name=query]').focus();
+  initialQuery();
 };
 
 const googleMapTxtOverlay = (OverlayView, LatLng, gridClickHandler) => {
@@ -510,54 +539,55 @@ const googleMapTxtOverlay = (OverlayView, LatLng, gridClickHandler) => {
       this.content = txt;
       this.cssClass = cls;
       this.map = map;
-      this.div = null;
+      this.element = null;
       this.setMap(map);
     }
 
     TxtOverlay.prototype = new OverlayView();
 
     TxtOverlay.prototype.onAdd = function() {
-      const div = document.createElement('div');
-      div.style.position = 'absolute';
-      div.className = this.cssClass;
-      div.innerHTML = this.content;
+      const element = document.createElement('a');
+      element.style.position = 'absolute';
+      element.className = this.cssClass;
+      element.innerHTML = this.content;
+      element.style.textDecoration = 'none';
+      element.style.color = '#000000';
 
       const panes = this.getPanes();
-      panes.floatPane.appendChild(div);
+      panes.floatPane.appendChild(element);
 
-      div.addEventListener('click', gridClickHandler);
-      this.div = div;
+      element.addEventListener('click', gridClickHandler);
+      this.element = element;
     }
 
     TxtOverlay.prototype.draw = function() {
       const overlayProjection = this.getProjection();
       const position = overlayProjection.fromLatLngToDivPixel(this.position);
 
-      const div = this.div;
-      div.style.left = `${position.x - 35}px`;
-      div.style.top = `${position.y}px`;
+      this.element.style.left = `${position.x - 35}px`;
+      this.element.style.top = `${position.y}px`;
     }
 
     TxtOverlay.prototype.onRemove = function() {
-      this.div.parentNode.removeChild(this.div);
-      this.div = null;
+      this.element.parentNode.removeChild(this.element);
+      this.element = null;
     }
 
     TxtOverlay.prototype.hide = function() {
-      if (this.div) {
-        this.div.style.visibility = 'hidden';
+      if (this.element) {
+        this.element.style.visibility = 'hidden';
       }
     }
 
     TxtOverlay.prototype.show = function() {
-      if (this.div) {
-        this.div.style.visibility = 'visible';
+      if (this.element) {
+        this.element.style.visibility = 'visible';
       }
     }
 
     TxtOverlay.prototype.toggle = function() {
-      if (this.div) {
-        if (this.div.style.visibility == 'hidden') {
+      if (this.element) {
+        if (this.element.style.visibility == 'hidden') {
           this.show();
         } else {
           this.hide();
