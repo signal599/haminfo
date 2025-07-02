@@ -29,7 +29,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     googleLibs.AdvancedMarkerElement = AdvancedMarkerElement;
     googleLibs.PinElement = PinElement;
     googleLibs.Rectangle = Rectangle;
-    googleLibs.TxtOverlay = googleMapTxtOverlay(OverlayView, LatLng, gridClickHandler);
+    googleLibs.TxtOverlay = googleMapTxtOverlay(OverlayView, LatLng);
   }
 
   const loadPlacesLibrary = async () => {
@@ -232,10 +232,18 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     });
   };
 
+  // Handle some events as they bubble up.
   mapContainer.addEventListener('click', event => {
-    if (event.target.classList.contains('info-close')) {
+    const classes = event.target.classList;
+    if (classes.contains('info-close')) {
       event.preventDefault();
       closeInfoWindow();
+    }
+    else if (classes.contains('grid-marker')) {
+      event.preventDefault();
+      setQueryType('g', true);
+      formElement.querySelector('input[name=query]').value = event.target.innerHTML;
+      submitQueryFromForm();
     }
   });
 
@@ -323,12 +331,6 @@ Drupal.hamApp = (Drupal, hsSettings) => {
 
   const writeGridLabel = (subsquare) => {
     gridLabels.push(new googleLibs.TxtOverlay(subsquare.latCenter, subsquare.lngCenter, subsquare.code, 'grid-marker', googleMap));
-  }
-
-  const gridClickHandler = (event) => {
-    setQueryType('g', true);
-    formElement.querySelector('input[name=query]').value = event.target.innerHTML;
-    submitQueryFromForm();
   }
 
   const validateAndBuildQuery = () => {
@@ -531,7 +533,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   initialQuery();
 };
 
-const googleMapTxtOverlay = (OverlayView, LatLng, gridClickHandler) => {
+const googleMapTxtOverlay = (OverlayView, LatLng) => {
 
   function TxtOverlay(lat, lng, txt, cls, map) {
       this.position = new LatLng(lat, lng);
@@ -551,8 +553,6 @@ const googleMapTxtOverlay = (OverlayView, LatLng, gridClickHandler) => {
 
       const panes = this.getPanes();
       panes.floatPane.appendChild(element);
-
-      element.addEventListener('click', gridClickHandler);
       this.element = element;
     }
 
