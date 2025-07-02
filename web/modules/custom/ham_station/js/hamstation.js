@@ -216,9 +216,12 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       classes.push('multi');
     }
 
+    const content = `<div class="${classes.join(' ')}">${addresses.join('')}<a class="info-close" href="">Close</a></div>`;
+
     const infoWindow = new googleLibs.InfoWindow({
-      content: `<div class="${classes.join(' ')}">${addresses.join('')}</div>`,
+      content: content,
       zIndex: 99,
+      headerDisabled: true,
     });
 
     infoWindow.open(googleMap, marker);
@@ -229,6 +232,13 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     });
   };
 
+  mapContainer.addEventListener('click', event => {
+    if (event.target.classList.contains('info-close')) {
+      event.preventDefault();
+      closeInfoWindow();
+    }
+  });
+
   const closeInfoWindow = () => {
     if (activeInfoWindow) {
       activeInfoWindow.close();
@@ -238,21 +248,9 @@ Drupal.hamApp = (Drupal, hsSettings) => {
 
   const writeAddress = (address) => {
     const stations = [];
-    const lastIndex = address.stations.length - 1;
-    const multi = address.stations.length > 1;
 
     address.stations.forEach((station, index) => {
-      let classes = ['station'];
-      if (multi) {
-        if (index === 0) {
-          classes.push('first');
-        }
-        else if(index === lastIndex)
-        {
-          classes.push('last');
-        }
-      }
-      stations.push(`<div class="${classes.join(' ')}">${writeStation(station)}</div>`)
+      stations.push(`<div>${writeStation(station)}</div>`)
     });
 
     const address2 = address.address2 ? address.address2 + '<br>' : '';
