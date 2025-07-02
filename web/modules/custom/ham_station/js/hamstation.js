@@ -1,134 +1,151 @@
-const hamstationApp = (function ($) {
+Drupal.hamApp = (Drupal, hsSettings) => {
+  const formElement = document.querySelector('.ham-map-form');
+  const mapContainer = document.querySelector('.map-container');
+  let googleMap;
+  const mapMarkers = new Map();
+  let placesLocation;
+  let centerMovedTimerId;
+  let setCenterEnabled = false;
+  let centerChangedEnabled = false;
+  let activeInfoWindow;
+  let rectangles = [];
+  let gridLabels = [];
+  const googleLibs = {};
+  let queryResult;
 
-  // ----- UI Controller -----
-  const uiController = (function () {
+  const loadMapsLibrary = async () => {
+    const [
+      { Map, InfoWindow, OverlayView, Rectangle },
+      { AdvancedMarkerElement, PinElement },
+      { LatLng }
+    ] = await Promise.all([
+      google.maps.importLibrary('maps'),
+      google.maps.importLibrary('marker'),
+      google.maps.importLibrary('core'),
+    ]);
 
-    let map = null;
-    let mapData;
-    let rectangles = [];
-    let gridLabels = [];
-    let markers = new Map();
-    let locationMap = new Map();
-    let activeInfoWindow = null;
-    let txtOverlay;
-    let mapCenterChangedListener = null;
+    googleLibs.Map = Map;
+    googleLibs.InfoWindow = InfoWindow;
+    googleLibs.AdvancedMarkerElement = AdvancedMarkerElement;
+    googleLibs.PinElement = PinElement;
+    googleLibs.Rectangle = Rectangle;
+    googleLibs.TxtOverlay = googleMapTxtOverlay(OverlayView, LatLng, gridClickHandler);
+  }
 
-    function selectQueryType(queryType) {
-      let labels = {
-        c:['Callsign', 'Enter a callsign.'],
-        g:['Gridsquare', 'Enter a six character grid subsquare.'],
-        z:['Zip code', 'Enter a five digit zip code.']
-      };
+  const loadPlacesLibrary = async () => {
+    const { PlaceAutocompleteElement } = await google.maps.importLibrary('places');
 
-      if ('cgz'.indexOf(queryType) > -1) {
-        document.querySelector('.ham-map-form .query-other label').innerHTML = labels[queryType][0];
-        document.querySelector('.ham-map-form .query-other .description').innerHTML = labels[queryType][1];
-        document.querySelector('.ham-map-form .query-other').classList.remove('hidden');
-        document.querySelector('.ham-map-form .query-address').classList.add('hidden');
-      }
-      else {
-        document.querySelector('.ham-map-form .query-other').classList.add('hidden');
-        document.querySelector('.ham-map-form .query-address').classList.remove('hidden');
-      }
+    const placeAutocomplete = new PlaceAutocompleteElement({includedRegionCodes: ['us']});
+    const addressWrapper = formElement.querySelector('.query-address');
+    const oldInput = addressWrapper.querySelector('input');
+    const oldId = oldInput.id;
+    addressWrapper.replaceChild(placeAutocomplete, oldInput);
+    placeAutocomplete.id = oldId;
+    addressWrapper.classList.remove('hidden');
+
+    placeAutocomplete.addEventListener('gmp-select', async ({ placePrediction }) => {
+      const place = placePrediction.toPlace();
+      await place.fetchFields({ fields: ['location'] });
+      placesLocation = place.location;
+      submitQueryFromForm();
+    });
+
+    googleLibs.placesLoaded = true;
+  };
+
+  const setQueryType = (queryType, setRadio = false) => {
+    const labels = {
+      c: ['Callsign', 'Enter a callsign.'],
+      g: ['Gridsquare', 'Enter a six character grid subsquare.'],
+      z: ['Zip code', 'Enter a five digit zip code.']
+    };
+
+    if (setRadio) {
+      formElement.querySelector(`input[name=query_type][value=${queryType}]`).checked = true;
     }
 
-    function createMap(mapCenterChangedListener) {
-      if (map) {
-        return;
-      }
+    const address = formElement.querySelector('.query-address');
+    const other = formElement.querySelector('.query-other');
 
-      let map_container = document.querySelector('.map-container');
-
-      map = new google.maps.Map(map_container, {
-        zoom: 14,
-        zoomControl: true,
-      });
-
-      map.addListener('center_changed', function () {
-        mapCenterChangedListener(map.getCenter());
-      });
+    if ('cgz'.indexOf(queryType) > -1) {
+      other.querySelector('label').innerHTML = labels[queryType][0];
+      other.querySelector('.description').innerHTML = labels[queryType][1];
+      other.classList.remove('hidden');
+      address.classList.add('hidden');
+      return;
     }
 
-    function setMapCenter() {
-      map.setCenter({lat: mapData.mapCenterLat, lng: mapData.mapCenterLng});
+    other.classList.add('hidden');
+
+    if (googleLibs.placesLoaded) {
+      address.classList.remove('hidden');
+      return;
     }
 
-    function clearInfoWindow() {
-      if (activeInfoWindow) {
-        activeInfoWindow.close();
-        activeInfoWindow = null;
-      }
+    loadPlacesLibrary();
+  }
+
+  const getQueryType = () => {
+    return formElement.querySelector('input[name=query_type]:checked').value;
+  }
+
+  const mapCenterChanged = () => {
+    if (!centerChangedEnabled) {
+      centerChangedEnabled = true;
+      return;
     }
 
-    function clearRectangles() {
-      rectangles.forEach((el, index) => {
-        rectangles[index].setMap(null);
-        rectangles[index] = null;
-      });
-
-      rectangles = [];
+    if (centerMovedTimerId) {
+      clearTimeout(centerMovedTimerId);
     }
 
-    function clearGridLabels() {
-      gridLabels.forEach((el, index) => {
-        gridLabels[index].setMap(null);
-        gridLabels[index] = null;
-      });
+    centerMovedTimerId = setTimeout(() => {
+      const location = googleMap.getCenter();
+      setCenterEnabled = false;
+      mapAjaxRequest({queryType:'latlng', value:`${location.lat()},${location.lng()}}`}, false);
+    }, 2000);
+  }
 
-      gridLabels = [];
+  const setMapCenter = () => {
+    centerChangedEnabled = false;
+    googleMap.setCenter({lat: queryResult.mapCenterLat, lng: queryResult.mapCenterLng});
+  }
+
+  const setLocationsMap = () => {
+    const map = new Map();
+    queryResult.locations.forEach(location => {
+      map.set(location.id, true);
+    });
+
+    queryResult.locationsMap = map;
+  };
+
+  const getStationCountForLocation = (location) => {
+    let stationCount = 0;
+    location.addresses.forEach(address => {
+      address.stations.forEach(station => stationCount++);
+    });
+
+    return stationCount;
+  }
+
+    const markerLabel = (location) => {
+      const stationCount = getStationCountForLocation(location);
+      return location.addresses[0].stations[0].callsign + (stationCount > 1 ? '+' : '');
     }
 
-    function drawGridsquares(show) {
-      clearRectangles();
-
-      if (show) {
-        mapData.subsquares.forEach(x => x.forEach(y => drawGridsquare(y)));
-      }
-    }
-
-    function drawGridsquare(subsquare) {
-      let rectangle = new google.maps.Rectangle({
-        strokeColor: '#000000',
-        strokeOpacity: 0.5,
-        strokeWeight: 1,
-        fillOpacity: 0,
-        map: map,
-        bounds: {
-          north: subsquare.latNorth,
-          south: subsquare.latSouth,
-          east: subsquare.lngEast,
-          west: subsquare.lngWest
-        }
-      });
-
-      rectangles.push(rectangle);
-    }
-
-    function writeGridlabels(show) {
-      clearGridLabels();
-
-      if (show) {
-        mapData.subsquares.forEach(x => x.forEach(y => writeGridLabel(y)));
-      }
-    }
-
-    function writeGridLabel(subsquare) {
-      gridLabels.push(new txtOverlay(subsquare.latCenter, subsquare.lngCenter, subsquare.code, "grid-marker", map));
-    }
-
-    function drawMarkers() {
-
-      for (var [id, marker] of markers) {
-        if (!locationMap.has(id)) {
+    const drawMarkers = () => {
+      // Remove markers for locations no longer on the map.
+      for (const [id, marker] of mapMarkers) {
+        if (!queryResult.locationsMap.has(id)) {
           marker.setMap(null);
-          markers.delete(id);
+          mapMarkers.delete(id);
         }
       }
 
-      removeQueriedCallsign();
-
-      mapData.locations.forEach(location => {
-        if (!markers.has(location.id)) {
+      // Add new markers.
+      queryResult.locations.forEach(location => {
+        if (!mapMarkers.has(location.id)) {
           drawMarker(location);
         }
       });
@@ -136,515 +153,459 @@ const hamstationApp = (function ($) {
       openQueriedCallsign();
     }
 
-    // Remove the marker for the callsign that was queried.
-    // This forces a redraw to put the queried call on the label
-    // and at the top of the infowindow.
-    function removeQueriedCallsign() {
-      if (mapData.queryCallsignIdx === null) {
-        return;
-      }
-
-      let location = mapData.locations[mapData.queryCallsignIdx];
-      if (!markers.has(location.id)) {
-        return;
-      }
-
-      if (getStationCountForLocation(location) < 2) {
-        return;
-      }
-
-      let marker = markers.get(location.id);
-      marker.setMap(null);
-      markers.delete(location.id);
-    }
-
-    // Open infowindow for queries callsign.
-    function openQueriedCallsign() {
-      if (mapData.queryCallsignIdx === null) {
-        return;
-      }
-
-      let location = mapData.locations[mapData.queryCallsignIdx];
-      console.log(location);
-      let marker = markers.get(location.id);
-
-      openInfowindow(location, marker);
-    }
-
-    function getStationCountForLocation(location) {
-      let stationCount = 0;
-      location.addresses.forEach(address => {
-        address.stations.forEach(station => stationCount++);
-      });
-
-      return stationCount;
-    }
-
-    function markerLabel(location) {
-      let stationCount = getStationCountForLocation(location);
-      return location.addresses[0].stations[0].callsign + (stationCount > 1 ? '+' : '');
-    }
-
-    function drawMarker(location) {
-
+    const drawMarker = (location) => {
       if (location.addresses.length === 0) {
-        // @todo Find out why we have locations with no addresses.
         return;
       }
 
-      let stationCount = 0;
-      location.addresses.forEach(address => {
-        address.stations.forEach(station => stationCount++);
+      // Workaround because AdvancedMarkerElement doesn't have labels like legacy did.
+      const glyphLabel = document.createElement('div');
+      glyphLabel.className = 'marker-label';
+      glyphLabel.innerText = markerLabel(location);
+      let iconImage = new googleLibs.PinElement({
+        glyph: glyphLabel,
       });
 
-      let marker = new google.maps.Marker({
+      const marker = new googleLibs.AdvancedMarkerElement({
         position: {lat: location.lat, lng: location.lng},
-        map: map,
-        label: markerLabel(location)
+        map: googleMap,
+        content: iconImage.element
       });
 
-      markers.set(location.id, marker);
+      mapMarkers.set(location.id, marker);
 
       marker.addListener('click', e => {
-        openInfowindow(location, marker);
+        openInfoWindow(location, marker);
       });
     }
 
-    function openInfowindow(location, marker) {
-      clearInfoWindow();
+    const openQueriedCallsign = () => {
+      if (queryResult.queryCallsignIdx === null) {
+        return;
+      }
 
-      let addresses = [];
-      let lastIndex = location.addresses.length - 1;
-      let multi = location.addresses.length > 1;
-      location.addresses.forEach((address, index) => {
-        let classes = ['address'];
-        if (multi) {
-          if (index === 0) {
-            classes.push('first');
-          }
-          else if(index === lastIndex)
-          {
-            classes.push('last');
-          }
-        }
-        addresses.push(`<div class="${classes.join(' ')}">${writeAddress(address)}</div>`);
-      });
+      const location = queryResult.locations[queryResult.queryCallsignIdx];
+      const marker = mapMarkers.get(location.id);
 
-      let classes = ['infowindow'];
+      openInfoWindow(location, marker);
+    }
+
+  const openInfoWindow = (location, marker) => {
+    closeInfoWindow();
+
+    const addresses = [];
+    const lastIndex = location.addresses.length - 1;
+    const multi = location.addresses.length > 1;
+
+    location.addresses.forEach((address, index) => {
+      let classes = ['address'];
       if (multi) {
-        classes.push('multi');
-      }
-      let infowindow = new google.maps.InfoWindow({
-        content: `<div class="${classes.join(' ')}">${addresses.join('')}</div>`,
-        zIndex: 99
-      });
-
-      infowindow.open(map, marker);
-      activeInfoWindow = infowindow;
-
-      infowindow.addListener('closeclick', () => {
-        activeInfoWindow = null;
-      });
-    }
-
-    function writeAddress(address) {
-      let stations = [];
-      let lastIndex = address.stations.length - 1;
-      let multi = address.stations.length > 1;
-      address.stations.forEach((station, index) => {
-        let classes = ['station'];
-        if (multi) {
-          if (index === 0) {
-            classes.push('first');
-          }
-          else if(index === lastIndex)
-          {
-            classes.push('last');
-          }
+        if (index === 0) {
+          classes.push('first');
         }
-        stations.push(`<div class="${classes.join(' ')}">${writeStation(station)}</div>`)
-      });
-
-      let address2 = address.address2 ? address.address2 + '<br>' : '';
-
-      return `<div class="stations">${stations.join('')}</div><div>
-        ${address.address1}<br>
-        ${address2}
-        ${address.city}, ${address.state} ${address.zip}</div>`;
-    }
-
-    function writeStation(station) {
-      let opclass = station.operatorClass ? (' ' + station.operatorClass) : '';
-
-      return `
-      <span>${station.callsign}</span> <a href="https://www.qrz.com/db/${station.callsign}" target="_blank">qrz.com</a>${opclass}<br>
-      ${station.name}`;
-    }
-
-    function showError(error) {
-      let element = document.querySelector('.error-message');
-      element.innerHTML = error;
-      if (error) {
-        element.classList.remove('hidden');
-      }
-      else {
-        element.classList.add('hidden');
-      }
-    }
-
-    function setMapData(data) {
-      mapData = data;
-      locationMap.clear();
-      mapData.locations.forEach(location => {
-        locationMap.set(location.id, true);
-      });
-    }
-
-    return {
-      init: txtOl => txtOverlay = txtOl,
-      setMapData: setMapData,
-      selectQueryType: selectQueryType,
-      createMap: createMap,
-      setMapCenter: setMapCenter,
-      drawGridsquares: drawGridsquares,
-      writeGridLabels: writeGridlabels,
-      drawMarkers: drawMarkers,
-      showError: showError
-    };
-
-  })();
-
-  // ----- Main controller -----
-  const controller = (function (uiCtrl) {
-    let context;
-    let center_moved_timer_id = null;
-    let setCenterEnabled = false;
-    let autocompleteLocation = null;
-
-    function mapDataRequest(query, setCenter) {
-      let showGrid = document.getElementById('edit-show-gridlabels').checked;
-      $('.processing').show();
-
-      $.post('/ham-map-ajax',
-        query,
-        (data) => {
-          if (data.hasOwnProperty('error')) {
-            uiCtrl.showError(data.error);
-            return;
-          }
-
-          uiCtrl.showError('');
-          uiCtrl.setMapData(data);
-          uiCtrl.drawGridsquares(showGrid);
-          uiCtrl.writeGridLabels(showGrid);
-          uiCtrl.drawMarkers();
-
-          if (setCenter) {
-            uiCtrl.setMapCenter();
-          }
-
-          $('.map-container').show();
-        }
-      )
-      .always(() => {
-        $('.processing').hide();
-      });
-    }
-
-    function getAndFormatQuery() {
-      let queryType = document.querySelector('input[type=radio][name=query_type]:checked').value;
-
-      if ('cgz'.indexOf(queryType) > -1) {
-        let valueElement = document.getElementById('edit-query');
-
-        if (queryType == 'c') {
-          return getCallsignQuery(valueElement);
-        }
-
-        if (queryType == 'g') {
-          return getGridsquareQuery(valueElement);
-        }
-
-        if (queryType == 'z') {
-          return getZipcodeQuery(valueElement);
+        else if(index === lastIndex)
+        {
+          classes.push('last');
         }
       }
-      else if (queryType == 'a') {
-        return getAddressQuery();
-      }
+      addresses.push(`<div class="${classes.join(' ')}">${writeAddress(address)}</div>`);
+    });
+
+    let classes = ['infowindow'];
+    if (multi) {
+      classes.push('multi');
     }
 
-    function getCallsignQuery(valueElement) {
-      let value = valueElement.value.trim();
+    const infoWindow = new googleLibs.InfoWindow({
+      content: `<div class="${classes.join(' ')}">${addresses.join('')}</div>`,
+      zIndex: 99,
+    });
 
-      if (!value) {
-        uiCtrl.showError('Please enter a callsign.');
-        return null;
-      }
+    infoWindow.open(googleMap, marker);
+    activeInfoWindow = infoWindow;
 
-      valueElement.value = value.toUpperCase();
-      return {queryType:'c', value:valueElement.value};
-    }
-
-    function getGridsquareQuery(valueElement) {
-      let value = valueElement.value.trim();
-
-      if (!value.match(/^[A-R]{2}\d\d[a-x]{2}$/i)) {
-        uiCtrl.showError('Please enter a six character gridsquare.');
-        return null;
-      }
-
-      valueElement.value = value.substring(0, 2).toUpperCase() + value.substring(2, 4) + value.substring(4).toLowerCase();
-      return {queryType:'g', value:valueElement.value};
-    }
-
-    function getZipcodeQuery(valueElement) {
-      let value = valueElement.value.trim();
-
-      if (!value.match(/^\d{5}$/)) {
-        uiCtrl.showError('Please enter a five digit zip code.');
-        return null;
-      }
-
-      return {queryType:'z', value:value};
-    }
-
-    function getAddressQuery() {
-      return {queryType:'latlng', value:`${autocompleteLocation.lat()},${autocompleteLocation.lng()}}`}
-    }
-
-      let setupEventListeners = () => {
-      $('input[type=radio][name=query_type]', context).change(e => {
-        uiCtrl.selectQueryType(e.target.value);
-      });
-
-      $('#ham-map-form', context).on('submit', e => {
-        e.preventDefault();
-
-        let query = getAndFormatQuery();
-        if (!query) {
-          return;
-        }
-
-        let path = '/map';
-        if (query.queryType === 'c') {
-          path += `/${query.value}`;
-        }
-        else if ('gz'.indexOf(query.queryType) > -1) {
-          path += `/${query.queryType}/${query.value}`;
-        }
-
-        window.history.pushState({}, null, path);
-
-        setCenterEnabled = false;
-        mapDataRequest(query, true);
-      });
-
-      function mapCenterChanged(location) {
-        if (center_moved_timer_id) {
-          clearTimeout(center_moved_timer_id);
-        }
-
-        center_moved_timer_id = setTimeout(location => {
-          if (setCenterEnabled) {
-            mapDataRequest({queryType:'latlng', value:`${location.lat()},${location.lng()}}`}, false);
-          }
-          else {
-            setCenterEnabled = true;
-          }
-        }, 2000, location);
-      }
-
-      $('#edit-show-gridlabels').click(e => {
-        uiCtrl.drawGridsquares(e.target.checked);
-        uiCtrl.writeGridLabels(e.target.checked);
-      });
-
-      uiCtrl.createMap(mapCenterChanged);
-    };
-
-    function gridLabelClick(e) {
-      let gridsquare = e.target.dataset.grid;
-
-      document.querySelector('input[type=radio][name=query_type][value=g]').checked = true;
-      document.getElementById('edit-query').value = gridsquare;
-
-      window.history.pushState({}, null, `/map/g/${gridsquare}`);
-      setCenterEnabled = false;
-      mapDataRequest({queryType:'latlng', value: e.target.dataset.pos}, true);
-    }
-
-    function setupAutocomplete() {
-      let autocomplete = new google.maps.places.Autocomplete(
-        document.getElementById('edit-address')
-      );
-
-      autocomplete.setFields(['geometry.location']);
-
-      autocomplete.addListener('place_changed', () => {
-        let place = autocomplete.getPlace();
-        autocompleteLocation = place.geometry.location;
-      });
-    }
-
-    function initialQuery(hs_settings) {
-      if (!hs_settings.query_type || !hs_settings.query_value) {
-        return;
-      }
-
-      if ('cgz'.indexOf(hs_settings.query_type) < 0) {
-        return;
-      }
-
-      document.querySelector('input[type=radio][name=query_type][value=' + hs_settings.query_type + ']').checked = true;
-      document.getElementById('edit-query').value = hs_settings.query_value;
-
-      let query = getAndFormatQuery();
-      if (!query) {
-        return;
-      }
-
-      setCenterEnabled = false;
-      mapDataRequest(query, true);
-    }
-
-    return {
-      'init': (ctx, txtlib, hs_settings) => {
-        txtlib.init(gridLabelClick);
-        context = ctx;
-        uiCtrl.init(txtlib.txtOverlay);
-        setupEventListeners();
-        setupAutocomplete();
-        document.getElementById('edit-query').focus();
-        initialQuery(hs_settings)
-      }
-    };
-  })(uiController);
-
-  return {
-    'init': controller.init
+    infoWindow.addListener('closeclick', () => {
+      activeInfoWindow = null;
+    });
   };
 
-})(jQuery);
-
-let txtOverlayLib = function() {
-
-  var clickListener = null;
-
-  var TxtOverlay = function(lat, lng, txt, cls, map) {
-
-    // Now initialize all properties.
-    this.pos = new google.maps.LatLng(lat, lng);
-    this.txt_ = txt;
-    this.cls_ = cls;
-    this.map_ = map;
-
-    // We define a property to hold the image's
-    // div. We'll actually create this div
-    // upon receipt of the add() method so we'll
-    // leave it null for now.
-    this.div_ = null;
-
-    // Explicitly call setMap() on this overlay
-    this.setMap(map);
-  };
-
- // TxtOverlay.prototype = new google.maps.OverlayView();
-
-  let onAdd = function() {
-
-    // Note: an overlay's receipt of onAdd() indicates that
-    // the map's panes are now available for attaching
-    // the overlay to the map via the DOM.
-
-    // Create the DIV and set some basic attributes.
-    var div = document.createElement('DIV');
-    div.className = this.cls_;
-    div.innerHTML = this.txt_;
-
-    div.dataset.grid = this.txt_
-    div.dataset.pos = `${this.pos.lat()},${this.pos.lng()}`;
-
-    div.addEventListener('click', clickListener);
-
-    // Set the overlay's div_ property to this DIV
-    this.div_ = div;
-    var overlayProjection = this.getProjection();
-    var position = overlayProjection.fromLatLngToDivPixel(this.pos);
-    div.style.left = position.x + 'px';
-    div.style.top = position.y + 'px';
-    div.style.position = 'absolute';
-    // We add an overlay to a map via one of the map's panes.
-
-    var panes = this.getPanes();
-    panes.floatPane.appendChild(div);
-  };
-
-  let draw = function() {
-
-    var overlayProjection = this.getProjection();
-
-    // Retrieve the southwest and northeast coordinates of this overlay
-    // in latlngs and convert them to pixels coordinates.
-    // We'll use these coordinates to resize the DIV.
-    var position = overlayProjection.fromLatLngToDivPixel(this.pos);
-
-    var div = this.div_;
-    div.style.left = position.x + 'px';
-    div.style.top = position.y + 'px';
-  };
-
-//Optional: helper methods for removing and toggling the text overlay.
-  let onRemove = function() {
-    this.div_.parentNode.removeChild(this.div_);
-    this.div_ = null;
-  };
-  let hide = function() {
-    if (this.div_) {
-      this.div_.style.visibility = "hidden";
+  const closeInfoWindow = () => {
+    if (activeInfoWindow) {
+      activeInfoWindow.close();
+      activeInfoWindow = null;
     }
-  };
-
-  let show = function() {
-    if (this.div_) {
-      this.div_.style.visibility = "visible";
-    }
-  };
-
-  let toggle = function() {
-    if (this.div_) {
-      if (this.div_.style.visibility == "hidden") {
-        this.show();
-      } else {
-        this.hide();
-      }
-    }
-  };
-
-  let toggleDOM = function() {
-    if (this.getMap()) {
-      this.setMap(null);
-    } else {
-      this.setMap(this.map_);
-    }
-  };
-
-  return {
-    init: (cllist) => {
-      TxtOverlay.prototype = new google.maps.OverlayView();
-      TxtOverlay.prototype.onAdd = onAdd;
-      TxtOverlay.prototype.draw = draw;
-      TxtOverlay.prototype.onRemove = onRemove;
-      TxtOverlay.prototype.hide = hide;
-      TxtOverlay.prototype.toggle = toggle;
-      TxtOverlay.prototype.toggleDOM = toggleDOM;
-      clickListener = cllist;
-    },
-    txtOverlay: TxtOverlay
   }
-}();
+
+  const writeAddress = (address) => {
+    const stations = [];
+    const lastIndex = address.stations.length - 1;
+    const multi = address.stations.length > 1;
+
+    address.stations.forEach((station, index) => {
+      let classes = ['station'];
+      if (multi) {
+        if (index === 0) {
+          classes.push('first');
+        }
+        else if(index === lastIndex)
+        {
+          classes.push('last');
+        }
+      }
+      stations.push(`<div class="${classes.join(' ')}">${writeStation(station)}</div>`)
+    });
+
+    const address2 = address.address2 ? address.address2 + '<br>' : '';
+
+    return `<div class="stations">${stations.join('')}</div><div>
+      ${address.address1}<br>
+      ${address2}
+      ${address.city}, ${address.state} ${address.zip}</div>`;
+  }
+
+  const writeStation = (station) => {
+    const opclass = station.operatorClass ? (' ' + station.operatorClass) : '';
+
+    return `
+    <span>${station.callsign}</span> <a href="https://www.qrz.com/db/${station.callsign}" target="_blank">qrz.com</a>${opclass}<br>
+    ${station.name}`;
+  }
+
+  const clearRectangles = () => {
+    rectangles.forEach((el, index) => {
+      rectangles[index].setMap(null);
+      rectangles[index] = null;
+    });
+
+    rectangles = [];
+  }
+
+  const drawGridsquares = (show) => {
+    clearRectangles();
+
+    if (show) {
+      queryResult.subsquares.forEach(x => x.forEach(y => drawGridsquare(y)));
+    }
+  }
+
+  const drawGridsquare = (subsquare) => {
+    const rectangle = new googleLibs.Rectangle({
+      strokeColor: '#000000',
+      strokeOpacity: 0.5,
+      strokeWeight: 1,
+      fillOpacity: 0,
+      map: googleMap,
+      bounds: {
+        north: subsquare.latNorth,
+        south: subsquare.latSouth,
+        east: subsquare.lngEast,
+        west: subsquare.lngWest
+      }
+    });
+
+    rectangles.push(rectangle);
+  }
+
+  const clearGridLabels = () => {
+    gridLabels.forEach((el, index) => {
+      gridLabels[index].setMap(null);
+      gridLabels[index] = null;
+    });
+
+    gridLabels = [];
+  }
+
+  const writeGridlabels = (show) => {
+    clearGridLabels();
+
+    if (show) {
+      queryResult.subsquares.forEach(x => x.forEach(y => writeGridLabel(y)));
+    }
+  }
+
+  const writeGridLabel = (subsquare) => {
+    gridLabels.push(new googleLibs.TxtOverlay(subsquare.latCenter, subsquare.lngCenter, subsquare.code, 'grid-marker', googleMap));
+  }
+
+  const gridClickHandler = (event) => {
+    setQueryType('g', true);
+    formElement.querySelector('input[name=query]').value = event.target.innerHTML;
+    submitQueryFromForm();
+  }
+
+  const validateAndBuildQuery = () => {
+    const queryType = getQueryType();
+    let query;
+
+    if ('cgz'.indexOf(queryType) > -1) {
+      const element = formElement.querySelector('input[name=query');
+      const value = element.value.trim();
+
+      if (queryType === 'c') {
+        query = buildCallsignQuery(value);
+      }
+      else if (queryType === 'g') {
+        query = buildGridsquareQuery(value);
+      }
+      else if (queryType === 'z') {
+        query = buildZipcodeQuery(value);
+      }
+
+      if (!query.error) {
+        element.value = query.value;
+      }
+    }
+    else {
+      query = buildAddressQuery();
+    }
+
+    return query;
+  };
+
+  const buildCallsignQuery = (value) => {
+    value = value.toUpperCase();
+
+    return value
+      ? {queryType: 'c', value}
+      : {error: 'Please enter a callsign.'};
+  };
+
+  const buildGridsquareQuery = (value) => {
+    if (!value.match(/^[A-R]{2}\d\d[a-x]{2}$/i)) {
+      return {error: 'Please enter a six character gridsquare.'};
+    }
+
+    return {
+      queryType:'g',
+      value: value.substring(0, 2).toUpperCase() + value.substring(2, 4) + value.substring(4).toLowerCase(),
+    };
+  }
+
+  const buildZipcodeQuery = (value) => {
+    if (!value.match(/^\d{5}$/)) {
+      return {error: 'Please enter a five digit zip code.'};
+    }
+
+    return {queryType:'z', value};
+  }
+
+  const buildAddressQuery = () => {
+    if (!placesLocation) {
+      return {error: ''};
+    }
+
+    return {
+      queryType:'latlng',
+      value: `${placesLocation.lat()},${placesLocation.lng()}}`
+    }
+  }
+
+  const showError = (error) => {
+    const element = formElement.querySelector('.error-message');
+    element.innerHTML = error;
+    if (error) {
+      element.classList.remove('hidden');
+    }
+    else {
+      element.classList.add('hidden');
+    }
+  }
+
+  const processSuccessResponse = async (result) => {
+    if (!googleMap) {
+      await loadMapsLibrary();
+
+      googleMap = new googleLibs.Map(mapContainer, {
+        zoom: 14,
+        zoomControl: true,
+        mapId: 'ham-stations',
+      });
+
+      googleMap.addListener('center_changed', mapCenterChanged)
+    }
+
+    queryResult = result;
+    setLocationsMap();
+
+    if (setCenterEnabled) {
+      setMapCenter();
+    }
+
+    drawMarkers();
+    const showGrid = getShowGrid();
+    drawGridsquares(showGrid);
+    writeGridlabels(showGrid);
+    mapContainer.classList.remove('hidden');
+  };
+
+  const setUrl = (query) => {
+      let path = '/map';
+
+      if (query.queryType === 'c') {
+        path = `${path}/${query.value}`;
+      }
+      else if ('gz'.indexOf(query.queryType) > -1) {
+        path = `${path}/${query.queryType}/${query.value}`;
+      }
+
+      window.history.pushState({}, null, path);
+  };
+
+  const mapAjaxRequest = (query) => {
+
+    const ajax = Drupal.ajax({
+      url: '/ham-map-ajax',
+      httpMethod: 'POST',
+      submit: query,
+      progress: { type: 'throbber', message: 'Processing...' },
+      element: formElement.querySelector('.processing'),
+    });
+
+    Drupal.AjaxCommands.prototype.hamMapQuery = (ajax, response, status) => {
+      if (status !== 'success') {
+        showError('Sorry, something went wrong.')
+        return;
+      }
+
+      if (response.result.error) {
+        showError(response.result.error);
+        return;
+      }
+
+      processSuccessResponse(response.result);
+    };
+
+    ajax.execute();
+  };
+
+  formElement.addEventListener('change', event => {
+    if (event.target.getAttribute('name') === 'query_type') {
+       setQueryType(event.target.value);
+    }
+  });
+
+  const submitQueryFromForm = () => {
+    closeInfoWindow();
+    showError('');
+    query = validateAndBuildQuery();
+
+    if (query.error) {
+      showError(query.error);
+    }
+    else {
+      setCenterEnabled = true;
+      setUrl(query);
+      mapAjaxRequest(query);
+    }
+  };
+
+  formElement.addEventListener('submit', event => {
+    event.preventDefault();
+    submitQueryFromForm();
+  });
+
+  const getShowGrid = () => {
+    return formElement.querySelector('input[name=show_gridlabels]').checked;
+  };
+
+  formElement.querySelector('input[name=show_gridlabels]').addEventListener('click', event => {
+    if (event.target.checked) {
+      drawGridsquares(true);
+      writeGridlabels(true);
+    }
+    else {
+      clearGridLabels();
+      clearRectangles();
+    }
+  });
+
+  const initialQuery = () => {
+    if (!hsSettings.query_type) {
+      return;
+    }
+
+    setQueryType(hsSettings.query_type, true);
+    formElement.querySelector('input[name=query]').value = hsSettings.query_value;
+    submitQueryFromForm();
+  };
+
+  formElement.querySelector('input[name=query]').focus();
+  initialQuery();
+};
+
+const googleMapTxtOverlay = (OverlayView, LatLng, gridClickHandler) => {
+
+  function TxtOverlay(lat, lng, txt, cls, map) {
+      this.position = new LatLng(lat, lng);
+      this.content = txt;
+      this.cssClass = cls;
+      this.map = map;
+      this.element = null;
+      this.setMap(map);
+    }
+
+    TxtOverlay.prototype = new OverlayView();
+
+    TxtOverlay.prototype.onAdd = function() {
+      const element = document.createElement('a');
+      element.className = this.cssClass;
+      element.innerHTML = this.content;
+
+      const panes = this.getPanes();
+      panes.floatPane.appendChild(element);
+
+      element.addEventListener('click', gridClickHandler);
+      this.element = element;
+    }
+
+    TxtOverlay.prototype.draw = function() {
+      const overlayProjection = this.getProjection();
+      const position = overlayProjection.fromLatLngToDivPixel(this.position);
+
+      this.element.style.left = `${position.x - 35}px`;
+      this.element.style.top = `${position.y}px`;
+    }
+
+    TxtOverlay.prototype.onRemove = function() {
+      this.element.parentNode.removeChild(this.element);
+      this.element = null;
+    }
+
+    TxtOverlay.prototype.hide = function() {
+      if (this.element) {
+        this.element.style.visibility = 'hidden';
+      }
+    }
+
+    TxtOverlay.prototype.show = function() {
+      if (this.element) {
+        this.element.style.visibility = 'visible';
+      }
+    }
+
+    TxtOverlay.prototype.toggle = function() {
+      if (this.element) {
+        if (this.element.style.visibility == 'hidden') {
+          this.show();
+        } else {
+          this.hide();
+        }
+      }
+    }
+
+    TxtOverlay.prototype.toggleDOM = function() {
+      if (this.getMap()) {
+        this.setMap(null);
+      } else {
+        this.setMap(this.map);
+      }
+    }
+
+    return TxtOverlay;
+};
 
 (function (Drupal, once) {
+
   Drupal.behaviors.hamstation = {
     attach: (context, settings) => {
       if (context !== document) {
@@ -656,9 +617,7 @@ let txtOverlayLib = function() {
         return;
       }
 
-    //  txtOverlayLib.init();
-      hamstationApp.init(context, txtOverlayLib, settings.ham_station);
+      Drupal.hamApp(Drupal, settings.ham_station);
     }
   };
 })(Drupal, once);
-

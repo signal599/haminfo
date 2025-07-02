@@ -1,0 +1,41 @@
+$schema: https://git.drupalcode.org/project/drupal/-/raw/10.1.x/core/modules/sdc/src/metadata.schema.json
+name: HTML Document
+status: experimental
+description: 'This provides structure for an entire HTML document, from DOCTYPE declaration to closing HTML tag.'
+props:
+  type: object
+  properties:
+    doc_lang:
+      type: string
+      title: Document Language
+      description: Defines the language used in the HTML document. Default language is English (en).
+      default: en
+    body_classes:
+      type: array
+      items:
+        type: string
+      title: Body Classes
+      default: []
+      description: An array of utility classes applied to the body of the HTML document.
+    body_utility_classes:
+      type: array
+      items:
+        type: string
+      title: Utility Classes
+      default: []
+      description: An array of utility classes for general use across the HTML document.
+    attributes:
+      type: Drupal\Core\Template\Attribute
+slots:
+  head_start:
+    title: Head
+    description: Serves as a container for metadata (data about data) and is placed between the `<head>` tags.
+  head_end:
+    title: Head End
+    description: Optional. Can contain information or elements to be included at the end of the head.
+  body_start:
+    title: Body
+    description: Defines the document's body and contains all the contents of an HTML document, such as text, hyperlinks, images, tables, lists, etc.
+  body_end:
+    title: Foot
+    description: Optional. Can contain information or elements to be included at the end of the document.

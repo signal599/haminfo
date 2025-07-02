@@ -19,8 +19,6 @@ class MapQueryService {
    */
   private $subsquares = [];
 
-  private $errorMessage;
-
   const DIRECTION_NORTH = 0;
   const DIRECTION_EAST = 1;
   const DIRECTION_SOUTH = 2;
@@ -90,13 +88,11 @@ class MapQueryService {
   private function getMapDataByCallsign($callsign) {
     $callsign = strtoupper($callsign);
     $result = $this->callsignQuery($callsign);
+    $error = $result['error'] ?? NULL;
 
-    if (isset($result['error'])) {
-      $this->errorMessage = $result['error'];
-      return NULL;
-    }
-
-    return $this->getMapDataCentered($result['lat'], $result['lng'], $callsign);
+    return empty($error)
+      ? $this->getMapDataCentered($result['lat'], $result['lng'], $callsign)
+      : MapQueryResult::createForError($error);
   }
 
   private function getMapDataByGridsquare($code) {
@@ -106,13 +102,11 @@ class MapQueryService {
 
   private function getMapDataByZipCode($zipcode) {
     $result = $this->googleGeocoder->geocodePostalCode($zipcode);
+    $error = $result['error'] ?? NULL;
 
-    if (empty($result)) {
-      $this->errorMessage = t('We can\'t find a location for that zip code.');
-      return NULL;
-    }
-
-    return $this->getMapDataCentered($result['lat'], $result['lng']);
+    return empty($error)
+      ? $this->getMapDataCentered($result['lat'], $result['lng'])
+      : MapQueryResult::createForError($error);
   }
 
   private function getMapDataCentered($lat, $lng, $callsign = NULL) {
@@ -339,10 +333,6 @@ class MapQueryService {
     }
 
     return [$result, $query_callsign_idx];
-  }
-
-  public function getErrorMessage() {
-    return $this->errorMessage;
   }
 
   private function buildSubsquares($lat, $lng) {

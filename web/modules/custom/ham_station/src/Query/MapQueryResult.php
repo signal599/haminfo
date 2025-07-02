@@ -9,6 +9,7 @@ class MapQueryResult {
   private $mapCenterLat;
   private $mapCenterLng;
   private $queryCallsignIdx = NULL;
+  private $error;
 
   /**
    * GridSquareCluster constructor.
@@ -18,12 +19,18 @@ class MapQueryResult {
    * @param null $map_center_lng
    * @param array $locations
    */
-  public function __construct(array $subsquares, $map_center_lat = NULL, $map_center_lng = NULL, $locations = [], $query_callsign_idx = NULL) {
+  public function __construct(?array $subsquares = NULL, $map_center_lat = NULL, $map_center_lng = NULL, $locations = [], $query_callsign_idx = NULL) {
     $this->subsquares = $subsquares;
     $this->mapCenterLat = $map_center_lat;
     $this->mapCenterLng = $map_center_lng;
     $this->locations = $locations;
     $this->queryCallsignIdx = $query_callsign_idx;
+  }
+
+  public static function createForError($error) {
+    $result = new static();
+    $result->error = $error;
+    return $result;
   }
 
   public function getSubsquares() {
@@ -69,9 +76,13 @@ class MapQueryResult {
   public function setQueryCallsignIdx($query_callsign_idx) {
     $this->queryCallsignIdx = $query_callsign_idx;
   }
-  
+
   public function getQueryCallsignIdx() {
     return $this->queryCallsignIdx;
+  }
+
+  public function getError() {
+    return $this->error;
   }
 
 }

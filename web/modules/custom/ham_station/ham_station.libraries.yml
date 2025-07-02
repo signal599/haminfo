@@ -1,8 +1,7 @@
 neighbors:
   js:
     js/hamstation.js: {}
-    https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places:
-      type: external
   dependencies:
-    - core/jquery
+    - core/drupal
+    - core/drupal.ajax
     - core/once

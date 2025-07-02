@@ -33,10 +33,19 @@
   margin-bottom: 20px;
 }
 
+.ham-map-wrapper .marker-label {
+  color: black;
+  font-size: 14px;
+}
+
 .ham-map-wrapper .grid-marker {
+  display: block;
   font-size: 20px;
+  color: black;
   background-color: yellow;
   padding: 0 3px;
+  position: absolute;
+  text-decoration: none;
 }
 
 .ham-map-wrapper .infowindow.multi .address {

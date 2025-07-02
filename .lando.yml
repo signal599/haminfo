@@ -21,6 +21,11 @@ tooling:
     dir: /app/web/themes/custom/haminfo
     cmd: npm install
 
+  theme-build:
+    service: node
+    dir: /app/web/themes/custom/haminfo
+    cmd: npm run production
+
   theme-watch:
     service: node
     dir: /app/web/themes/custom/haminfo
