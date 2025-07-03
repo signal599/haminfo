@@ -29,7 +29,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     googleLibs.AdvancedMarkerElement = AdvancedMarkerElement;
     googleLibs.PinElement = PinElement;
     googleLibs.Rectangle = Rectangle;
-    googleLibs.TxtOverlay = googleMapTxtOverlay(OverlayView, LatLng);
+    googleLibs.TextOverlay = getTextOverlayClass(OverlayView, LatLng);
   }
 
   const loadPlacesLibrary = async () => {
@@ -330,7 +330,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   }
 
   const writeGridLabel = (subsquare) => {
-    gridLabels.push(new googleLibs.TxtOverlay(subsquare.latCenter, subsquare.lngCenter, subsquare.code, 'grid-marker', googleMap));
+    gridLabels.push(new googleLibs.TextOverlay(subsquare.latCenter, subsquare.lngCenter, subsquare.code, 'grid-marker', googleMap));
   }
 
   const validateAndBuildQuery = () => {
@@ -533,55 +533,59 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   initialQuery();
 };
 
-const googleMapTxtOverlay = (OverlayView, LatLng) => {
+const getTextOverlayClass = (OverlayView, LatLng) => {
+  // Based on https://developers.google.com/maps/documentation/javascript/customoverlays#code
+  return class extends OverlayView {
+    lat;
+    lng;
+    content;
+    cssClass;
+    element;
 
-  function TxtOverlay(lat, lng, txt, cls, map) {
-      this.position = new LatLng(lat, lng);
-      this.content = txt;
-      this.cssClass = cls;
-      this.map = map;
-      this.element = null;
+    constructor(lat, lng, content, cssClass, map) {
+      super();
+      this.lat = lat;
+      this.lng = lng;
+      this.content = content;
+      this.cssClass = cssClass;
       this.setMap(map);
     }
 
-    TxtOverlay.prototype = new OverlayView();
+    onAdd() {
+      this.element = document.createElement('a');
+      this.element.className = this.cssClass;
+      this.element.innerHTML = this.content;
 
-    TxtOverlay.prototype.onAdd = function() {
-      const element = document.createElement('a');
-      element.className = this.cssClass;
-      element.innerHTML = this.content;
-
-      const panes = this.getPanes();
-      panes.floatPane.appendChild(element);
-      this.element = element;
+      this.getPanes().floatPane.appendChild(this.element);
     }
 
-    TxtOverlay.prototype.draw = function() {
+    draw() {
       const overlayProjection = this.getProjection();
-      const position = overlayProjection.fromLatLngToDivPixel(this.position);
+      const latlng = new LatLng(this.lat, this.lng);
+      const position = overlayProjection.fromLatLngToDivPixel(latlng);
 
       this.element.style.left = `${position.x - 35}px`;
       this.element.style.top = `${position.y}px`;
     }
 
-    TxtOverlay.prototype.onRemove = function() {
+    onRemove() {
       this.element.parentNode.removeChild(this.element);
       this.element = null;
     }
 
-    TxtOverlay.prototype.hide = function() {
+    hide() {
       if (this.element) {
         this.element.style.visibility = 'hidden';
       }
     }
 
-    TxtOverlay.prototype.show = function() {
+    show() {
       if (this.element) {
         this.element.style.visibility = 'visible';
       }
     }
 
-    TxtOverlay.prototype.toggle = function() {
+    toggle() {
       if (this.element) {
         if (this.element.style.visibility == 'hidden') {
           this.show();
@@ -591,16 +595,15 @@ const googleMapTxtOverlay = (OverlayView, LatLng) => {
       }
     }
 
-    TxtOverlay.prototype.toggleDOM = function() {
+    toggleDOM() {
       if (this.getMap()) {
         this.setMap(null);
       } else {
         this.setMap(this.map);
       }
     }
-
-    return TxtOverlay;
-};
+  }
+}
 
 (function (Drupal, once) {
 
