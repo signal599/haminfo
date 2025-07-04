@@ -452,30 +452,28 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   };
 
   const mapAjaxRequest = (query) => {
-
-    const ajax = Drupal.ajax({
+    Drupal.ajax({
       url: '/ham-map-ajax',
       httpMethod: 'POST',
       submit: query,
       progress: { type: 'throbber', message: 'Processing...' },
       element: formElement.querySelector('.processing'),
-    });
+    }).execute();
+  };
 
-    Drupal.AjaxCommands.prototype.hamMapQuery = (ajax, response, status) => {
-      if (status !== 'success') {
-        showError('Sorry, something went wrong.')
-        return;
-      }
+  // Listen for AJAX response.
+  Drupal.AjaxCommands.prototype.hamMapQuery = (ajax, response, status) => {
+    if (status !== 'success') {
+      showError('Sorry, something went wrong.')
+      return;
+    }
 
-      if (response.result.error) {
-        showError(response.result.error);
-        return;
-      }
+    if (response.result.error) {
+      showError(response.result.error);
+      return;
+    }
 
-      processSuccessResponse(response.result);
-    };
-
-    ajax.execute();
+    processSuccessResponse(response.result);
   };
 
   formElement.addEventListener('change', event => {
