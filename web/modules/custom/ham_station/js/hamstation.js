@@ -13,6 +13,78 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   const googleLibs = {};
   let queryResult;
 
+  const getTextOverlayClass = (OverlayView, LatLng) => {
+  // Based on https://developers.google.com/maps/documentation/javascript/customoverlays#code
+    return class extends OverlayView {
+      lat;
+      lng;
+      content;
+      cssClass;
+      element;
+
+      constructor(lat, lng, content, cssClass, map) {
+        super();
+        this.lat = lat;
+        this.lng = lng;
+        this.content = content;
+        this.cssClass = cssClass;
+        this.setMap(map);
+      }
+
+      onAdd() {
+        this.element = document.createElement('a');
+        this.element.className = this.cssClass;
+        this.element.innerHTML = this.content;
+
+        this.getPanes().floatPane.appendChild(this.element);
+      }
+
+      draw() {
+        const overlayProjection = this.getProjection();
+        const latlng = new LatLng(this.lat, this.lng);
+        const position = overlayProjection.fromLatLngToDivPixel(latlng);
+
+        this.element.style.left = `${position.x - 35}px`;
+        this.element.style.top = `${position.y}px`;
+      }
+
+      onRemove() {
+        this.element.parentNode.removeChild(this.element);
+        this.element = null;
+      }
+
+      hide() {
+        if (this.element) {
+          this.element.style.visibility = 'hidden';
+        }
+      }
+
+      show() {
+        if (this.element) {
+          this.element.style.visibility = 'visible';
+        }
+      }
+
+      toggle() {
+        if (this.element) {
+          if (this.element.style.visibility == 'hidden') {
+            this.show();
+          } else {
+            this.hide();
+          }
+        }
+      }
+
+      toggleDOM() {
+        if (this.getMap()) {
+          this.setMap(null);
+        } else {
+          this.setMap(this.map);
+        }
+      }
+    }
+  }
+
   const loadMapsLibrary = async () => {
     const [
       { Map, InfoWindow, OverlayView, Rectangle },
@@ -530,78 +602,6 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   formElement.querySelector('input[name=query]').focus();
   initialQuery();
 };
-
-const getTextOverlayClass = (OverlayView, LatLng) => {
-  // Based on https://developers.google.com/maps/documentation/javascript/customoverlays#code
-  return class extends OverlayView {
-    lat;
-    lng;
-    content;
-    cssClass;
-    element;
-
-    constructor(lat, lng, content, cssClass, map) {
-      super();
-      this.lat = lat;
-      this.lng = lng;
-      this.content = content;
-      this.cssClass = cssClass;
-      this.setMap(map);
-    }
-
-    onAdd() {
-      this.element = document.createElement('a');
-      this.element.className = this.cssClass;
-      this.element.innerHTML = this.content;
-
-      this.getPanes().floatPane.appendChild(this.element);
-    }
-
-    draw() {
-      const overlayProjection = this.getProjection();
-      const latlng = new LatLng(this.lat, this.lng);
-      const position = overlayProjection.fromLatLngToDivPixel(latlng);
-
-      this.element.style.left = `${position.x - 35}px`;
-      this.element.style.top = `${position.y}px`;
-    }
-
-    onRemove() {
-      this.element.parentNode.removeChild(this.element);
-      this.element = null;
-    }
-
-    hide() {
-      if (this.element) {
-        this.element.style.visibility = 'hidden';
-      }
-    }
-
-    show() {
-      if (this.element) {
-        this.element.style.visibility = 'visible';
-      }
-    }
-
-    toggle() {
-      if (this.element) {
-        if (this.element.style.visibility == 'hidden') {
-          this.show();
-        } else {
-          this.hide();
-        }
-      }
-    }
-
-    toggleDOM() {
-      if (this.getMap()) {
-        this.setMap(null);
-      } else {
-        this.setMap(this.map);
-      }
-    }
-  }
-}
 
 (function (Drupal, once) {
 
