@@ -201,66 +201,66 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     return stationCount;
   }
 
-    const markerLabel = (location) => {
-      const stationCount = getStationCountForLocation(location);
-      return location.addresses[0].stations[0].callsign + (stationCount > 1 ? '+' : '');
+  const markerLabel = (location) => {
+    const stationCount = getStationCountForLocation(location);
+    return location.addresses[0].stations[0].callsign + (stationCount > 1 ? '+' : '');
+  }
+
+  const drawMarkers = () => {
+    // Remove markers for locations no longer on the map.
+    for (const [id, marker] of mapMarkers) {
+      if (!queryResult.locationsMap.has(id)) {
+        marker.setMap(null);
+        mapMarkers.delete(id);
+      }
     }
 
-    const drawMarkers = () => {
-      // Remove markers for locations no longer on the map.
-      for (const [id, marker] of mapMarkers) {
-        if (!queryResult.locationsMap.has(id)) {
-          marker.setMap(null);
-          mapMarkers.delete(id);
-        }
+    // Add new markers.
+    queryResult.locations.forEach(location => {
+      if (!mapMarkers.has(location.id)) {
+        drawMarker(location);
       }
+    });
 
-      // Add new markers.
-      queryResult.locations.forEach(location => {
-        if (!mapMarkers.has(location.id)) {
-          drawMarker(location);
-        }
-      });
+    openQueriedCallsign();
+  }
 
-      openQueriedCallsign();
+  const drawMarker = (location) => {
+    if (location.addresses.length === 0) {
+      return;
     }
 
-    const drawMarker = (location) => {
-      if (location.addresses.length === 0) {
-        return;
-      }
+    // Workaround because AdvancedMarkerElement doesn't have labels like legacy did.
+    const glyphLabel = document.createElement('div');
+    glyphLabel.className = 'marker-label';
+    glyphLabel.innerText = markerLabel(location);
+    let iconImage = new googleLibs.PinElement({
+      glyph: glyphLabel,
+    });
 
-      // Workaround because AdvancedMarkerElement doesn't have labels like legacy did.
-      const glyphLabel = document.createElement('div');
-      glyphLabel.className = 'marker-label';
-      glyphLabel.innerText = markerLabel(location);
-      let iconImage = new googleLibs.PinElement({
-        glyph: glyphLabel,
-      });
+    const marker = new googleLibs.AdvancedMarkerElement({
+      position: {lat: location.lat, lng: location.lng},
+      map: googleMap,
+      content: iconImage.element
+    });
 
-      const marker = new googleLibs.AdvancedMarkerElement({
-        position: {lat: location.lat, lng: location.lng},
-        map: googleMap,
-        content: iconImage.element
-      });
+    mapMarkers.set(location.id, marker);
 
-      mapMarkers.set(location.id, marker);
-
-      marker.addListener('click', e => {
-        openInfoWindow(location, marker);
-      });
-    }
-
-    const openQueriedCallsign = () => {
-      if (queryResult.queryCallsignIdx === null) {
-        return;
-      }
-
-      const location = queryResult.locations[queryResult.queryCallsignIdx];
-      const marker = mapMarkers.get(location.id);
-
+    marker.addListener('click', e => {
       openInfoWindow(location, marker);
+    });
+  }
+
+  const openQueriedCallsign = () => {
+    if (queryResult.queryCallsignIdx === null) {
+      return;
     }
+
+    const location = queryResult.locations[queryResult.queryCallsignIdx];
+    const marker = mapMarkers.get(location.id);
+
+    openInfoWindow(location, marker);
+  }
 
   const openInfoWindow = (location, marker) => {
     closeInfoWindow();
