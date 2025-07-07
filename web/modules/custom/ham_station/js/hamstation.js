@@ -606,7 +606,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
 (function (Drupal, once) {
 
   Drupal.behaviors.hamstation = {
-    attach: (context, settings) => {
+    attach(context, settings) {
       if (context !== document) {
         return;
       }
