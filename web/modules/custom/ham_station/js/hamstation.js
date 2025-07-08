@@ -295,7 +295,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       classes.push('multi');
     }
 
-    const content = `<div class="${classes.join(' ')}">${addresses.join('')}<a class="info-close" href="">Close</a></div>`;
+    const content = `<div class="${classes.join(' ')}">${addresses.join('')}</div>`;
 
     const infoWindow = new googleLibs.InfoWindow({
       content: content,
@@ -310,12 +310,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
 
   // Handle some events as they bubble up.
   mapContainer.addEventListener('click', event => {
-    const classes = event.target.classList;
-    if (classes.contains('info-close')) {
-      event.preventDefault();
-      closeInfoWindow();
-    }
-    else if (classes.contains('grid-marker')) {
+    if (event.target.classList.contains('grid-marker')) {
       event.preventDefault();
       setQueryType('g', true);
       formElement.querySelector('input[name=query]').value = event.target.innerHTML;
