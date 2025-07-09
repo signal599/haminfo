@@ -102,7 +102,9 @@ class MapQueryService {
 
   private function getMapDataByZipCode($zipcode) {
     $result = $this->googleGeocoder->geocodePostalCode($zipcode);
-    $error = $result['error'] ?? NULL;
+    if (empty($result)) {
+      $error = sprintf('%s seems to be an invalid zip code', $zipcode);
+    }
 
     return empty($error)
       ? $this->getMapDataCentered($result['lat'], $result['lng'])

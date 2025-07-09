@@ -21,7 +21,10 @@ class GoogleGeocoder {
   }
 
   public function geocodePostalCode($code) {
-    $response = $this->makeRequest(['components' => 'postal_code:' . $code]);
+    $response = $this->makeRequest([
+      'components' => "postal_code:{$code}|country:US",
+    ]);
+
     $location = $response['results'][0]['geometry']['location'] ?? NULL;
 
     if (empty($location)) {
@@ -50,6 +53,3 @@ class GoogleGeocoder {
     return $response;
   }
 }
-
-// $a["status"]
-// $a["results"][0]["geometry"]["location"]["lat"]
