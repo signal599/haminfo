@@ -8,7 +8,6 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   let setCenterEnabled = false;
   let centerChangedEnabled = false;
   let activeInfoWindow;
-  let activeInfoWindowLocId;
   let rectangles = [];
   let gridLabels = [];
   const googleLibs = {};
@@ -248,13 +247,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     mapMarkers.set(location.id, marker);
 
     marker.addListener('click', e => {
-      // Toggle infowindow.
-      if (activeInfoWindowLocId === location.id) {
-        closeInfoWindow();
-      }
-      else {
-        openInfoWindow(location, marker);
-      }
+      openInfoWindow(location, marker);
     });
   }
 
@@ -300,12 +293,10 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     const infoWindow = new googleLibs.InfoWindow({
       content: content,
       zIndex: 99,
-      headerDisabled: true,
     });
 
     infoWindow.open(googleMap, marker);
     activeInfoWindow = infoWindow;
-    activeInfoWindowLocId = location.id;
   };
 
   // Handle some events as they bubble up.
@@ -322,7 +313,6 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     if (activeInfoWindow) {
       activeInfoWindow.close();
       activeInfoWindow = null;
-      activeInfoWindowLocId = null;
     }
   }
 
