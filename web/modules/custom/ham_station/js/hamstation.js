@@ -7,11 +7,13 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   let centerMovedTimerId;
   let setCenterEnabled = false;
   let centerChangedEnabled = false;
-  let activeInfoWindow;
   let rectangles = [];
   let gridLabels = [];
   const googleLibs = {};
   let queryResult;
+
+  const emptyInfoWindow = { element: null, locationId: null };
+  let activeInfoWindow = emptyInfoWindow;
 
   const getTextOverlayClass = (OverlayView, LatLng) => {
   // Based on https://developers.google.com/maps/documentation/javascript/customoverlays#code
@@ -246,8 +248,13 @@ Drupal.hamApp = (Drupal, hsSettings) => {
 
     mapMarkers.set(location.id, marker);
 
-    marker.addListener('click', e => {
-      openInfoWindow(location, marker);
+    marker.addListener('click', () => {
+      if (activeInfoWindow.locationId === location.id) {
+        closeInfoWindow();
+      }
+      else {
+        openInfoWindow(location, marker);
+      }
     });
   }
 
@@ -296,7 +303,12 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     });
 
     infoWindow.open(googleMap, marker);
-    activeInfoWindow = infoWindow;
+
+    activeInfoWindow = { element: infoWindow, locationId: location.id };
+
+    infoWindow.addListener('close', () => {
+      activeInfoWindow = emptyInfoWindow;
+    });
   };
 
   // Handle some events as they bubble up.
@@ -310,9 +322,8 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   });
 
   const closeInfoWindow = () => {
-    if (activeInfoWindow) {
-      activeInfoWindow.close();
-      activeInfoWindow = null;
+    if (activeInfoWindow.element) {
+      activeInfoWindow.element.close();
     }
   }
 
