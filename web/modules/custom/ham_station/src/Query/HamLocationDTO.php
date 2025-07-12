@@ -69,8 +69,8 @@ class HamLocationDTO {
       $b_class = !empty($a_stations) ? reset($b_stations)->getOperatorClass() : NULL;
 
       // Put no license class at the bottom.
-      $a_rank = !empty($a_class) ? (HamStationDTO::CLASS_RANKINGS[$a_class] ?? 0) : 99;
-      $b_rank = !empty($b_class) ? (HamStationDTO::CLASS_RANKINGS[$b_class] ?? 0) : 99;
+      $a_rank = !empty($a_class) ? (HamStationDTO::CLASS_RANKINGS[$a_class] ?? 999) : 999;
+      $b_rank = !empty($b_class) ? (HamStationDTO::CLASS_RANKINGS[$b_class] ?? 999) : 999;
 
       return $a_rank <=> $b_rank;
     });

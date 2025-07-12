@@ -78,10 +78,10 @@ class HamAddressDTO {
    */
   public function sortStations() {
     usort($this->stations, function(HamStationDTO $a, HamStationDTO $b) {
-      $a_rank = HamStationDTO::CLASS_RANKINGS[$a->getOperatorClass()] ?? 0;
-      $b_rank = HamStationDTO::CLASS_RANKINGS[$b->getOperatorClass()] ?? 0;
+      $a_rank = HamStationDTO::CLASS_RANKINGS[$a->getOperatorClass()] ?? 999;
+      $b_rank = HamStationDTO::CLASS_RANKINGS[$b->getOperatorClass()] ?? 999;
 
-      return $a <=> $b;
+      return $a_rank <=> $b_rank;
     });
   }
 
