@@ -65,12 +65,21 @@ class HamLocationDTO {
       $a_stations = $a->getStations();
       $b_stations = $b->getStations();
 
-      $a_class = !empty($a_stations) ? reset($a_stations)->getOperatorClass() : NULL;
-      $b_class = !empty($a_stations) ? reset($b_stations)->getOperatorClass() : NULL;
+      /** @var HamStationDTO $a_station */
+      $a_station = !empty($a_stations) ? reset($a_stations) : NULL;
+      /** @var HamStationDTO $b_station */
+      $b_station = !empty($b_stations) ? reset($b_stations) : NULL;
 
       // Put no license class at the bottom.
-      $a_rank = !empty($a_class) ? (HamStationDTO::CLASS_RANKINGS[$a_class] ?? 999) : 999;
-      $b_rank = !empty($b_class) ? (HamStationDTO::CLASS_RANKINGS[$b_class] ?? 999) : 999;
+      $a_rank = 999;
+      if (!empty($a_station)) {
+        $a_rank = (HamStationDTO::CLASS_RANKINGS[$a_station->getOperatorClass()] ?? 999) . $a_station->getCallsign();
+      }
+
+      $b_rank = 999;
+      if (!empty($b_station)) {
+        $b_rank = (HamStationDTO::CLASS_RANKINGS[$b_station->getOperatorClass()] ?? 999) . $b_station->getCallsign();
+      }
 
       return $a_rank <=> $b_rank;
     });
