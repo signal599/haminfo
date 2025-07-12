@@ -34,13 +34,17 @@ class HamLocationDTO {
   {
     return $this->lng;
   }
-  
+
   public function addAddress(HamAddressDTO $address) {
     $this->addresses[] = $address;
   }
 
   public function getAddresses() {
     return $this->addresses;
+  }
+
+  public function setAddress(HamAddressDTO $address, $idx) {
+    $this->addresses[$idx] = $address;
   }
 
   public function moveAddressToTop($top_idx) {

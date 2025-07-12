@@ -289,7 +289,7 @@ class MapQueryService {
       /** @var HamLocationDTO $location */
       $location = $result[$result_idx];
 
-      $address = new HamAddressDTO(
+      $new_address = new HamAddressDTO(
         $row->address__address_line1,
         $row->address__address_line2,
         $row->address__locality,
@@ -300,16 +300,23 @@ class MapQueryService {
       // Case insensitive key for addresses at the same location.
       // Used to avoid showing the same address twice in an info window only
       // varied by case or 5/9 digit zip.
-      $address_key = $row->location_id . '|' . $address->getKey();
+      $address_key = $row->location_id . '|' . $new_address->getKey();
 
       if (!isset($address_map[$address_key])) {
         // New address so use it.
+        $address = $new_address;
         $location->addAddress($address);
         $address_map[$address_key] = count($location->getAddresses()) - 1;
       }
       else {
         // Get existing address.
         $address = $location->getAddresses()[$address_map[$address_key]];
+        // Sometimes we have two addresses at the same location where one is
+        // all upper case and one proper case. Favor the proper case.
+        if (!preg_match('/[a-z]/', $address->getCity()) && preg_match('/[a-z]/', $new_address->getCity())) {
+          $location->setAddress($new_address, $address_map[$address_key]);
+          $address = $new_address;
+        }
       }
 
       $address->addStation(
