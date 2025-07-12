@@ -29,7 +29,7 @@ class HamAddressDTO {
     $this->address2 = $address2;
     $this->city = $city;
     $this->state = $state;
-    $this->zip = $zip;
+    $this->zip = explode('-', $zip)[0];
   }
 
   /**
@@ -56,7 +56,7 @@ class HamAddressDTO {
       }
     }
 
-    return $address;
+    return rtrim($address, '.');
   }
 
   public function addStation(HamStationDTO $station) {
@@ -140,9 +140,7 @@ class HamAddressDTO {
    *   Key.
    */
   public function getKey() {
-    // 5 digit zip.
-    $zip = explode('-', $this->zip)[0];
-    return strtolower(implode('|', [$this->address1, $this->address2, $this->city, $this->state, $zip]));
+    return strtolower(implode('|', [$this->address1, $this->address2, $this->city, $this->state, $this->zip]));
   }
 
 }
