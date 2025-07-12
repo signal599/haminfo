@@ -43,6 +43,10 @@ class HamLocationDTO {
     return $this->addresses;
   }
 
+  public function getAddress($idx) {
+    return $this->addresses[$idx];
+  }
+
   public function setAddress(HamAddressDTO $address, $idx) {
     $this->addresses[$idx] = $address;
   }

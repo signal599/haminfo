@@ -301,20 +301,22 @@ class MapQueryService {
       // Used to avoid showing the same address twice in an info window only
       // varied by case or 5/9 digit zip.
       $address_key = $row->location_id . '|' . $new_address->getKey();
+      $address_idx = $address_map[$address_key] ?? NULL;
 
-      if (!isset($address_map[$address_key])) {
+      if (is_null($address_idx)) {
         // New address so use it.
         $address = $new_address;
         $location->addAddress($address);
-        $address_map[$address_key] = count($location->getAddresses()) - 1;
+        $address_idx = count($location->getAddresses()) - 1;
+        $address_map[$address_key] = $address_idx;
       }
       else {
         // Get existing address.
-        $address = $location->getAddresses()[$address_map[$address_key]];
+        $address = $location->getAddress($address_idx);
         // Sometimes we have two addresses at the same location where one is
         // all upper case and one proper case. Favor the proper case.
         if (!preg_match('/[a-z]/', $address->getCity()) && preg_match('/[a-z]/', $new_address->getCity())) {
-          $location->setAddress($new_address, $address_map[$address_key]);
+          $location->setAddress($new_address, $address_idx);
           $address = $new_address;
         }
       }
@@ -332,7 +334,7 @@ class MapQueryService {
       );
 
       if (!empty($callsign) && empty($callsign_idx) && $row->callsign === $callsign) {
-        $callsign_idx = [$result_idx, $address_map[$address_key], count($address->getStations()) - 1];
+        $callsign_idx = [$result_idx, $address_idx, count($address->getStations()) - 1];
       }
     }
 
