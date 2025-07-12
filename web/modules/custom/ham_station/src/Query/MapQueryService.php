@@ -254,13 +254,13 @@ class MapQueryService {
     $query->range(0, 200);
     $query->orderBy('distance');
 
-    $result = [];
+    $locations = [];
     $stmt = $query->execute();
 
     $location_map = [];
     $idx = -1;
     foreach ($stmt as $row) {
-      $result[] = new HamLocationDTO(
+      $locations[] = new HamLocationDTO(
         (int) $row->id,
         (float) $row->latitude,
         (float) $row->longitude
@@ -268,8 +268,8 @@ class MapQueryService {
       $location_map[$row->id] = ++$idx;
     }
 
-    if (empty($result)) {
-      return [$result, NULL];
+    if (empty($locations)) {
+      return [$locations, NULL];
     }
 
     $address_alias = 'ha';
@@ -285,9 +285,9 @@ class MapQueryService {
     $callsign_idx = NULL;
 
     foreach ($stmt as $row) {
-      $result_idx = $location_map[$row->location_id];
+      $location_idx = $location_map[$row->location_id];
       /** @var HamLocationDTO $location */
-      $location = $result[$result_idx];
+      $location = $locations[$location_idx];
 
       $new_address = new HamAddressDTO(
         $row->address__address_line1,
@@ -334,25 +334,30 @@ class MapQueryService {
       );
 
       if (!empty($callsign) && empty($callsign_idx) && $row->callsign === $callsign) {
-        $callsign_idx = [$result_idx, $address_idx, count($address->getStations()) - 1];
+        $callsign_idx = [$location_idx, $address_idx, count($address->getStations()) - 1];
       }
     }
 
-    $query_callsign_idx = NULL;
-
     if (!empty($callsign_idx)) {
-      // This puts the queried callsign on the marker label if there
-      // are more than one callsign at the location.
-      list($result_idx, $address_idx, $station_idx) = $callsign_idx;
-
-      /** @var HamLocationDTO $location */
-      $location = $result[$result_idx];
-      $address = $location->moveAddressToTop($address_idx);
-      $address->moveStationToTop($station_idx);
-      $query_callsign_idx = $result_idx;
+      list($query_location_idx, $query_address_idx, $query_station_idx) = $callsign_idx;
     }
 
-    return [$result, $query_callsign_idx];
+    foreach ($locations as $location_idx => $location) {
+      if (!empty($callsign_idx) && $location_idx === $query_location_idx) {
+      // This puts the queried callsign on the marker label if there
+      // are more multiple callsigns at the location.
+        $address = $location->moveAddressToTop($query_address_idx);
+        $address->moveStationToTop($query_station_idx);
+        $query_callsign_idx = $location_idx;
+      }
+      else {
+        // Sort by license class, highest at the top. This is a an attempt to
+        // make the map pin show the most likely active callsign.
+        $location->sortAddresses();
+      }
+    }
+
+    return [$locations, $query_callsign_idx];
   }
 
   private function buildSubsquares($lat, $lng) {

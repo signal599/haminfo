@@ -4,6 +4,14 @@ namespace Drupal\ham_station\Query;
 
 class HamStationDTO {
 
+  const CLASS_RANKINGS = [
+    'E' => 1,
+    'A' => 2,
+    'G' => 3,
+    'T' => 4,
+    'N' => 5,
+  ];
+
   private $callsign;
   private $firstName;
   private $middleName;
@@ -46,7 +54,7 @@ class HamStationDTO {
     if (!empty($this->suffix)) {
       $parts[] = $this->suffix;
     }
-    
+
     return implode(' ', $parts);
   }
 

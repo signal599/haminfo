@@ -51,6 +51,31 @@ class HamLocationDTO {
     $this->addresses[$idx] = $address;
   }
 
+  /**
+   * Sort addresses by license class.
+   */
+  public function sortAddresses() {
+    // Sort stations, highest class at the top.
+    foreach ($this->addresses as $address) {
+      $address->sortStations();
+    }
+
+    // Sort addresses by first license class.
+    usort($this->addresses, function (HamAddressDTO $a, HamAddressDTO $b) {
+      $a_stations = $a->getStations();
+      $b_stations = $b->getStations();
+
+      $a_class = !empty($a_stations) ? reset($a_stations)->getOperatorClass() : NULL;
+      $b_class = !empty($a_stations) ? reset($b_stations)->getOperatorClass() : NULL;
+
+      // Put no license class at the bottom.
+      $a_rank = !empty($a_class) ? (HamStationDTO::CLASS_RANKINGS[$a_class] ?? 0) : 99;
+      $b_rank = !empty($b_class) ? (HamStationDTO::CLASS_RANKINGS[$b_class] ?? 0) : 99;
+
+      return $a_rank <=> $b_rank;
+    });
+  }
+
   public function moveAddressToTop($top_idx) {
     $address = $this->addresses[$top_idx];
 

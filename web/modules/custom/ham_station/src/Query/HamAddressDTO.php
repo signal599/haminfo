@@ -2,6 +2,8 @@
 
 namespace Drupal\ham_station\Query;
 
+use Drupal\ham_station\Entity\HamStation;
+
 class HamAddressDTO {
 
   private $address1;
@@ -69,6 +71,18 @@ class HamAddressDTO {
   public function getStations()
   {
     return $this->stations;
+  }
+
+  /**
+   * Sort by license class, highest at the top.
+   */
+  public function sortStations() {
+    usort($this->stations, function(HamStationDTO $a, HamStationDTO $b) {
+      $a_rank = HamStationDTO::CLASS_RANKINGS[$a->getOperatorClass()] ?? 0;
+      $b_rank = HamStationDTO::CLASS_RANKINGS[$b->getOperatorClass()] ?? 0;
+
+      return $a <=> $b;
+    });
   }
 
   public function moveStationToTop($top_idx) {
