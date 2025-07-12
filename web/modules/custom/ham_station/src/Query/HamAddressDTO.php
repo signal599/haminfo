@@ -6,6 +6,17 @@ use Drupal\ham_station\Entity\HamStation;
 
 class HamAddressDTO {
 
+  const ROAD_SHORTS = [
+    'Road' => 'Rd',
+    'Street' => 'St',
+    'Avenue' => 'Ave',
+    'Drive' => 'Dr',
+    'Lane' => 'Ln',
+    'Circle' => 'Cir',
+  ];
+
+  private static $roadShorts;
+
   private $address1;
   private $address2;
   private $city;
@@ -14,11 +25,38 @@ class HamAddressDTO {
   private $stations = [];
 
   public function __construct($address1, $address2, $city, $state, $zip) {
-    $this->address1 = $address1;
+    $this->address1 = $this->normalizeAddress($address1);
     $this->address2 = $address2;
     $this->city = $city;
     $this->state = $state;
     $this->zip = $zip;
+  }
+
+  /**
+   * Normalize some common abbreviations.
+   *
+   * @param [type] $address
+   * @return void
+   */
+  private function normalizeAddress($address) {
+    if (empty(self::$roadShorts)) {
+      // Addresses tend to be proper case or all upper case.
+      $all = self::ROAD_SHORTS;
+      foreach (self::ROAD_SHORTS as $long => $short) {
+        $all[strtoupper($long)] = strtoupper($short);
+      }
+      self::$roadShorts = $all;
+    }
+
+    foreach (self::$roadShorts as $long => $short) {
+      $count = 0;
+      $address = preg_replace("/ {$long}($| )/", " $short", $address, 1, $count);
+      if ($count > 0) {
+        break;
+      }
+    }
+
+    return $address;
   }
 
   public function addStation(HamStationDTO $station) {
