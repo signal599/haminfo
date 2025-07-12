@@ -280,6 +280,7 @@ class MapQueryService {
     $query->condition('ha.location_id', array_keys($location_map), 'IN');
     $stmt = $query->execute();
 
+    // Keep the array index of this address in location->getAddresses().
     $address_map = [];
     $callsign_idx = NULL;
 
@@ -288,19 +289,27 @@ class MapQueryService {
       /** @var HamLocationDTO $location */
       $location = $result[$result_idx];
 
-      if (!isset($address_map[$row->id])) {
-        $address = new HamAddressDTO(
-          $row->address__address_line1,
-          $row->address__address_line2,
-          $row->address__locality,
-          $row->address__administrative_area,
-          $row->address__postal_code
-        );
+      $address = new HamAddressDTO(
+        $row->address__address_line1,
+        $row->address__address_line2,
+        $row->address__locality,
+        $row->address__administrative_area,
+        $row->address__postal_code
+      );
+
+      // Case insensitive key for addresses at the same location.
+      // Used to avoid showing the same address twice in an info window only
+      // varied by case or 5/9 digit zip.
+      $address_key = $row->location_id . '|' . $address->getKey();
+
+      if (!isset($address_map[$address_key])) {
+        // New address so use it.
         $location->addAddress($address);
-        $address_map[$row->id] = count($location->getAddresses()) - 1;
+        $address_map[$address_key] = count($location->getAddresses()) - 1;
       }
       else {
-        $address = $location->getAddresses()[$address_map[$row->id]];
+        // Get existing address.
+        $address = $location->getAddresses()[$address_map[$address_key]];
       }
 
       $address->addStation(
@@ -316,7 +325,7 @@ class MapQueryService {
       );
 
       if (!empty($callsign) && empty($callsign_idx) && $row->callsign === $callsign) {
-        $callsign_idx = [$result_idx, $address_map[$row->id], count($address->getStations()) - 1];
+        $callsign_idx = [$result_idx, $address_map[$address_key], count($address->getStations()) - 1];
       }
     }
 

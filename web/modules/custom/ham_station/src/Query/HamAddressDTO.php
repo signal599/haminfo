@@ -81,4 +81,16 @@ class HamAddressDTO {
     array_unshift($this->stations, $station);
   }
 
+  /**
+   * Create a case insenstive string key.
+   *
+   * @return string
+   *   Key.
+   */
+  public function getKey() {
+    // 5 digit zip.
+    $zip = explode('-', $this->zip)[0];
+    return strtolower(implode('|', [$this->address1, $this->address2, $this->city, $this->state, $zip]));
+  }
+
 }
