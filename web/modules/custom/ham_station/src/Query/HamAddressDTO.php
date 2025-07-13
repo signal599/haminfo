@@ -50,7 +50,7 @@ class HamAddressDTO {
 
     foreach (self::$roadShorts as $long => $short) {
       $count = 0;
-      $address = preg_replace("/ {$long}($| )/", " $short", $address, 1, $count);
+      $address = preg_replace("/ {$long}$/", " $short", $address, 1, $count);
       if ($count > 0) {
         break;
       }
