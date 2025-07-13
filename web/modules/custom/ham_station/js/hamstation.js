@@ -225,6 +225,14 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     openQueriedCallsign();
   }
 
+  const getOpenInfoWindowId = () => {
+    if (!(infoWindow && infoWindow.isOpen)) {
+      return null;
+    }
+
+    return parseInt(mapContainer.querySelector('.infowindow').dataset.lid);
+  };
+
   const drawMarker = (location) => {
     if (location.addresses.length === 0) {
       return;
@@ -247,7 +255,12 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     mapMarkers.set(location.id, marker);
 
     marker.addListener('click', () => {
-      openInfoWindow(location, marker);
+      if (getOpenInfoWindowId() === location.id) {
+        infoWindow.close();
+      }
+      else {
+        openInfoWindow(location, marker);
+      }
     });
   }
 
@@ -286,7 +299,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       classes.push('multi');
     }
 
-    const content = `<div class="${classes.join(' ')}">${addresses.join('')}</div>`;
+    const content = `<div class="${classes.join(' ')}" data-lid="${location.id}">${addresses.join('')}</div>`;
 
     if (!infoWindow) {
       infoWindow = new googleLibs.InfoWindow({ zIndex: 99 });
