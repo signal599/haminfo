@@ -61,7 +61,7 @@ class HamMapForm extends FormBase {
 
     $form['show_gridlabels'] = [
       '#type' => 'checkbox',
-      '#title' => $this->t('Show grid labels'),
+      '#title' => $this->t('Show grid squares'),
       '#default_value' => TRUE,
     ];
 
