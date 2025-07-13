@@ -202,28 +202,36 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     return formElement.querySelector('input[name=query_type]:checked').value;
   }
 
+  // Handle map center changed event.
   function mapCenterChanged() {
     if (!centerChangedEnabled) {
+      // We only want to do this when the map has been dragged, not when the
+      // center is set by a new query.
       centerChangedEnabled = true;
       return;
     }
 
     if (centerMovedTimerId) {
+      // If a timeout is already running, clear it and start a new one.
       clearTimeout(centerMovedTimerId);
     }
 
+    // Wait for timeout before doing a new query.
     centerMovedTimerId = setTimeout(() => {
+      centerMovedTimerId = null;
       const location = googleMap.getCenter();
       setCenterEnabled = false;
-      mapAjaxRequest({queryType:'latlng', value:`${location.lat()},${location.lng()}}`}, false);
+      mapAjaxRequest({queryType:'latlng', value:`${location.lat()},${location.lng()}}`});
     }, 2000);
   }
 
+  // Set the map center without triggering a refresh.
   function setMapCenter() {
     centerChangedEnabled = false;
     googleMap.setCenter({lat: queryResult.mapCenterLat, lng: queryResult.mapCenterLng});
   }
 
+  // Create a Javascript map of current locations and therefore markers on the Google map.
   function setLocationsMap() {
     const map = new Map();
     queryResult.locations.forEach(location => {
@@ -233,6 +241,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     queryResult.locationsMap = map;
   }
 
+  // Count the stations at a location.
   function getStationCountForLocation(location) {
     let stationCount = 0;
     location.addresses.forEach(address => {
@@ -242,11 +251,14 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     return stationCount;
   }
 
+  // Get the marker label.
   function markerLabel(location) {
     const stationCount = getStationCountForLocation(location);
+    // Callsign plus '+' if there are multiple stations.
     return location.addresses[0].stations[0].callsign + (stationCount > 1 ? '+' : '');
   }
 
+  // Draw the markers (pins) on the map.
   function drawMarkers() {
     // Remove markers for locations no longer on the map.
     for (const [id, marker] of mapMarkers) {
@@ -266,20 +278,13 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     openQueriedCallsign();
   }
 
-  function getOpenInfoWindowId() {
-    if (!(infoWindow && infoWindow.isOpen)) {
-      return null;
-    }
-
-    return parseInt(mapContainer.querySelector('.infowindow').dataset.lid);
-  }
-
   function drawMarker(location) {
     if (location.addresses.length === 0) {
       return;
     }
 
     // Workaround because AdvancedMarkerElement doesn't have labels like legacy did.
+    // See https://issuetracker.google.com/issues/330384265#comment4
     const glyphLabel = document.createElement('div');
     glyphLabel.className = 'marker-label';
     glyphLabel.innerText = markerLabel(location);
@@ -293,6 +298,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       content: iconImage.element
     });
 
+    // Record markers so we can clear them when the map moves.
     mapMarkers.set(location.id, marker);
 
     marker.addListener('click', () => {
@@ -300,23 +306,23 @@ Drupal.hamApp = (Drupal, hsSettings) => {
         infoWindow.close();
       }
       else {
-        openInfoWindow(location, marker);
+        openInfoWindow(location);
       }
     });
   }
 
+  // Open the map marker for the query callsign if we queried by callsign.
   function openQueriedCallsign() {
     if (queryResult.queryCallsignIdx === null) {
       return;
     }
 
     const location = queryResult.locations[queryResult.queryCallsignIdx];
-    const marker = mapMarkers.get(location.id);
-
-    openInfoWindow(location, marker);
+    openInfoWindow(location);
   }
 
-  function openInfoWindow(location, marker) {
+  // Open the info window for a location.
+  function openInfoWindow(location) {
     const addresses = [];
     const lastIndex = location.addresses.length - 1;
     const multi = location.addresses.length > 1;
@@ -343,13 +349,24 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     const content = `<div class="${classes.join(' ')}" data-lid="${location.id}">${addresses.join('')}</div>`;
 
     if (!infoWindow) {
+      // Create one info window and move it around.
       infoWindow = new googleLibs.InfoWindow({ zIndex: 99 });
     }
 
     infoWindow.setContent(content);
-    infoWindow.open(googleMap, marker);
+    infoWindow.open(googleMap, mapMarkers.get(location.id));
   }
 
+  // Get the location id of the open info window.
+  function getOpenInfoWindowId() {
+    if (!(infoWindow && infoWindow.isOpen)) {
+      return null;
+    }
+
+    return parseInt(mapContainer.querySelector('.infowindow').dataset.lid);
+  }
+
+  // Write the address markup to a string.
   function writeAddress(address) {
     const stations = [];
 
@@ -373,6 +390,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     ${station.name}`;
   }
 
+  // Clear the grid marker rectangles.
   function clearRectangles() {
     rectangles.forEach((el, index) => {
       rectangles[index].setMap(null);
@@ -382,6 +400,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     rectangles = [];
   }
 
+  // Draw the gridsquares.
   function drawGridsquares(show) {
     clearRectangles();
 
@@ -390,6 +409,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     }
   }
 
+  // Draw one gridsquare.
   function drawGridsquare(subsquare) {
     const rectangle = new googleLibs.Rectangle({
       strokeColor: '#000000',
@@ -417,6 +437,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     gridLabels = [];
   }
 
+  // Write the grid labels.
   function writeGridlabels(show) {
     clearGridLabels();
 
@@ -425,10 +446,12 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     }
   }
 
+  // Write one grid label.
   function writeGridLabel(subsquare) {
     gridLabels.push(new googleLibs.TextOverlay(subsquare.latCenter, subsquare.lngCenter, subsquare.code, 'grid-marker', googleMap));
   }
 
+  // Validate and build query from form.
   function validateAndBuildQuery() {
     const queryType = getQueryType();
     let query;
@@ -458,6 +481,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     return query;
   }
 
+  // Build a query for callsign.
   function buildCallsignQuery(value) {
     value = value.toUpperCase();
 
@@ -466,6 +490,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       : {error: 'Please enter a callsign.'};
   }
 
+  // Build a query for grid square.
   function buildGridsquareQuery(value) {
     if (!value.match(/^[A-R]{2}\d\d[a-x]{2}$/i)) {
       return {error: 'Please enter a six character gridsquare.'};
@@ -477,6 +502,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     };
   }
 
+  // Build a query for zip code.
   function buildZipcodeQuery(value) {
     if (!value.match(/^\d{5}$/)) {
       return {error: 'Please enter a five digit zip code.'};
@@ -485,6 +511,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     return {queryType:'z', value};
   }
 
+  // Build a query for a street address.
   function buildAddressQuery() {
     if (!placesLocation) {
       return {error: ''};
@@ -496,6 +523,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     }
   }
 
+  // Show error message on the form.
   function showError(error) {
     const element = formElement.querySelector('.error-message');
     element.innerHTML = error;
@@ -507,8 +535,10 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     }
   }
 
+  // Process a successful AJAX response.
   async function processSuccessResponse(result) {
     if (!googleMap) {
+      // Load and create the Google map.
       await loadMapsLibrary();
 
       googleMap = new googleLibs.Map(mapContainer, {
@@ -534,6 +564,8 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     mapContainer.classList.remove('hidden');
   }
 
+  // Set the URL so it can be shared and the query will be repeated.
+  // The initial page load receives the request from the backend via behavior settings.
   function setUrl(query) {
       let path = '/map';
 
@@ -547,6 +579,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       window.history.pushState({}, null, path);
   }
 
+  // Do the AJAX request using Drupal AJAX API.
   function mapAjaxRequest(query) {
     Drupal.ajax({
       url: '/ham-map-ajax',
@@ -557,7 +590,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     }).execute();
   }
 
-  // Listen for AJAX response.
+  // Receive the AJAX response.
   Drupal.AjaxCommands.prototype.hamMapQuery = (ajax, response, status) => {
     if (status !== 'success') {
       showError('Sorry, something went wrong.')
@@ -572,6 +605,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     processSuccessResponse(response.result);
   };
 
+  // Submit the query from the form.
   function submitQueryFromForm() {
     showError('');
     query = validateAndBuildQuery();
@@ -586,10 +620,12 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     }
   }
 
+  // Get the state of the Show Grid checkbox.
   function getShowGrid() {
     return formElement.querySelector('input[name=show_gridlabels]').checked;
   }
 
+  // Do the initial query received from the request on page load.
   function initialQuery() {
     if (!hsSettings.query_type) {
       return;
@@ -601,6 +637,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   }
 };
 
+// Drupal behavior.
 (function (Drupal, once) {
   Drupal.behaviors.hamstation = {
     attach(context, settings) {
