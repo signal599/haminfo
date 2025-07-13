@@ -2,6 +2,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   const formElement = document.querySelector('.ham-map-form');
   const mapContainer = document.querySelector('.map-container');
   let googleMap;
+  let infoWindow;
   const mapMarkers = new Map();
   let placesLocation;
   let centerMovedTimerId;
@@ -11,9 +12,6 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   let gridLabels = [];
   const googleLibs = {};
   let queryResult;
-
-  const emptyInfoWindow = { element: null, locationId: null };
-  let activeInfoWindow = emptyInfoWindow;
 
   const getTextOverlayClass = (OverlayView, LatLng) => {
   // Based on https://developers.google.com/maps/documentation/javascript/customoverlays#code
@@ -249,12 +247,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     mapMarkers.set(location.id, marker);
 
     marker.addListener('click', () => {
-      if (activeInfoWindow.locationId === location.id) {
-        closeInfoWindow();
-      }
-      else {
-        openInfoWindow(location, marker);
-      }
+      openInfoWindow(location, marker);
     });
   }
 
@@ -270,8 +263,6 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   }
 
   const openInfoWindow = (location, marker) => {
-    closeInfoWindow();
-
     const addresses = [];
     const lastIndex = location.addresses.length - 1;
     const multi = location.addresses.length > 1;
@@ -297,18 +288,12 @@ Drupal.hamApp = (Drupal, hsSettings) => {
 
     const content = `<div class="${classes.join(' ')}">${addresses.join('')}</div>`;
 
-    const infoWindow = new googleLibs.InfoWindow({
-      content: content,
-      zIndex: 99,
-    });
+    if (!infoWindow) {
+      infoWindow = new googleLibs.InfoWindow({ zIndex: 99 });
+    }
 
+    infoWindow.setContent(content);
     infoWindow.open(googleMap, marker);
-
-    activeInfoWindow = { element: infoWindow, locationId: location.id };
-
-    infoWindow.addListener('close', () => {
-      activeInfoWindow = emptyInfoWindow;
-    });
   };
 
   // Handle some events as they bubble up.
@@ -320,12 +305,6 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       submitQueryFromForm();
     }
   });
-
-  const closeInfoWindow = () => {
-    if (activeInfoWindow.element) {
-      activeInfoWindow.element.close();
-    }
-  }
 
   const writeAddress = (address) => {
     const stations = [];
@@ -556,7 +535,6 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   });
 
   const submitQueryFromForm = () => {
-    closeInfoWindow();
     showError('');
     query = validateAndBuildQuery();
 
