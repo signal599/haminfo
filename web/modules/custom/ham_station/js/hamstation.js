@@ -13,8 +13,47 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   const googleLibs = {};
   let queryResult;
 
-  const getTextOverlayClass = (OverlayView, LatLng) => {
-  // Based on https://developers.google.com/maps/documentation/javascript/customoverlays#code
+  // ------- Main code -------
+  formElement.addEventListener('submit', event => {
+    event.preventDefault();
+    submitQueryFromForm();
+  });
+
+  formElement.addEventListener('change', event => {
+    if (event.target.getAttribute('name') === 'query_type') {
+       setQueryType(event.target.value);
+    }
+  });
+
+  formElement.querySelector('input[name=show_gridlabels]').addEventListener('click', event => {
+    if (event.target.checked) {
+      drawGridsquares(true);
+      writeGridlabels(true);
+    }
+    else {
+      clearGridLabels();
+      clearRectangles();
+    }
+  });
+
+  // Handle some events as they bubble up.
+  mapContainer.addEventListener('click', event => {
+    if (event.target.classList.contains('grid-marker')) {
+      event.preventDefault();
+      setQueryType('g', true);
+      formElement.querySelector('input[name=query]').value = event.target.innerHTML;
+      submitQueryFromForm();
+    }
+  });
+
+  formElement.querySelector('input[name=query]').focus();
+  initialQuery();
+  // ------- End of main code -------
+
+  // Class to provide text overlays.
+  function getTextOverlayClass(OverlayView, LatLng) {
+    // Implemented as a class expression because of the dynamically loaded OverlayView and LatLng.
+    // Based on https://developers.google.com/maps/documentation/javascript/customoverlays#code
     return class extends OverlayView {
       lat;
       lng;
@@ -85,7 +124,8 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     }
   }
 
-  const loadMapsLibrary = async () => {
+  // Load Maps libraries dynamically.
+  async function loadMapsLibrary() {
     const [
       { Map, InfoWindow, OverlayView, Rectangle },
       { AdvancedMarkerElement, PinElement },
@@ -104,7 +144,8 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     googleLibs.TextOverlay = getTextOverlayClass(OverlayView, LatLng);
   }
 
-  const loadPlacesLibrary = async () => {
+  // Load Places library dynamically.
+  async function loadPlacesLibrary() {
     const { PlaceAutocompleteElement } = await google.maps.importLibrary('places');
 
     const placeAutocomplete = new PlaceAutocompleteElement({includedRegionCodes: ['us']});
@@ -123,9 +164,9 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     });
 
     googleLibs.placesLoaded = true;
-  };
+  }
 
-  const setQueryType = (queryType, setRadio = false) => {
+  function setQueryType(queryType, setRadio = false) {
     const labels = {
       c: ['Callsign', 'Enter a callsign.'],
       g: ['Gridsquare', 'Enter a six character grid subsquare.'],
@@ -157,11 +198,11 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     loadPlacesLibrary();
   }
 
-  const getQueryType = () => {
+  function getQueryType() {
     return formElement.querySelector('input[name=query_type]:checked').value;
   }
 
-  const mapCenterChanged = () => {
+  function mapCenterChanged() {
     if (!centerChangedEnabled) {
       centerChangedEnabled = true;
       return;
@@ -178,21 +219,21 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     }, 2000);
   }
 
-  const setMapCenter = () => {
+  function setMapCenter() {
     centerChangedEnabled = false;
     googleMap.setCenter({lat: queryResult.mapCenterLat, lng: queryResult.mapCenterLng});
   }
 
-  const setLocationsMap = () => {
+  function setLocationsMap() {
     const map = new Map();
     queryResult.locations.forEach(location => {
       map.set(location.id, true);
     });
 
     queryResult.locationsMap = map;
-  };
+  }
 
-  const getStationCountForLocation = (location) => {
+  function getStationCountForLocation(location) {
     let stationCount = 0;
     location.addresses.forEach(address => {
       address.stations.forEach(station => stationCount++);
@@ -201,12 +242,12 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     return stationCount;
   }
 
-  const markerLabel = (location) => {
+  function markerLabel(location) {
     const stationCount = getStationCountForLocation(location);
     return location.addresses[0].stations[0].callsign + (stationCount > 1 ? '+' : '');
   }
 
-  const drawMarkers = () => {
+  function drawMarkers() {
     // Remove markers for locations no longer on the map.
     for (const [id, marker] of mapMarkers) {
       if (!queryResult.locationsMap.has(id)) {
@@ -225,15 +266,15 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     openQueriedCallsign();
   }
 
-  const getOpenInfoWindowId = () => {
+  function getOpenInfoWindowId() {
     if (!(infoWindow && infoWindow.isOpen)) {
       return null;
     }
 
     return parseInt(mapContainer.querySelector('.infowindow').dataset.lid);
-  };
+  }
 
-  const drawMarker = (location) => {
+  function drawMarker(location) {
     if (location.addresses.length === 0) {
       return;
     }
@@ -264,7 +305,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     });
   }
 
-  const openQueriedCallsign = () => {
+  function openQueriedCallsign() {
     if (queryResult.queryCallsignIdx === null) {
       return;
     }
@@ -275,7 +316,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     openInfoWindow(location, marker);
   }
 
-  const openInfoWindow = (location, marker) => {
+  function openInfoWindow(location, marker) {
     const addresses = [];
     const lastIndex = location.addresses.length - 1;
     const multi = location.addresses.length > 1;
@@ -307,19 +348,9 @@ Drupal.hamApp = (Drupal, hsSettings) => {
 
     infoWindow.setContent(content);
     infoWindow.open(googleMap, marker);
-  };
+  }
 
-  // Handle some events as they bubble up.
-  mapContainer.addEventListener('click', event => {
-    if (event.target.classList.contains('grid-marker')) {
-      event.preventDefault();
-      setQueryType('g', true);
-      formElement.querySelector('input[name=query]').value = event.target.innerHTML;
-      submitQueryFromForm();
-    }
-  });
-
-  const writeAddress = (address) => {
+  function writeAddress(address) {
     const stations = [];
 
     address.stations.forEach((station, index) => {
@@ -334,7 +365,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       ${address.city}, ${address.state} ${address.zip}</div>`;
   }
 
-  const writeStation = (station) => {
+  function writeStation(station) {
     const opclass = station.operatorClass ? (' ' + station.operatorClass) : '';
 
     return `
@@ -342,7 +373,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     ${station.name}`;
   }
 
-  const clearRectangles = () => {
+  function clearRectangles() {
     rectangles.forEach((el, index) => {
       rectangles[index].setMap(null);
       rectangles[index] = null;
@@ -351,7 +382,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     rectangles = [];
   }
 
-  const drawGridsquares = (show) => {
+  function drawGridsquares(show) {
     clearRectangles();
 
     if (show) {
@@ -359,7 +390,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     }
   }
 
-  const drawGridsquare = (subsquare) => {
+  function drawGridsquare(subsquare) {
     const rectangle = new googleLibs.Rectangle({
       strokeColor: '#000000',
       strokeOpacity: 0.5,
@@ -377,7 +408,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     rectangles.push(rectangle);
   }
 
-  const clearGridLabels = () => {
+  function clearGridLabels() {
     gridLabels.forEach((el, index) => {
       gridLabels[index].setMap(null);
       gridLabels[index] = null;
@@ -386,7 +417,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     gridLabels = [];
   }
 
-  const writeGridlabels = (show) => {
+  function writeGridlabels(show) {
     clearGridLabels();
 
     if (show) {
@@ -394,11 +425,11 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     }
   }
 
-  const writeGridLabel = (subsquare) => {
+  function writeGridLabel(subsquare) {
     gridLabels.push(new googleLibs.TextOverlay(subsquare.latCenter, subsquare.lngCenter, subsquare.code, 'grid-marker', googleMap));
   }
 
-  const validateAndBuildQuery = () => {
+  function validateAndBuildQuery() {
     const queryType = getQueryType();
     let query;
 
@@ -425,17 +456,17 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     }
 
     return query;
-  };
+  }
 
-  const buildCallsignQuery = (value) => {
+  function buildCallsignQuery(value) {
     value = value.toUpperCase();
 
     return value
       ? {queryType: 'c', value}
       : {error: 'Please enter a callsign.'};
-  };
+  }
 
-  const buildGridsquareQuery = (value) => {
+  function buildGridsquareQuery(value) {
     if (!value.match(/^[A-R]{2}\d\d[a-x]{2}$/i)) {
       return {error: 'Please enter a six character gridsquare.'};
     }
@@ -446,7 +477,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     };
   }
 
-  const buildZipcodeQuery = (value) => {
+  function buildZipcodeQuery(value) {
     if (!value.match(/^\d{5}$/)) {
       return {error: 'Please enter a five digit zip code.'};
     }
@@ -454,7 +485,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     return {queryType:'z', value};
   }
 
-  const buildAddressQuery = () => {
+  function buildAddressQuery() {
     if (!placesLocation) {
       return {error: ''};
     }
@@ -465,7 +496,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     }
   }
 
-  const showError = (error) => {
+  function showError(error) {
     const element = formElement.querySelector('.error-message');
     element.innerHTML = error;
     if (error) {
@@ -476,7 +507,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     }
   }
 
-  const processSuccessResponse = async (result) => {
+  async function processSuccessResponse(result) {
     if (!googleMap) {
       await loadMapsLibrary();
 
@@ -501,9 +532,9 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     drawGridsquares(showGrid);
     writeGridlabels(showGrid);
     mapContainer.classList.remove('hidden');
-  };
+  }
 
-  const setUrl = (query) => {
+  function setUrl(query) {
       let path = '/map';
 
       if (query.queryType === 'c') {
@@ -514,9 +545,9 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       }
 
       window.history.pushState({}, null, path);
-  };
+  }
 
-  const mapAjaxRequest = (query) => {
+  function mapAjaxRequest(query) {
     Drupal.ajax({
       url: '/ham-map-ajax',
       httpMethod: 'POST',
@@ -524,7 +555,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       progress: { type: 'throbber', message: 'Processing...' },
       element: formElement.querySelector('.processing'),
     }).execute();
-  };
+  }
 
   // Listen for AJAX response.
   Drupal.AjaxCommands.prototype.hamMapQuery = (ajax, response, status) => {
@@ -541,13 +572,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     processSuccessResponse(response.result);
   };
 
-  formElement.addEventListener('change', event => {
-    if (event.target.getAttribute('name') === 'query_type') {
-       setQueryType(event.target.value);
-    }
-  });
-
-  const submitQueryFromForm = () => {
+  function submitQueryFromForm() {
     showError('');
     query = validateAndBuildQuery();
 
@@ -559,29 +584,13 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       setUrl(query);
       mapAjaxRequest(query);
     }
-  };
+  }
 
-  formElement.addEventListener('submit', event => {
-    event.preventDefault();
-    submitQueryFromForm();
-  });
-
-  const getShowGrid = () => {
+  function getShowGrid() {
     return formElement.querySelector('input[name=show_gridlabels]').checked;
-  };
+  }
 
-  formElement.querySelector('input[name=show_gridlabels]').addEventListener('click', event => {
-    if (event.target.checked) {
-      drawGridsquares(true);
-      writeGridlabels(true);
-    }
-    else {
-      clearGridLabels();
-      clearRectangles();
-    }
-  });
-
-  const initialQuery = () => {
+  function initialQuery() {
     if (!hsSettings.query_type) {
       return;
     }
@@ -589,14 +598,10 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     setQueryType(hsSettings.query_type, true);
     formElement.querySelector('input[name=query]').value = hsSettings.query_value;
     submitQueryFromForm();
-  };
-
-  formElement.querySelector('input[name=query]').focus();
-  initialQuery();
+  }
 };
 
 (function (Drupal, once) {
-
   Drupal.behaviors.hamstation = {
     attach(context, settings) {
       if (context !== document) {
@@ -608,6 +613,8 @@ Drupal.hamApp = (Drupal, hsSettings) => {
         return;
       }
 
+      // Main code is implemented as a function on the Drupal object to avoid a
+      // couple of levels of indent here.
       Drupal.hamApp(Drupal, settings.ham_station);
     }
   };
