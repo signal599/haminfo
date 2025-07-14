@@ -64,10 +64,6 @@ class HamAddressDTO {
     $this->stations[] = $station;
   }
 
-  public function setStations($stations) {
-    $this->stations = $stations;
-  }
-
   /**
    * @return mixed
    */
@@ -114,6 +110,14 @@ class HamAddressDTO {
   public function getStations()
   {
     return $this->stations;
+  }
+
+  public function setFromAnother(HamAddressDTO $other) {
+    $this->address1 = $other->address1;
+    $this->address2 = $other->address2;
+    $this->city = $other->city;
+    $this->state = $other->state;
+    $this->zip = $other->zip;
   }
 
   /**
