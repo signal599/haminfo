@@ -40,10 +40,11 @@ class HamAddressDTO {
    */
   private function normalizeAddress($address) {
     if (empty(self::$roadShorts)) {
-      // Addresses tend to be proper case or all upper case.
+      // Addresses tend to be proper case or all upper or lower case.
       $all = self::ROAD_SHORTS;
       foreach (self::ROAD_SHORTS as $long => $short) {
         $all[strtoupper($long)] = strtoupper($short);
+        $all[strtolower($long)] = strtolower($short);
       }
       self::$roadShorts = $all;
     }
@@ -61,6 +62,10 @@ class HamAddressDTO {
 
   public function addStation(HamStationDTO $station) {
     $this->stations[] = $station;
+  }
+
+  public function setStations($stations) {
+    $this->stations = $stations;
   }
 
   /**

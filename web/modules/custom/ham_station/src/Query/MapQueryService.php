@@ -316,6 +316,9 @@ class MapQueryService {
         // Sometimes we have two addresses at the same location where one is
         // all upper case and one proper case. Favor the proper case.
         if (!preg_match('/[a-z]/', $address->getCity()) && preg_match('/[a-z]/', $new_address->getCity())) {
+          // The old address looks to be all upper case but the new address is
+          // proper case. Replace the old with the new.
+          $new_address->setStations($address->getStations());
           $location->setAddress($new_address, $address_idx);
           $address = $new_address;
         }
