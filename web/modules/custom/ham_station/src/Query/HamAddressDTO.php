@@ -142,6 +142,10 @@ class HamAddressDTO {
     array_unshift($this->stations, $station);
   }
 
+  public function hasLowerCase() {
+    return preg_match('/[a-z]/', $this->address1 . $this->city);
+  }
+
   /**
    * Create a case insenstive string key.
    *
