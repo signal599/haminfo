@@ -318,7 +318,7 @@ class MapQueryService {
         if (!preg_match('/[a-z]/', $address->getCity()) && preg_match('/[a-z]/', $new_address->getCity())) {
           // The old address looks to be all upper case but the new address is
           // proper case. Replace details from the new address.
-          $address->SetFromAnother($new_address);
+          $address->setFromAnother($new_address);
         }
       }
 
