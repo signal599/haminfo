@@ -2,16 +2,16 @@
 
 namespace Drupal\ham_station\Controller;
 
-use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Block\BlockManagerInterface;
 use Drupal\Core\Cache\Cache;
+use Drupal\Core\Cache\CacheableAjaxResponse;
+use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Link;
 use Drupal\ham_station\AjaxCommands\MapQueryCommand;
 use Drupal\ham_station\Form\HamMapForm;
 use Drupal\ham_station\Query\MapQueryService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\Serializer;
@@ -117,7 +117,7 @@ class DefaultController extends ControllerBase {
 
     $result = $this->mapQueryService->mapQuery($query_type, $query_value);
 
-    $response = new AjaxResponse();
+    $response = new CacheableAjaxResponse();
     $cmd = new MapQueryCommand($result);
     $response->addCommand($cmd);
 
@@ -125,6 +125,11 @@ class DefaultController extends ControllerBase {
     // By default the command uses json_encode which doesn't handle objects well.
     $response->setJson(
       $this->serializer->serialize([$cmd->render()], 'json')
+    );
+
+    // Cache for 5 minutes.
+    $response->addCacheableDependency(
+      (new CacheableMetadata())->setCacheMaxAge(300)
     );
 
     return $response;
