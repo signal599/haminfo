@@ -343,6 +343,8 @@ class MapQueryService {
       list($query_location_idx, $query_address_idx, $query_station_idx) = $callsign_idx;
     }
 
+    $query_callsign_idx = NULL;
+
     foreach ($locations as $location_idx => $location) {
       if (!empty($callsign_idx) && $location_idx === $query_location_idx) {
       // This puts the queried callsign on the marker label if there
