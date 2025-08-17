@@ -57,7 +57,8 @@ class HamAddressDTO {
       }
     }
 
-    return rtrim($address, '.');
+    $address = rtrim($address, '.');
+    return preg_replace('/\s+/', ' ', $address);
   }
 
   public function addStation(HamStationDTO $station) {
