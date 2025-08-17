@@ -221,7 +221,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       centerMovedTimerId = null;
       const location = googleMap.getCenter();
       setCenterEnabled = false;
-      mapAjaxRequest({queryType:'latlng', value:`${location.lat()},${location.lng()}}`});
+      mapAjaxRequest({queryType:'latlng', value:`${location.lat()},${location.lng()}`});
     }, 2000);
   }
 
