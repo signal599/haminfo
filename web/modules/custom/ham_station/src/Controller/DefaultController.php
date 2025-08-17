@@ -128,9 +128,11 @@ class DefaultController extends ControllerBase {
     );
 
     // Cache for 5 minutes.
-    $response->addCacheableDependency(
-      (new CacheableMetadata())->setCacheMaxAge(300)
-    );
+    $cache_meta = (new CacheableMetadata())
+      ->addCacheContexts(['url.query_args'])
+      ->setCacheMaxAge(300);
+
+    $response->addCacheableDependency($cache_meta);
 
     return $response;
   }
