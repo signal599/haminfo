@@ -315,7 +315,7 @@ class MapQueryService {
         $address = $location->getAddress($address_idx);
         // Sometimes we have two addresses at the same location where one is
         // all upper case and one proper case. Favor the proper case.
-        if (!$address->hasLowerCase && $new_address->hasLowerCase()) {
+        if (!$address->hasLowerCase() && $new_address->hasLowerCase()) {
           // The old address looks to be all upper case but the new address is
           // proper case. Replace details from the new address.
           $address->setFromAnother($new_address);
