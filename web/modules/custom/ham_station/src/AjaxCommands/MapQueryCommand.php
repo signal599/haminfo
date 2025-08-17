@@ -19,13 +19,10 @@ class MapQueryCommand implements CommandInterface {
    * {@inheritDoc}
    */
   public function render() {
-
-    $return = [
+    return [
       'command' => 'hamMapQuery',
       'result' => $this->result,
     ];
-
-    return $return;
   }
 
 }
