@@ -581,10 +581,10 @@ Drupal.hamApp = (Drupal, hsSettings) => {
 
   // Do the AJAX request using Drupal AJAX API.
   function mapAjaxRequest(query) {
+    const queryString = (new URLSearchParams(query)).toString();
     Drupal.ajax({
-      url: '/ham-map-ajax',
-      httpMethod: 'POST',
-      submit: query,
+      url: `/ham-map-ajax?${queryString}`,
+      httpMethod: 'GET',
       progress: { type: 'throbber', message: 'Processing...' },
       element: formElement.querySelector('.processing'),
     }).execute();

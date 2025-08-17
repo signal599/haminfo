@@ -29,7 +29,7 @@ ham_station.ham_map_ajax:
   defaults:
     _controller: '\Drupal\ham_station\Controller\DefaultController::hamMapAjax'
   requirements:
-    _method: 'POST'
+    _method: 'GET'
     _permission: 'access content'
 
 ham_station.geocode_invalidate_cache:

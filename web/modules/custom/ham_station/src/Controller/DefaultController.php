@@ -112,8 +112,8 @@ class DefaultController extends ControllerBase {
   }
 
   public function hamMapAjax(Request $request) {
-    $query_type = $request->get('queryType');
-    $query_value = $request->get('value');
+    $query_type = $request->query->get('queryType');
+    $query_value = $request->query->get('value');
 
     $result = $this->mapQueryService->mapQuery($query_type, $query_value);
 
