@@ -519,7 +519,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
 
     return {
       queryType:'latlng',
-      value: `${placesLocation.lat()},${placesLocation.lng()}}`
+      value: `${placesLocation.lat()},${placesLocation.lng()}`
     }
   }
 
