@@ -48,3 +48,9 @@ services:
       - '@entity_type.manager'
       - '@file_system'
       - '@current_user'
+
+  ham_station.ajax_no_page_cache:
+    class: Drupal\ham_station\AjaxNoPageCache
+    public: false
+    tags:
+      - { name: page_cache_request_policy }
