@@ -10,6 +10,8 @@ services:
       php: lando-config/php.ini
   node:
     type: node:20
+  database:
+    type: mysql:8.0
 
 tooling:
   npm:
