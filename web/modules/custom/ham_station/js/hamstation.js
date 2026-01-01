@@ -283,20 +283,17 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       return;
     }
 
-    // Workaround because AdvancedMarkerElement doesn't have labels like legacy did.
-    // See https://issuetracker.google.com/issues/330384265#comment4
-    const glyphLabel = document.createElement('div');
-    glyphLabel.className = 'marker-label';
-    glyphLabel.innerText = markerLabel(location);
-    let iconImage = new googleLibs.PinElement({
-      glyph: glyphLabel,
+    const labelElement = new googleLibs.PinElement({
+      glyphText: markerLabel(location),
+      glyphColor: 'black',
     });
 
     const marker = new googleLibs.AdvancedMarkerElement({
       position: {lat: location.lat, lng: location.lng},
       map: googleMap,
-      content: iconImage.element
     });
+
+    marker.append(labelElement);
 
     // Record markers so we can clear them when the map moves.
     mapMarkers.set(location.id, marker);
