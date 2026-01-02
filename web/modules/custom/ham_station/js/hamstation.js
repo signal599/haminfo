@@ -202,6 +202,51 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     return formElement.querySelector('input[name=query_type]:checked').value;
   }
 
+  // Clean and format input text.
+  formElement.querySelector('input[name=query').addEventListener('input', event => {
+    const element = event.target;
+    const selectIndex = element.selectionStart;
+    const value = element.value.trim();
+    let newValue = value;
+
+    switch (getQueryType()) {
+      case 'c':
+        newValue = cleanAndValidateCallsign(value);
+        break;
+      case 'g':
+        newValue = cleanAndValidateGrid(value);
+        break;
+      case 'z':
+        newValue = cleanAndValidateZip(value);
+        break;
+    }
+
+    element.value = newValue;
+    element.selectionStart = selectIndex;
+    element.selectionEnd = selectIndex;
+  });
+
+  // Clean and format callsign.
+  function cleanAndValidateCallsign(value) {
+    return value.substring(0, 10).toUpperCase();
+  }
+
+  // Clean and format grid code.
+  function cleanAndValidateGrid(value) {
+    value = value.substring(0, 6).toUpperCase();
+
+    if (value.length > 4) {
+      value = `${value.substring(0, 4)}${value.substring(4, 6).toLowerCase()}`;
+    }
+
+    return value;
+  }
+
+  // Clean and format zip.
+  function cleanAndValidateZip(value) {
+    return value.substring(0, 5).replace(/\D/g, '');
+  }
+
   // Handle map center changed event.
   function mapCenterChanged() {
     if (!centerChangedEnabled) {
