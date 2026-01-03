@@ -228,12 +228,12 @@ Drupal.hamApp = (Drupal, hsSettings) => {
 
   // Clean and format callsign.
   function cleanAndValidateCallsign(value) {
-    return value.substring(0, 10).toUpperCase();
+    return value.substring(0, 10).toUpperCase().replace(/[^0-9A-Z]/g, '');
   }
 
   // Clean and format grid code.
   function cleanAndValidateGrid(value) {
-    value = value.substring(0, 6).toUpperCase();
+    value = value.substring(0, 6).toUpperCase().replace(/[^0-9A-Z]/g, '');
 
     if (value.length > 4) {
       value = `${value.substring(0, 4)}${value.substring(4, 6).toLowerCase()}`;
