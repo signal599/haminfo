@@ -45,6 +45,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       event.preventDefault();
       setQueryType('g', true);
       queryElement.value = event.target.innerHTML;
+      inputValues.set('g', queryElement.value);
       submitQueryFromForm();
     }
   });
