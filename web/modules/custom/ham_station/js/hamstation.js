@@ -1,5 +1,6 @@
 Drupal.hamApp = (Drupal, hsSettings) => {
   const formElement = document.querySelector('.ham-map-form');
+  const queryElement = formElement.querySelector('input[name=query]');
   const mapContainer = document.querySelector('.map-container');
   let googleMap;
   let infoWindow;
@@ -12,6 +13,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   let gridLabels = [];
   const googleLibs = {};
   let queryResult;
+  const inputValues = new Map();
 
   // ------- Main code -------
   formElement.addEventListener('submit', event => {
@@ -22,6 +24,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
   formElement.addEventListener('change', event => {
     if (event.target.getAttribute('name') === 'query_type') {
        setQueryType(event.target.value);
+       queryElement.value = inputValues.get(event.target.value) || '';
     }
   });
 
@@ -41,12 +44,12 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     if (event.target.classList.contains('grid-marker')) {
       event.preventDefault();
       setQueryType('g', true);
-      formElement.querySelector('input[name=query]').value = event.target.innerHTML;
+      queryElement.value = event.target.innerHTML;
       submitQueryFromForm();
     }
   });
 
-  formElement.querySelector('input[name=query]').focus();
+  queryElement.focus();
   initialQuery();
   // ------- End of main code -------
 
@@ -207,9 +210,10 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     const element = event.target;
     const selectIndex = element.selectionStart;
     const value = element.value.trim();
+    const queryType = getQueryType();
     let newValue = value;
 
-    switch (getQueryType()) {
+    switch (queryType) {
       case 'c':
         newValue = cleanAndValidateCallsign(value);
         break;
@@ -224,6 +228,7 @@ Drupal.hamApp = (Drupal, hsSettings) => {
     element.value = newValue;
     element.selectionStart = selectIndex;
     element.selectionEnd = selectIndex;
+    inputValues.set(queryType, newValue);
   });
 
   // Clean and format callsign.
@@ -673,8 +678,9 @@ Drupal.hamApp = (Drupal, hsSettings) => {
       return;
     }
 
+    inputValues.set(hsSettings.query_type, hsSettings.query_value);
     setQueryType(hsSettings.query_type, true);
-    formElement.querySelector('input[name=query]').value = hsSettings.query_value;
+    queryElement.value = hsSettings.query_value;
     submitQueryFromForm();
   }
 };
