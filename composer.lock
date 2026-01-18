@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c680c6c082622df27911a96895683582",
+    "content-hash": "2a69083c5dc942ba83e46c6720c72d62",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -1721,6 +1721,60 @@
                 "source": "https://github.com/drupal/core-recommended/tree/11.3.2"
             },
             "time": "2026-01-08T09:19:50+00:00"
+        },
+        {
+            "name": "drupal/permissions_fixer",
+            "version": "2.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/permissions_fixer.git",
+                "reference": "11fa7a95ff470bef94ea2bbd637a34edece9cbb5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://git.drupalcode.org/api/v4/projects/project%2Fpermissions_fixer/repository/archive.zip?sha=11fa7a95ff470bef94ea2bbd637a34edece9cbb5",
+                "reference": "11fa7a95ff470bef94ea2bbd637a34edece9cbb5",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.4"
+            },
+            "require-dev": {
+                "composer/composer": "^2.0"
+            },
+            "bin": [
+                "fix-drupal-permissions",
+                "autofix-drupal-permissions"
+            ],
+            "type": "library",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Ricardo Sanz Ante",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Metadrop",
+                    "homepage": "https://www.metadrop.net"
+                }
+            ],
+            "description": "Security-focused bash scripts to fix file permissions and ownership in Drupal installations following best practices",
+            "homepage": "https://www.drupal.org/project/permissions_fixer",
+            "keywords": [
+                "deployment",
+                "drupal",
+                "filesystem",
+                "permissions",
+                "security"
+            ],
+            "support": {
+                "issues": "https://www.drupal.org/project/issues/permissions_fixer",
+                "source": "https://git.drupalcode.org/project/permissions_fixer"
+            },
+            "time": "2026-01-14T12:31:28+00:00"
         },
         {
             "name": "drupal/radix",
