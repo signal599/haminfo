@@ -12,6 +12,7 @@ services:
     type: node:20
   database:
     type: mysql:8.0
+    portforward: 41923
 
 tooling:
   npm:
