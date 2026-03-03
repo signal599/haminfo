@@ -35,3 +35,4 @@ $DRUSH fcc_ham_data:truncate en
 $DRUSH fcc_ham_data:truncate am
 
 $DRUSH cr
+revalidate-hamnext.sh
