@@ -32,6 +32,14 @@ ham_station.ham_map_ajax:
     _method: 'GET'
     _permission: 'access content'
 
+ham_station.ham_next_ajax:
+  path: '/ham-next-ajax'
+  defaults:
+    _controller: '\Drupal\ham_station\Controller\DefaultController::hamNextAjax'
+  requirements:
+    _method: 'GET'
+    _permission: 'access content'
+
 ham_station.geocode_invalidate_cache:
   path: '/ham-map/invalidate-geocode-cache/{key}'
   defaults:

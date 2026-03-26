@@ -5,6 +5,7 @@ namespace Drupal\ham_station\Controller;
 use Drupal\Core\Block\BlockManagerInterface;
 use Drupal\Core\Cache\Cache;
 use Drupal\Core\Cache\CacheableAjaxResponse;
+use Drupal\Core\Cache\CacheableJsonResponse;
 use Drupal\Core\Cache\CacheableMetadata;
 use Drupal\Core\Controller\ControllerBase;
 use Drupal\Core\Link;
@@ -12,6 +13,7 @@ use Drupal\ham_station\AjaxCommands\MapQueryCommand;
 use Drupal\ham_station\Form\HamMapForm;
 use Drupal\ham_station\Query\MapQueryService;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Serializer\Serializer;
@@ -134,6 +136,23 @@ class DefaultController extends ControllerBase {
 
     $response->addCacheableDependency($cache_meta);
 
+    return $response;
+  }
+
+  public function hamNextAjax(Request $request) {
+    $query_type = $request->query->get('type');
+    $query_value = $request->query->get('value');
+
+    $result = $this->mapQueryService->mapQuery($query_type, $query_value);
+    $response = new CacheableJsonResponse();
+    $response->setJson($this->serializer->serialize($result, 'json'));
+
+    // Cache for 5 minutes.
+    $cache_meta = (new CacheableMetadata())
+      ->addCacheContexts(['url.query_args'])
+      ->setCacheMaxAge(300);
+
+    $response->addCacheableDependency($cache_meta);
     return $response;
   }
 
