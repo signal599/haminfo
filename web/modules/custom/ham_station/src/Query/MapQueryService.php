@@ -112,8 +112,8 @@ class MapQueryService {
   }
 
   private function getMapDataCentered($lat, $lng, $callsign = NULL) {
-    list($locations, $query_callsign_idx) = $this->getStationsInRadius($lat, $lng, 20, 'miles', $callsign);
-    return new MapQueryResult($this->buildSubsquares($lat, $lng), $lat, $lng, $locations, $query_callsign_idx);
+    list($locations, $query_callsign_idx, $query_location_id) = $this->getStationsInRadius($lat, $lng, 20, 'miles', $callsign);
+    return new MapQueryResult($this->buildSubsquares($lat, $lng), $lat, $lng, $locations, $query_callsign_idx, $query_location_id);
   }
 
   /**
@@ -344,6 +344,7 @@ class MapQueryService {
     }
 
     $query_callsign_idx = NULL;
+    $query_location_id = NULL;
 
     foreach ($locations as $location_idx => $location) {
       if (!empty($callsign_idx) && $location_idx === $query_location_idx) {
@@ -352,6 +353,7 @@ class MapQueryService {
         $address = $location->moveAddressToTop($query_address_idx);
         $address->moveStationToTop($query_station_idx);
         $query_callsign_idx = $location_idx;
+        $query_location_id = $location->getId();
       }
       else {
         // Sort by license class, highest at the top. This is a an attempt to
@@ -360,7 +362,7 @@ class MapQueryService {
       }
     }
 
-    return [$locations, $query_callsign_idx];
+    return [$locations, $query_callsign_idx, $query_location_id];
   }
 
   private function buildSubsquares($lat, $lng) {

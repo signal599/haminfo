@@ -9,6 +9,7 @@ class MapQueryResult {
   private $mapCenterLat;
   private $mapCenterLng;
   private $queryCallsignIdx = NULL;
+  private $queryLocationId = NULL;
   private $error;
 
   /**
@@ -19,12 +20,13 @@ class MapQueryResult {
    * @param null $map_center_lng
    * @param array $locations
    */
-  public function __construct(?array $subsquares = NULL, $map_center_lat = NULL, $map_center_lng = NULL, $locations = [], $query_callsign_idx = NULL) {
+  public function __construct(?array $subsquares = NULL, $map_center_lat = NULL, $map_center_lng = NULL, $locations = [], $query_callsign_idx = NULL, $query_location_id = NULL) {
     $this->subsquares = $subsquares;
     $this->mapCenterLat = $map_center_lat;
     $this->mapCenterLng = $map_center_lng;
     $this->locations = $locations;
     $this->queryCallsignIdx = $query_callsign_idx;
+    $this->queryLocationId = $query_location_id;
   }
 
   public static function createForError($error) {
@@ -79,6 +81,14 @@ class MapQueryResult {
 
   public function getQueryCallsignIdx() {
     return $this->queryCallsignIdx;
+  }
+
+  public function setQueryLocationId($query_location_id) {
+    $this->queryLocationId = $query_location_id;
+  }
+
+  public function getQueryLocationId() {
+    return $this->queryLocationId;
   }
 
   public function getError() {
