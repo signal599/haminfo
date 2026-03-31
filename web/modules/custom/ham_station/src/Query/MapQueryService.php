@@ -272,11 +272,12 @@ class MapQueryService {
       return [$locations, NULL];
     }
 
-    $address_alias = 'ha';
-    $query = $this->dbConnection->select('ham_address', $address_alias);
-    $query->fields($address_alias, ['id', 'address__address_line1', 'address__address_line2', 'address__locality', 'address__administrative_area', 'address__postal_code', 'location_id']);
+    $query = $this->dbConnection->select('ham_address', 'ha');
+    $query->fields('ha', ['id', 'address__address_line1', 'address__address_line2', 'address__locality', 'address__administrative_area', 'address__postal_code', 'location_id']);
+    $query->addField('ha', 'id', 'ha_id');
     $query->addJoin('INNER', 'ham_station', 'hs', 'hs.address_hash = ha.hash');
     $query->fields('hs', ['callsign', 'first_name', 'middle_name', 'last_name', 'suffix', 'organization', 'operator_class']);
+    $query->addField('hs', 'id', 'hs_id');
     $query->condition('ha.location_id', array_keys($location_map), 'IN');
     $stmt = $query->execute();
 
@@ -290,6 +291,7 @@ class MapQueryService {
       $location = $locations[$location_idx];
 
       $new_address = new HamAddressDTO(
+        $row->ha_id,
         $row->address__address_line1,
         $row->address__address_line2,
         $row->address__locality,
@@ -324,6 +326,7 @@ class MapQueryService {
 
       $address->addStation(
         new HamStationDTO(
+          $row->hs_id,
           $row->callsign,
           $row->first_name,
           $row->middle_name,

@@ -17,6 +17,7 @@ class HamAddressDTO {
 
   private static $roadShorts;
 
+  private $id;
   private $address1;
   private $address2;
   private $city;
@@ -24,7 +25,8 @@ class HamAddressDTO {
   private $zip;
   private $stations = [];
 
-  public function __construct($address1, $address2, $city, $state, $zip) {
+  public function __construct($id, $address1, $address2, $city, $state, $zip) {
+    $this->id = $id;
     $this->address1 = $this->normalizeAddress($address1);
     $this->address2 = $address2;
     $this->city = $city;
@@ -63,6 +65,10 @@ class HamAddressDTO {
 
   public function addStation(HamStationDTO $station) {
     $this->stations[] = $station;
+  }
+
+  public function getId() {
+    return $this->id;
   }
 
   /**

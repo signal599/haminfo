@@ -12,6 +12,7 @@ class HamStationDTO {
     'N' => 5,
   ];
 
+  private $id;
   private $callsign;
   private $firstName;
   private $middleName;
@@ -20,7 +21,8 @@ class HamStationDTO {
   private $organization;
   private $operatorClass;
 
-  public function __construct($callsign, $first_name, $middle_name, $last_name, $suffix, $organization, $operator_class) {
+  public function __construct($id, $callsign, $first_name, $middle_name, $last_name, $suffix, $organization, $operator_class) {
+    $this->id = $id;
     $this->callsign = $callsign;
     $this->firstName = $first_name;
     $this->middleName = $middle_name;
@@ -28,6 +30,10 @@ class HamStationDTO {
     $this->suffix = $suffix;
     $this->organization = $organization;
     $this->operatorClass = $operator_class;
+  }
+
+  public function getId() {
+    return $this->id;
   }
 
   /**
