@@ -6,6 +6,7 @@ use Drupal\Core\Database\Connection;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\ham_station\DistanceService;
 use Drupal\ham_station\GoogleGeocoder;
+use Drupal\ham_station\Utils;
 
 /**
  * Service to provide data for the map.
@@ -71,7 +72,7 @@ class MapQueryService {
     }
 
     if ($query_type === 'g') {
-      return $this->getMapDataByGridsquare($query_value);
+      return $this->getMapDataByGridsquare(Utils::formatSubsquare($query_value));
     }
 
     if ($query_type === 'z') {
