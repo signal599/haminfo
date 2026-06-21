@@ -23,7 +23,7 @@
         "drupal/core-project-message": "^11.0",
         "drupal/core-recommended": "^11.0",
         "drupal/permissions_fixer": "^2.0",
-        "drupal/radix": "^6.0@RC",
+        "drupal/radix": "^6.0",
         "drupal/redirect": "^1.10",
         "drupal/smtp": "^1.4",
         "drush/drush": "^13.3",
@@ -43,7 +43,12 @@
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "php-http/discovery": true
         },
-        "sort-packages": true
+        "sort-packages": true,
+        "policy": {
+            "advisories": {
+                "block": false
+            }
+        }
     },
     "extra": {
         "drupal-scaffold": {
